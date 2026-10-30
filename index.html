@@ -34,7 +34,7 @@
 #intro .in-main { position: relative; margin: auto 0; padding: 0 14px; width: 100%; max-width: 1200px; }
 #intro .in-role { font-family: var(--f-mono); font-size: var(--ui-size); letter-spacing: .28em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; display: flex; align-items: center; gap: 14px; opacity: 0; animation: inUp .6s 1s forwards; }
 #intro .in-role::before { content: ""; width: 40px; height: 1px; background: var(--accent); }
-#intro h1 { margin: 0; font-family: var(--f-display); font-weight: 800; font-stretch: 100%; text-transform: uppercase; line-height: .92; letter-spacing: -.025em; font-size: clamp(2.8rem, 15vw, 10rem); overflow: hidden; padding: .22em 0 .06em; margin-top: -.22em; }
+#intro h1 { margin: 0; font-family: var(--f-display); font-weight: 800; font-stretch: 100%; text-transform: uppercase; line-height: .92; letter-spacing: -.025em; font-size: clamp(2.2rem, 15vw, 10rem); white-space: nowrap; overflow-wrap: normal; overflow: hidden; padding: .22em 0 .06em; margin-top: -.22em; }
 #intro h1 span { display: inline-block; transform: translateY(105%); animation: inRise .9s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(.45s + var(--i) * .05s); }
 @keyframes inRise { to { transform: none; } }
 #intro .in-sub { margin-top: 22px; max-width: 34ch; font-size: clamp(.95rem, 2.6vw, 1.15rem); line-height: 1.5; color: color-mix(in srgb, #F2F1EE 72%, transparent); opacity: 0; animation: inUp .7s 1.15s forwards; }
@@ -543,7 +543,18 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       h.appendChild(s);
     });
   }
+  function fit() {
+    if (done) return;
+    h.style.fontSize = '';
+    var box = h.parentNode.clientWidth - 28, fs = parseFloat(getComputedStyle(h).fontSize), n = 0;
+    h.style.display = 'inline-block';
+    while (h.scrollWidth > box && fs > 18 && n++ < 40) { fs *= .94; h.style.fontSize = fs + 'px'; }
+    h.style.display = '';
+  }
   setName('Grégoire');
+  fit();
+  window.addEventListener('resize', fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   window.__introName = function (n) { if (n && !el.classList.contains('leaving') && h.getAttribute('aria-label') !== n.trim().slice(0, 24)) setName(n); };
   var done = false;
   function go() {
@@ -671,7 +682,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio d'Ambre · v30</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio d'Ambre · v31</span><span id="footCount"></span></div>
   </div>
 </div>
 
