@@ -693,7 +693,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v34</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v35</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1788,10 +1788,98 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       pubErr = 'Le fichier portfolio-data.json n\'a pas le bon format : republie le portfolio.'; return null;
     } catch (e) { pubErr = 'Impossible de lire les données publiées (connexion ?).'; return null; }
   }
+  /* ---------- Mot de passe de l'espace propriétaire (enregistré sur cet appareil, sous forme brouillée) ---------- */
+  function pwHex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
+  async function pwHash(pw, salt) {
+    if (window.crypto && crypto.subtle && window.TextEncoder) {
+      var key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+      var bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: new TextEncoder().encode(salt), iterations: 150000 }, key, 256);
+      return pwHex(bits);
+    }
+    var a = 5381, b = 52711, t = salt + '|' + pw, i;
+    for (i = 0; i < t.length; i++) { a = ((a * 33) ^ t.charCodeAt(i)) >>> 0; b = ((b * 31) + t.charCodeAt(i) * (i + 7)) >>> 0; }
+    return 'x' + a.toString(16) + b.toString(16);
+  }
+  function pwSalt() { var u = new Uint8Array(16); if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(u); else for (var i = 0; i < 16; i++) u[i] = Math.floor(Math.random() * 256); return pwHex(u); }
+  function pwDialog(cfg) {
+    return new Promise(function (resolve) {
+      var wrap = h('div', { class: 'overlay center', role: 'dialog', 'aria-modal': 'true' }), inputs = {}, msg = h('p', { class: 'hint', role: 'alert', text: '' });
+      wrap.style.zIndex = '150';
+      var form = h('form', { novalidate: true });
+      if (cfg.intro) form.append(h('p', { class: 'hint', text: cfg.intro }));
+      cfg.fields.forEach(function (f) {
+        var inp = h('input', { type: 'password', autocomplete: f.cur ? 'current-password' : 'new-password', 'aria-label': f.label });
+        inputs[f.id] = inp; form.append(h('div', { class: 'field' }, h('label', { class: 'mono', text: f.label }), inp));
+      });
+      form.append(msg);
+      var actions = h('div', { class: 'actions' });
+      if (cfg.cancel) actions.append(h('button', { class: 'btn', type: 'button', text: cfg.cancel, onclick: function () { wrap.remove(); resolve(null); } }));
+      var sub = h('button', { class: 'btn solid', type: 'submit', text: cfg.submit }); actions.append(sub);
+      if (cfg.forgot) {
+        var note = h('p', { class: 'hint', hidden: true, text: 'Sur cet appareil, efface les données du site (Safari : Réglages › Safari › Avancé › Données de sites web › supprimer greg3d9.github.io). Attention : cela efface aussi les œuvres enregistrées ici. Tu les retrouves en appuyant sur « Espace propriétaire » depuis le site publié, ou avec une sauvegarde exportée.' });
+        form.append(h('button', { class: 'btn', type: 'button', text: 'Mot de passe oublié ?', onclick: function () { note.hidden = !note.hidden; } }), note);
+      }
+      form.append(actions);
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault(); sub.disabled = true; msg.textContent = '';
+        var vals = {}; Object.keys(inputs).forEach(function (k) { vals[k] = inputs[k].value; });
+        var err = null; try { err = await cfg.check(vals); } catch (x) { err = 'Une erreur est survenue.'; }
+        if (err) { msg.textContent = err; sub.disabled = false; var first = inputs[cfg.fields[0].id]; first.value = ''; first.focus(); return; }
+        wrap.remove(); resolve(true);
+      });
+      wrap.append(h('div', { class: 'panel' }, h('div', { class: 'panel-head' }, h('span', { text: cfg.title })), form));
+      document.body.append(wrap);
+      setTimeout(function () { var f0 = inputs[cfg.fields[0].id]; if (f0) f0.focus(); }, 60);
+    });
+  }
+  async function ownerAuth(opts) {
+    opts = opts || {};
+    try { if (sessionStorage.getItem('portfolio-unlocked') === '1') return true; } catch (e) {}
+    var rec; try { rec = await tx('kv', 'readonly', function (st) { return st.get('ownerpw'); }); } catch (e) { return true; }
+    var fails = 0, ok;
+    if (!rec || !rec.hash) {
+      ok = await pwDialog({ title: 'Choisis ton mot de passe', intro: 'Ce mot de passe protège ton espace propriétaire. Il reste sur cet appareil, sous forme brouillée : personne ne peut le relire, pas même moi. Si tu l\'oublies, tu devras effacer les données du site.',
+        fields: [{ id: 'a', label: 'Mot de passe (4 caractères minimum)' }, { id: 'b', label: 'Retape-le pour confirmer' }], submit: 'Enregistrer', cancel: opts.cancelable ? 'Retour au site' : '',
+        check: async function (v) {
+          if (v.a.length < 4) return 'Ton mot de passe doit contenir au moins 4 caractères.';
+          if (v.a !== v.b) return 'Les deux saisies ne sont pas identiques.';
+          var salt = pwSalt(), hash = await pwHash(v.a, salt);
+          await tx('kv', 'readwrite', function (st) { return st.put({ k: 'ownerpw', salt: salt, hash: hash }); });
+          return null;
+        } });
+    } else {
+      ok = await pwDialog({ title: 'Espace propriétaire', intro: 'Entre ton mot de passe pour modifier ton portfolio.', fields: [{ id: 'a', label: 'Mot de passe', cur: true }], submit: 'Entrer', cancel: opts.cancelable ? 'Retour au site' : '', forgot: true,
+        check: async function (v) {
+          if (fails) await new Promise(function (r) { setTimeout(r, Math.min(8000, 800 * fails)); });
+          if (await pwHash(v.a, rec.salt) === rec.hash) return null;
+          fails++; return 'Mot de passe incorrect.';
+        } });
+    }
+    if (ok) { try { sessionStorage.setItem('portfolio-unlocked', '1'); sessionStorage.removeItem('portfolio-guest'); } catch (e) {} return true; }
+    return false;
+  }
+  async function ownerChangePw() {
+    var rec; try { rec = await tx('kv', 'readonly', function (st) { return st.get('ownerpw'); }); } catch (e) { toast('Impossible de lire le mot de passe.', true); return; }
+    var fields = (rec && rec.hash ? [{ id: 'o', label: 'Mot de passe actuel', cur: true }] : []).concat([{ id: 'a', label: 'Nouveau mot de passe (4 caractères minimum)' }, { id: 'b', label: 'Retape le nouveau mot de passe' }]);
+    var ok = await pwDialog({ title: 'Changer le mot de passe', fields: fields, submit: 'Enregistrer', cancel: 'Annuler',
+      check: async function (v) {
+        if (rec && rec.hash && await pwHash(v.o, rec.salt) !== rec.hash) return 'Le mot de passe actuel est incorrect.';
+        if (v.a.length < 4) return 'Ton mot de passe doit contenir au moins 4 caractères.';
+        if (v.a !== v.b) return 'Les deux saisies ne sont pas identiques.';
+        var salt = pwSalt(), hash = await pwHash(v.a, salt);
+        await tx('kv', 'readwrite', function (st) { return st.put({ k: 'ownerpw', salt: salt, hash: hash }); });
+        return null;
+      } });
+    if (ok) toast('Mot de passe modifié');
+  }
+
   /* Espace propriétaire : copie le portfolio publié sur cet appareil (sans rien écraser), puis passe en mode édition */
   async function ownerEnter(d, btn) {
     if (btn.disabled) return; btn.disabled = true;
     try {
+      if (!(await ownerAuth({ cancelable: true }))) { btn.disabled = false; return; }
+      var hasLocal = (await tx('works', 'readonly', function (st) { return st.count(); })) > 0 || !!(await tx('kv', 'readonly', function (st) { return st.get('about'); }));
+      if (hasLocal) { try { localStorage.setItem('portfolio-owner', '1'); sessionStorage.removeItem('portfolio-guest'); } catch (e) {} location.reload(); return; }
       var fl = d.files.filter(function (f) { return urls[f.id]; }), ok = 0;
       for (var i = 0; i < fl.length; i++) {
         toast('Copie de ton portfolio sur cet appareil : ' + (i + 1) + ' / ' + fl.length + '…', false, 60000);
@@ -1839,6 +1927,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         h('button', { class: 'btn', type: 'button', text: 'Importer', onclick: function () { file.click(); } })),
       h('p', { class: 'hint', text: 'Pour que tes visiteurs et ton QR code voient ton portfolio, publie-le : l\'application crée les fichiers à mettre en ligne sur ton site (GitHub ou Netlify).' }),
       h('div', { class: 'imgrow' }, h('button', { class: 'btn solid', type: 'button', text: 'Publier le portfolio', onclick: publishSite })),
+      h('p', { class: 'hint', text: 'Ton espace propriétaire est protégé par un mot de passe que tu as choisi.' }),
+      h('div', { class: 'imgrow' }, h('button', { class: 'btn', type: 'button', text: 'Changer le mot de passe', onclick: ownerChangePw })),
       file);
   }
 
@@ -3114,7 +3204,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var stored = null, failed = false;
     try { stored = await loadLocal(); } catch (e) { failed = true; }
     var owner = false; try { owner = localStorage.getItem('portfolio-owner') === '1'; } catch (e) {}
-    if (!owner && (failed || (!Object.keys(memWorks).length && !about))) { var pub = await loadPublic(); if (pub) { startPublic(pub); return; } if (pubErr) toast(pubErr, true, 15000); }
+    var guest = false; try { guest = sessionStorage.getItem('portfolio-guest') === '1'; } catch (e) {}
+    if ((guest || !owner) && (failed || guest || (!Object.keys(memWorks).length && !about))) { var pub = await loadPublic(); if (pub) { startPublic(pub); return; } if (pubErr) toast(pubErr, true, 15000); }
+    if (!failed) {
+      var access = await ownerAuth({ cancelable: !guest });
+      if (!access) { try { sessionStorage.setItem('portfolio-guest', '1'); } catch (e) {} location.reload(); return; }
+    }
     if (stored && !hadLocal) theme = sanitize(stored);
     applyTheme(theme); cacheLocal();
     state.canStyle = true; $('styleBtn').hidden = false;
