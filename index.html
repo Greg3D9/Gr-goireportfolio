@@ -702,7 +702,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v36</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v37</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2640,7 +2640,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     return c;
   }
   var TL = { PW: 0.8, PH: 0.56, PITCH: 1.0 };
-  function tlBuild(items) {
+  function tlFlip(c) { var d = document.createElement('canvas'); d.width = c.width; d.height = c.height; var x = d.getContext('2d'); x.translate(0, c.height); x.scale(1, -1); x.drawImage(c, 0, 0); return d; }
+  function tlBuild(items, flip) {
     var accent = accentColor(), root = new THREE.Group(), n = items.length, total = n + 1, i;
     var dark = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.9, metalness: 0 });
     var accM = new THREE.MeshStandardMaterial({ color: accent, roughness: 0.6, metalness: 0 });
@@ -2649,7 +2650,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var line = new THREE.Mesh(new THREE.BoxGeometry(L, 0.012, 0.05), accM); line.position.set(0, 0.006, 0); root.add(line);
     for (i = 0; i < total; i++) {
       var cx = (i - (total - 1) / 2) * TL.PITCH, last = i === n;
-      var tex = new THREE.CanvasTexture(tlTexture(last ? {} : items[i], i, last, accent));
+      var cvT = tlTexture(last ? {} : items[i], i, last, accent), tex = new THREE.CanvasTexture(flip ? tlFlip(cvT) : cvT);
       var front = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffffff, emissiveMap: tex });
       var body = new THREE.Mesh(new THREE.BoxGeometry(TL.PW, TL.PH, 0.02), dark); body.position.set(cx, 0.46 + TL.PH / 2, 0); root.add(body);
       var pf = new THREE.Mesh(new THREE.PlaneGeometry(TL.PW, TL.PH), front); pf.position.set(cx, 0.46 + TL.PH / 2, 0.0105); root.add(pf);
@@ -2665,7 +2666,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     try {
       toast('Préparation de la réalité augmentée…', false, 8000);
       await Promise.all([loadThree(), loadScript('fflate.js'), loadScript('USDZExporter.js')]);
-      var root = tlBuild(items); root.updateMatrixWorld(true);
+      var root = tlBuild(items, true); root.updateMatrixWorld(true);
       var data = await new THREE.USDZExporter().parse(root);
       var url = URL.createObjectURL(new Blob([data], { type: 'model/vnd.usdz+zip' }));
       var a = document.createElement('a'); a.rel = 'ar'; a.href = url; a.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;overflow:hidden';
