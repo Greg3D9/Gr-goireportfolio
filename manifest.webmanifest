@@ -1,0 +1,16 @@
+{
+  "name": "Portfolio Ambre",
+  "short_name": "Portfolio",
+  "description": "Mes dessins, calligraphies et modélisations 3D.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFAA00",
+  "theme_color": "#FFAA00",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
