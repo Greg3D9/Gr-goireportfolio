@@ -495,6 +495,17 @@ html[data-view="phone"] .statusbar { padding: 6px 10px; }
 .ab-bio.mute { color: var(--mute); }
 .ab-soft { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
 .ab-soft li { border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel); padding: 5px 10px; font-family: var(--f-mono); font-size: var(--mono-size); text-transform: uppercase; letter-spacing: .06em; }
+.ab-skh { margin: 22px 0 0; color: var(--mute); }
+.ab-skills { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.ab-skills li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.ab-skills .sk-n { font-family: var(--f-display); font-weight: 800; font-stretch: 105%; text-transform: uppercase; letter-spacing: .03em; overflow-wrap: anywhere; }
+.ab-skills .sk-l { font-family: var(--f-mono); font-size: var(--mono-size); color: var(--mute); text-transform: uppercase; letter-spacing: .08em; }
+.ab-skills .sk-b { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.ab-skills .sk-b i { height: 8px; border: var(--bw-s) solid var(--edge); background: var(--panel-2); transform-origin: left; }
+.ab-skills .sk-b i.on { background: var(--accent); animation: skIn .6s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--k) * 90ms); }
+@keyframes skIn { from { transform: scaleX(0); } }
+.sk-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+.sk-row input, .sk-row select { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-family: var(--f-mono); font-size: var(--ui-size); }
 .ab-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .ab-actions a.btn { text-decoration: none; display: inline-block; }
 #aboutForm { padding: 16px; display: grid; gap: 14px; }
@@ -682,7 +693,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio d'Ambre · v31</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio d'Ambre · v32</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2314,6 +2325,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 
   /* ---------- Page À propos ---------- */
   var about = null, editingAbout = false, aboutPhotoChange = null;
+  var SK_LV = ['', 'Débutant', 'Notions', 'Intermédiaire', 'Avancé', 'Expert'];
+  function skParse(x) { var i = String(x).lastIndexOf('|'), l = i > 0 ? parseInt(String(x).slice(i + 1), 10) : 0; return { n: (i > 0 ? String(x).slice(0, i) : String(x)).trim(), l: l >= 1 && l <= 5 ? l : 0 }; }
   function sanitizeAbout(o) {
     o = o || {};
     var str = function (v, n) { return typeof v === 'string' ? v.slice(0, n) : ''; };
@@ -2336,8 +2349,21 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var photo = h('figure', { class: 'ab-photo' });
     if (a.photo && urlFor(a.photo)) photo.append(h('img', { src: urlFor(a.photo), alt: a.name ? 'Portrait de ' + a.name : 'Portrait' }));
     else photo.textContent = (a.name || 'A').trim().charAt(0).toUpperCase();
-    var soft = a.software && a.software.length ? h('ul', { class: 'ab-soft' }) : null;
-    if (soft) a.software.forEach(function (x) { soft.append(h('li', { text: x })); });
+    var soft = null;
+    if (a.software && a.software.length) {
+      var sk = a.software.map(skParse).filter(function (x) { return x.n; }), rated = sk.filter(function (x) { return x.l; }), plain = sk.filter(function (x) { return !x.l; });
+      soft = h('div', null);
+      if (rated.length) {
+        var ul = h('ul', { class: 'ab-skills' });
+        rated.forEach(function (x) {
+          var bar = h('div', { class: 'sk-b', role: 'img', 'aria-label': x.n + ' : ' + SK_LV[x.l] });
+          for (var k = 0; k < 5; k++) { var seg = h('i', { class: k < x.l ? 'on' : '' }); seg.style.setProperty('--k', k); bar.append(seg); }
+          ul.append(h('li', null, h('span', { class: 'sk-n', text: x.n }), h('span', { class: 'sk-l', text: SK_LV[x.l] }), bar));
+        });
+        soft.append(h('h3', { class: 'ab-skh mono', text: 'Compétences' }), ul);
+      }
+      if (plain.length) { var pl = h('ul', { class: 'ab-soft' }); plain.forEach(function (x) { pl.append(h('li', { text: x.n })); }); soft.append(pl); }
+    }
     var actions = h('div', { class: 'ab-actions' });
     if (a.email) actions.append(h('a', { class: 'btn solid', href: 'mailto:' + a.email, text: 'Me contacter' }));
     actions.append(h('button', { class: 'btn', type: 'button', text: 'Partager le portfolio', onclick: function () { shareLink(''); } }));
@@ -2352,7 +2378,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         soft, actions)));
   }
   function aboutForm() {
-    var a = about || { software: ['SolidWorks', 'CATIA'] };
+    var a = about || { software: ['SolidWorks|3', 'CATIA|3'] };
     var photoId = a.photo || '';
     aboutPhotoChange = null;
     var prev = h('div', { class: 'ab-photo-edit' });
@@ -2376,12 +2402,26 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var name = h('input', { type: 'text', maxlength: 80, value: a.name || '', placeholder: 'Ambre', autocomplete: 'off' });
     var role = h('input', { type: 'text', maxlength: 100, value: a.role || '', placeholder: 'Designer industriel, étudiante…', autocomplete: 'off' });
     var bio = h('textarea', { maxlength: 1500, placeholder: 'Parle de ton parcours, de ce que tu aimes dessiner et modéliser.' }); bio.value = a.bio || '';
-    var soft = h('input', { type: 'text', maxlength: 300, value: (a.software || []).join(', '), placeholder: 'SolidWorks, CATIA, Blender…', autocomplete: 'off' });
+    var skRows = (a.software || []).map(skParse).filter(function (x) { return x.n; }).map(function (x) { return { n: x.n, l: x.l || 3 }; });
+    var skBox = h('div', null);
+    var drawSk = function () {
+      skBox.textContent = '';
+      skRows.forEach(function (r, i) {
+        var ni = h('input', { type: 'text', maxlength: 28, value: r.n, placeholder: 'Logiciel', autocomplete: 'off', 'aria-label': 'Logiciel' });
+        ni.addEventListener('input', function () { r.n = ni.value; });
+        var se = h('select', { 'aria-label': 'Niveau' });
+        for (var k = 1; k <= 5; k++) { var o = h('option', { value: String(k), text: k + ' · ' + SK_LV[k] }); if (k === r.l) o.selected = true; se.append(o); }
+        se.addEventListener('change', function () { r.l = parseInt(se.value, 10); });
+        skBox.append(h('div', { class: 'sk-row' }, ni, se, h('button', { class: 'btn', type: 'button', text: '✕', 'aria-label': 'Retirer', onclick: function () { skRows.splice(i, 1); drawSk(); } })));
+      });
+      if (skRows.length < 12) skBox.append(h('button', { class: 'btn', type: 'button', text: '+ Ajouter un logiciel', onclick: function () { skRows.push({ n: '', l: 3 }); drawSk(); } }));
+    };
+    drawSk();
     var email = h('input', { type: 'email', maxlength: 120, value: a.email || '', placeholder: 'ton.adresse@mail.com', autocomplete: 'off' });
     var form = h('form', { id: 'aboutForm', novalidate: true },
       h('div', { class: 'field' }, h('span', { class: 'lbl mono', text: 'Photo' }), prev, file),
       fld('Nom', name), fld('Titre ou métier', role), fld('Bio', bio),
-      fld('Logiciels (séparés par des virgules)', soft), fld('E-mail de contact', email),
+      fld('Compétences : logiciels et niveau', skBox), fld('E-mail de contact', email),
       h('div', { class: 'actions' },
         h('button', { class: 'btn', type: 'button', text: 'Annuler', onclick: function () { if (aboutPhotoChange && aboutPhotoChange.url) URL.revokeObjectURL(aboutPhotoChange.url); aboutPhotoChange = null; editingAbout = false; renderAbout(); } }),
         h('button', { class: 'btn solid', type: 'submit', text: 'Enregistrer' })));
@@ -2389,7 +2429,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       e.preventDefault();
       var em = email.value.trim();
       if (em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { toast('Cette adresse e-mail n\'est pas valide.', true); email.focus(); return; }
-      var next = sanitizeAbout({ name: name.value, role: role.value, bio: bio.value, email: em, software: soft.value.split(','), photo: photoId });
+      var next = sanitizeAbout({ name: name.value, role: role.value, bio: bio.value, email: em, software: skRows.filter(function (r) { return r.n.trim(); }).map(function (r) { return r.n.trim().replace(/\|/g, '') + '|' + r.l; }), photo: photoId });
       var oldPhoto = (about && about.photo) || '';
       try {
         if (aboutPhotoChange && aboutPhotoChange.file) { var up = await assetsNS.upload(aboutPhotoChange.file); next.photo = up.id; }
@@ -2445,7 +2485,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     ctx.fillText(fit(name, '800 58px system-ui, Arial, sans-serif', 480), 70, 150);
     ctx.fillStyle = '#444';
     if (a.role) ctx.fillText(fit(a.role, '30px system-ui, Arial, sans-serif', 480), 70, 205);
-    var soft = (a.software || []).join(' · ');
+    var soft = (a.software || []).map(function (x) { return skParse(x).n; }).filter(Boolean).join(' · ');
     if (soft) ctx.fillText(fit(soft, '24px ui-monospace, Menlo, monospace', 480), 70, 262);
     ctx.fillStyle = '#111';
     if (a.email) ctx.fillText(fit(a.email, '26px system-ui, Arial, sans-serif', 480), 70, 470);
