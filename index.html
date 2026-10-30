@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Portfolio de Grégoire</title>
+<title>Portfolio Ambre</title>
 <meta name="description" content="Portfolio de dessins, street art et modélisations 3D.">
 <meta name="theme-color" content="#FFAA00">
 <link rel="manifest" href="manifest.webmanifest">
@@ -638,7 +638,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   <div class="win">
     <div class="menubar">
       <span class="logo" aria-hidden="true"></span>
-      <span class="mark" id="mark">GRÉGOIRE</span>
+      <span class="mark" id="mark">AMBRE</span>
       <span class="menu-meta mono">Portfolio · <span id="yr"></span></span>
       <span class="spacer"></span>
       <input id="qIn" class="search" type="search" placeholder="Rechercher" aria-label="Rechercher une pièce" autocomplete="off">
@@ -685,7 +685,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         <section class="pnl">
           <div class="pnl-h mono">Propriétés</div>
           <dl class="cartouche mono">
-            <dt>Auteur</dt><dd id="stAuthor">Grégoire</dd>
+            <dt>Auteur</dt><dd id="stAuthor">Ambre</dd>
             <dt>Pièces</dt><dd id="stCount">00</dd>
             <dt>Période</dt><dd id="stYears">—</dd>
             <dt>Outils</dt><dd id="stTools">—</dd>
@@ -693,7 +693,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v33</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio d'Ambre · v32</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -925,7 +925,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   var PATS = [['dots', 'Points'], ['grid', 'Grille'], ['lines', 'Lignes'], ['diag', 'Diagonales'], ['none', 'Aucun']];
   var FXS = [['none', 'Aucun'], ['gray', 'Noir et blanc'], ['sepia', 'Sépia'], ['duo', 'Duotone (couleurs du style)']];
   var LEDE = 'Dessins numériques et sur papier, street art et modélisations 3D, réunis depuis les premiers essais jusqu\'aux pièces les plus récentes.';
-  var DEFAULT = { preset: 'atelier', c: null, r: 14, bw: 4, so: 12, fd: 'Archivo', fb: 'Archivo', pat: 'dots', bgImg: '', cvImg: '', veil: 55, fx: 'none', crt: false, glow: false, name: 'GRÉGOIRE', title: 'Portfolio', lede: LEDE };
+  var DEFAULT = { preset: 'atelier', c: null, r: 14, bw: 4, so: 12, fd: 'Archivo', fb: 'Archivo', pat: 'dots', bgImg: '', cvImg: '', veil: 55, fx: 'none', crt: false, glow: false, name: 'AMBRE', title: 'Portfolio', lede: LEDE };
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function mk(o) { return Object.assign(clone(DEFAULT), o); }
   var PRESETS = [
@@ -992,7 +992,6 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     o.veil = num(t.veil, 0, 90, 55);
     o.crt = !!t.crt; o.glow = !!t.glow;
     o.name = typeof t.name === 'string' && t.name.trim() ? t.name.slice(0, 40) : DEFAULT.name;
-    if (o.name === 'AMBRE') o.name = 'GRÉGOIRE';
     o.title = typeof t.title === 'string' && t.title.trim() ? t.title.slice(0, 40) : DEFAULT.title;
     o.lede = typeof t.lede === 'string' ? t.lede.slice(0, 300) : DEFAULT.lede;
     return o;
@@ -2066,7 +2065,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var t = String(title || 'Sans titre').toUpperCase(); if (t.length > 26) t = t.slice(0, 25) + '…';
     ctx.fillText(t, cx + 16, cy + 48);
     ctx.font = '22px ui-monospace, Menlo, Consolas, monospace';
-    ctx.fillText('Dessinateur : ' + ((about && about.name) || 'Grégoire'), cx + 16, cy + 108);
+    ctx.fillText('Dessinateur : ' + ((about && about.name) || 'Ambre'), cx + 16, cy + 108);
     ctx.fillText('Date : ' + new Date().toLocaleDateString('fr-FR'), cx + 316, cy + 108);
     ctx.fillText('Unité : ' + unit, cx + 16, cy + 168);
     ctx.fillText('Proj. européenne', cx + 316, cy + 168);
@@ -2400,7 +2399,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     });
     drawPrev();
     var fld = function (label, input) { return h('div', { class: 'field' }, h('label', { class: 'mono', text: label }), input); };
-    var name = h('input', { type: 'text', maxlength: 80, value: a.name || '', placeholder: 'Grégoire', autocomplete: 'off' });
+    var name = h('input', { type: 'text', maxlength: 80, value: a.name || '', placeholder: 'Ambre', autocomplete: 'off' });
     var role = h('input', { type: 'text', maxlength: 100, value: a.role || '', placeholder: 'Designer industriel, étudiante…', autocomplete: 'off' });
     var bio = h('textarea', { maxlength: 1500, placeholder: 'Parle de ton parcours, de ce que tu aimes dessiner et modéliser.' }); bio.value = a.bio || '';
     var skRows = (a.software || []).map(skParse).filter(function (x) { return x.n; }).map(function (x) { return { n: x.n, l: x.l || 3 }; });
