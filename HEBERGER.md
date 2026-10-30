@@ -99,3 +99,9 @@ Les visiteurs voient une version en lecture seule, sans boutons de modification.
 - Il est enregistré **sur l'appareil seulement**, sous forme brouillée. Chaque appareil a donc son propre mot de passe.
 - Limite : le site est statique. Le mot de passe empêche d'ouvrir ton écran d'édition, mais ce que fait un visiteur reste sur son appareil et ne modifie jamais le site en ligne, qui ne change que lorsque tu renvoies les fichiers sur GitHub.
 - **Oublié ?** Efface les données du site dans le navigateur (Safari : Réglages › Safari › Avancé › Données de sites web). Cela efface aussi les œuvres enregistrées sur cet appareil : récupère-les avec « Espace propriétaire » depuis le site publié, ou avec une sauvegarde exportée.
+
+## 11. Frise chronologique (aperçu 3D et réalité augmentée)
+
+- Dans « À propos », le bouton **Frise chronologique** ouvre ton parcours en 3D : glisse avec le doigt ou utilise ‹ › pour passer d'une étape à l'autre.
+- Sur iPhone et iPad (Safari), le bouton **Voir en réalité augmentée** pose la frise dans la pièce (environ 4 m de long, 1 m de haut) : marche le long, téléphone en main. Tu peux la réduire en pinçant.
+- Pour changer les étapes : « À propos », « Modifier », rubrique « Frise chronologique » (8 étapes au maximum). Republie ensuite le portfolio pour que les visiteurs voient les changements.
