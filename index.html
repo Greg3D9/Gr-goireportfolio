@@ -370,6 +370,8 @@ html[data-fx="duo"] .thumb img, html[data-fx="duo"] .l-thumb, html[data-fx="duo"
 .card:nth-child(even):hover { transform: translate(-2px, -4px) rotate(.7deg); }
 .thumb img { transition: transform .5s ease; }
 .card:hover .thumb img { transform: scale(1.06); }
+html.tilt .card .thumb img, html.tilt .card:hover .thumb img { transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) scale(1.14); transition: none; }
+html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc(var(--ty, 0px) * -.22), 0); }
 .skeleton { animation: pulse 1.1s ease-in-out infinite alternate; }
 @keyframes pulse { from { opacity: .3; } to { opacity: .7; } }
 .overlay:not([hidden]) { animation: ovIn .22s ease-out; }
@@ -707,7 +709,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v48</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v49</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1242,6 +1244,54 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     }
   }
   function renderAll(anim) { renderNotice(); refresh(anim); }
+
+  /* ---------- Relief : les cartes bougent quand on penche le téléphone ---------- */
+  (function () {
+    if (RM || !window.DeviceOrientationEvent) return;
+    var KEY = 'portfolio-tilt', on = false, asked = false, base = null, tx = 0, ty = 0, gx = 0, gy = 0, raf = 0, lastTx = 99, lastTy = 99;
+    function denied() { try { return localStorage.getItem(KEY) === 'no'; } catch (e) { return false; } }
+    function clamp(v) { return Math.max(-1, Math.min(1, v)); }
+    function frame() {
+      raf = 0;
+      tx += (gx - tx) * .18; ty += (gy - ty) * .18;
+      var x = Math.round(tx * 70) / 10, y = Math.round(ty * 70) / 10;
+      if (Math.abs(x - lastTx) > .05 || Math.abs(y - lastTy) > .05) {
+        lastTx = x; lastTy = y;
+        var st = document.documentElement.style;
+        st.setProperty('--tx', x + 'px'); st.setProperty('--ty', y + 'px');
+      }
+      if (Math.abs(gx - tx) > .004 || Math.abs(gy - ty) > .004) raf = requestAnimationFrame(frame);
+    }
+    function onTilt(e) {
+      if (e.gamma == null || e.beta == null) return;
+      if (!base) base = { g: e.gamma, b: e.beta };
+      base.g += (e.gamma - base.g) * .01; base.b += (e.beta - base.b) * .01;
+      gx = clamp((e.gamma - base.g) / 22); gy = clamp((e.beta - base.b) / 22);
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+    function start() {
+      if (on) return; on = true;
+      document.documentElement.classList.add('tilt');
+      window.addEventListener('deviceorientation', onTilt, true);
+    }
+    window.tiltTest = onTilt;
+    function ask() {
+      if (asked || denied()) return; asked = true;
+      var D = window.DeviceOrientationEvent;
+      if (typeof D.requestPermission === 'function') {
+        try {
+          D.requestPermission().then(function (r) {
+            if (r === 'granted') start(); else { try { localStorage.setItem(KEY, 'no'); } catch (e) {} }
+          }).catch(function () { asked = false; });
+        } catch (e) { asked = false; }
+      } else start();
+    }
+    if (denied()) return;
+    if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+      var once = function () { document.removeEventListener('pointerup', once, true); ask(); };
+      document.addEventListener('pointerup', once, true);
+    } else start();
+  })();
 
   /* ---------- Visionneuse ---------- */
   function lockScroll(on) { document.body.style.overflow = on ? 'hidden' : ''; }

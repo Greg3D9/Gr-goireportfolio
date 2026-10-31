@@ -115,3 +115,7 @@ Les visiteurs voient une version en lecture seule, sans boutons de modification.
 ## 13. Ouverture d'une œuvre
 
 Quand tu touches une carte, l'image s'agrandit depuis sa place jusqu'à l'écran (environ une demi-seconde). Si ton iPhone est réglé sur « Réduire les animations », l'œuvre s'ouvre directement, sans mouvement.
+
+## 14. Effet de relief
+
+Quand tu penches ton iPhone, les images de la galerie bougent très légèrement. Au premier appui dans l'application, l'iPhone te demande l'autorisation d'utiliser les capteurs de mouvement : réponds « Autoriser ». Si tu refuses, l'effet reste coupé et l'application ne redemande pas. Pour le réactiver, ferme complètement l'application, puis dans Réglages > Safari > Avancé > Accès au mouvement et à l'orientation, vérifie que c'est activé.
