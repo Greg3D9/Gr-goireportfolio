@@ -119,3 +119,7 @@ Quand tu touches une carte, l'image s'agrandit depuis sa place jusqu'à l'écran
 ## 14. Effet de relief
 
 Quand tu penches ton iPhone, les images de la galerie bougent très légèrement. Au premier appui dans l'application, l'iPhone te demande l'autorisation d'utiliser les capteurs de mouvement : réponds « Autoriser ». Si tu refuses, l'effet reste coupé et l'application ne redemande pas. Pour le réactiver, ferme complètement l'application, puis dans Réglages > Safari > Avancé > Accès au mouvement et à l'orientation, vérifie que c'est activé.
+
+## 15. Frise chronologique : nouveau look
+
+Chaque étape est une carte sombre avec la période en grand, un numéro en filigrane, le titre, des pastilles pour les détails (lycée, ville, diplôme) et des points de progression. Dans la 3D et en réalité augmentée, les cartes sont encadrées et posées sur un socle, avec une bille sur le rail pour chaque étape. Pour avoir de jolies pastilles, sépare les détails par « · » dans le champ de détail de chaque étape.
