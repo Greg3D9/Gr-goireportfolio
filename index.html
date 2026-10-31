@@ -508,7 +508,8 @@ html[data-view="phone"] .statusbar { padding: 6px 10px; }
 .tl-row input { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-size: var(--ui-size); }
 .sk-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 .sk-row input, .sk-row select { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-family: var(--f-mono); font-size: var(--ui-size); }
-#musicBtn { padding: 3px 10px; font-size: calc(var(--ui-size) - 1px); }
+#musicBtn, #ambBtn { padding: 3px 10px; font-size: calc(var(--ui-size) - 1px); }
+.amb-d { font-family: var(--f-body); font-weight: 400; letter-spacing: 0; text-transform: none; opacity: .8; }
 .tl-body { padding: 14px; display: grid; gap: 12px; }
 .tl-box { height: min(44vh, 340px); border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--win-bar); overflow: hidden; display: grid; place-items: center; color: var(--mute); }
 .tl-box canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
@@ -703,7 +704,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v41</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v42</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1173,13 +1174,13 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     $('noticeBtn').hidden = !state.canAdd;
   }
   function refresh(anim) { renderHero(); renderTools(); renderLayers(); renderGrid(anim); }
-  function showAll() { state.hidden = {}; refresh(true); }
+  function showAll() { uiTick(2); state.hidden = {}; refresh(true); }
   function solo(id) {
-    state.hidden = {};
+    uiTick(2); state.hidden = {};
     CATS.forEach(function (c) { if (c.id !== id) state.hidden[c.id] = true; });
     refresh(true);
   }
-  function toggleCat(id) { if (state.hidden[id]) delete state.hidden[id]; else state.hidden[id] = true; refresh(true); }
+  function toggleCat(id) { uiTick(2); if (state.hidden[id]) delete state.hidden[id]; else state.hidden[id] = true; refresh(true); }
   function renderTools() {
     var box = $('tools'), s = soloCat(), none = Object.keys(state.hidden).length === 0;
     box.textContent = '';
@@ -1263,7 +1264,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var w = visible().filter(function (x) { return x.id === id; })[0];
     if (!w) return;
     lastFocus = document.activeElement;
-    currentId = id;
+    currentId = id; uiTick(1);
     fillViewer(w);
     $('viewer').hidden = false;
     lockScroll(true);
@@ -1799,7 +1800,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     } catch (e) { pubErr = 'Impossible de lire les données publiées (connexion ?).'; return null; }
   }
   /* ---------- Petite musique d'accueil de l'espace propriétaire (synthétisée, sans fichier) ---------- */
-  var MU = { el: null, url: '', building: null, playing: false };
+  var MU = { el: null, ctx: null, urls: {}, building: {}, playing: false, kind: 'calme' };
+  function muKind() { try { var k = localStorage.getItem('portfolio-ambiance'); return k === 'pluie' || k === 'atelier' ? k : 'calme'; } catch (e) { return 'calme'; } }
   var MU_SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
   function muOff() { try { return localStorage.getItem('portfolio-music') === 'off'; } catch (e) { return false; } }
   function musicPrime() {
@@ -1810,6 +1812,21 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         el.addEventListener('pause', function () { if (MU.playing && !el.ended && document.visibilityState === 'visible') { setTimeout(function () { if (MU.playing && el.paused) { var pr = el.play(); if (pr && pr.catch) pr.catch(function () { MU.playing = false; muBtn(); }); } }, 400); } });
       }
       var p = MU.el.play(); if (p && p.catch) p.catch(function () {});
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC && !MU.ctx) MU.ctx = new AC();
+      if (MU.ctx && MU.ctx.state === 'suspended') MU.ctx.resume();
+    } catch (e) {}
+  }
+  /* petits sons d'interface (actifs seulement quand la musique est activée) */
+  function uiTick(kind) {
+    try {
+      if (!MU.playing || !MU.ctx || MU.ctx.state !== 'running') return;
+      var c = MU.ctx, t = c.currentTime, f = kind === 1 ? 660 : 520, g = c.createGain(), o = c.createOscillator(), o2 = c.createOscillator();
+      o.type = 'sine'; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 1.5, t + 0.05);
+      o2.type = 'sine'; o2.frequency.value = f * 2.01;
+      var g2 = c.createGain(); g2.gain.value = 0.3; o2.connect(g2); g2.connect(g);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.035, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      o.connect(g); g.connect(c.destination); o.start(t); o2.start(t); o.stop(t + 0.2); o2.stop(t + 0.2);
     } catch (e) {}
   }
   function muNote(ctx, out, f, t, dur, vol, type, att) {
@@ -1834,10 +1851,69 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     return new Blob([buf], { type: 'audio/wav' });
   }
   /* prépare une longue piste (environ 3 minutes, 4 morceaux calmes enchaînés en fondu) puis la lit en boucle */
-  function muBuild() {
-    if (MU.url) return Promise.resolve(MU.url);
-    if (MU.building) return MU.building;
-    MU.building = new Promise(function (resolve, reject) {
+  function muBuild(kind) {
+    if (MU.urls[kind]) return Promise.resolve(MU.urls[kind]);
+    if (MU.building[kind]) return MU.building[kind];
+    var fn = kind === 'pluie' ? muBuildRain : kind === 'atelier' ? muBuildStudio : muBuildCalm;
+    MU.building[kind] = fn().then(function (u) { MU.urls[kind] = u; MU.building[kind] = null; return u; }, function (e) { MU.building[kind] = null; throw e; });
+    return MU.building[kind];
+  }
+  function muRender(ctxSec, SR, setup, norm, xf) {
+    return new Promise(function (resolve, reject) {
+      try {
+        var OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, ctx = new OC(1, Math.ceil(ctxSec * SR), SR);
+        setup(ctx);
+        var done = function (rb) {
+          var d = rb.getChannelData(0), n, peak = 0;
+          for (n = 0; n < d.length; n += 7) { var a = Math.abs(d[n]); if (a > peak) peak = a; }
+          var g = peak > 0 ? norm / peak : 1, out = d;
+          if (xf) {
+            var L = d.length - xf; out = new Float32Array(L);
+            for (n = 0; n < L; n++) out[n] = d[n];
+            for (n = 0; n < xf; n++) { var k = n / xf; out[n] = d[n] * k + d[L + n] * (1 - k); }
+          }
+          for (n = 0; n < out.length; n++) out[n] *= g;
+          resolve(URL.createObjectURL(muWav(out, SR)));
+        };
+        var pr = ctx.startRendering(); if (pr && pr.then) pr.then(done, reject); else ctx.oncomplete = function (e) { done(e.renderedBuffer); };
+      } catch (e) { reject(e); }
+    });
+  }
+  function muNoise(ctx, sec) { var b = ctx.createBuffer(1, Math.ceil(sec * ctx.sampleRate), ctx.sampleRate), d = b.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; var s = ctx.createBufferSource(); s.buffer = b; return s; }
+  /* Pluie douce : bruit de pluie filtré, grondement lointain et petites gouttes */
+  function muBuildRain() {
+    var SR = 22050, D = 48, XF = 4 * SR;
+    return muRender(D + 4, SR, function (ctx) {
+      var n1 = muNoise(ctx, D + 4), hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7000; var g1 = ctx.createGain(); g1.gain.value = 0.55;
+      n1.connect(hp); hp.connect(lp); lp.connect(g1); g1.connect(ctx.destination); n1.start(0);
+      var n2 = muNoise(ctx, D + 4), l2 = ctx.createBiquadFilter(); l2.type = 'lowpass'; l2.frequency.value = 380; var g2 = ctx.createGain(); g2.gain.value = 0.9;
+      n2.connect(l2); l2.connect(g2); g2.connect(ctx.destination); n2.start(0);
+      var lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.11; lg.gain.value = 0.12; lfo.connect(lg); lg.connect(g1.gain); lfo.start(0);
+      var t = 0.3; while (t < D + 3) { var f = 1700 + Math.random() * 1800, o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.05);
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.012 + Math.random() * 0.02, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.1); t += 0.15 + Math.random() * 0.5; }
+    }, 0.28, XF);
+  }
+  /* Atelier : léger bruit de pièce, souffle de ventilation et traits de crayon lointains */
+  function muBuildStudio() {
+    var SR = 22050, D = 48, XF = 4 * SR;
+    return muRender(D + 4, SR, function (ctx) {
+      var n1 = muNoise(ctx, D + 4), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520; var g1 = ctx.createGain(); g1.gain.value = 0.7;
+      n1.connect(lp); lp.connect(g1); g1.connect(ctx.destination); n1.start(0);
+      var lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 0.2; lfo.connect(lg); lg.connect(g1.gain); lfo.start(0);
+      var hum = ctx.createOscillator(), hg = ctx.createGain(); hum.type = 'sine'; hum.frequency.value = 98; hg.gain.value = 0.02; hum.connect(hg); hg.connect(ctx.destination); hum.start(0);
+      var t = 2 + Math.random() * 2;
+      while (t < D + 1) {
+        var dur = 0.35 + Math.random() * 0.7, ns = muNoise(ctx, dur + 0.1), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+        bp.type = 'bandpass'; bp.frequency.value = 2600 + Math.random() * 2800; bp.Q.value = 0.9;
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.06, t + dur * 0.3); g.gain.linearRampToValueAtTime(0.02, t + dur * 0.7); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+        ns.connect(bp); bp.connect(g); g.connect(ctx.destination); ns.start(t); ns.stop(t + dur + 0.1);
+        t += 3 + Math.random() * 5;
+      }
+    }, 0.2, XF);
+  }
+  function muBuildCalm() {
+    return new Promise(function (resolve, reject) {
       try {
         var SR = 22050, order = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; }), XF = 4, starts = [], t = 0, total, i;
         order.forEach(function (k) { starts.push(t); t += MU_TRACKS[k].step * 6 - XF; });
@@ -1861,21 +1937,20 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
           for (n = 0; n < d.length; n += 7) { var a = Math.abs(d[n]); if (a > peak) peak = a; }
           var g = peak > 0 ? 0.3 / peak : 1;
           for (n = 0; n < d.length; n++) d[n] *= g;
-          MU.url = URL.createObjectURL(muWav(d, SR)); MU.building = null; resolve(MU.url);
+          resolve(URL.createObjectURL(muWav(d, SR)));
         };
         var pr = ctx.startRendering();
         if (pr && pr.then) pr.then(done, reject); else ctx.oncomplete = function (e) { done(e.renderedBuffer); };
-      } catch (e) { MU.building = null; reject(e); }
+      } catch (e) { reject(e); }
     });
-    return MU.building;
   }
   function musicStart() {
     try {
       if (muOff() || MU.playing) return;
       musicPrime(); if (!MU.el) return;
-      MU.playing = true; muBtn();
-      muBuild().then(function (url) {
-        if (!MU.playing) return;
+      MU.playing = true; muBtn(); MU.kind = muKind(); var want = MU.kind;
+      muBuild(want).then(function (url) {
+        if (!MU.playing || want !== MU.kind) return;
         MU.el.src = url; MU.el.loop = true; MU.el.currentTime = 0;
         var pr = MU.el.play(); if (pr && pr.catch) pr.catch(function () { MU.playing = false; muBtn(); });
         try { if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: 'Ambiance douce', artist: 'Portfolio de Grégoire' }); } catch (e) {}
@@ -1898,7 +1973,33 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (MU.playing) { try { localStorage.setItem('portfolio-music', 'off'); } catch (e) {} musicStop(); }
       else { try { localStorage.removeItem('portfolio-music'); } catch (e) {} musicStart(); }
     } });
-    var bar = document.querySelector('.statusbar'); (bar || document.body).append(b); muBtn();
+    var amb = h('button', { class: 'btn', type: 'button', id: 'ambBtn', text: '♪ Ambiance', onclick: ambiancePicker });
+    var bar = document.querySelector('.statusbar'); (bar || document.body).append(b, amb); muBtn();
+  }
+  var AMB = [['calme', 'Calme', 'Douces notes de piano et de cloches, très lentes'], ['pluie', 'Pluie douce', 'Une pluie fine et lointaine, avec de petites gouttes'], ['atelier', 'Atelier', 'Un léger bruit de pièce et des traits de crayon au loin']];
+  function musicSwitch(kind) {
+    try { localStorage.setItem('portfolio-ambiance', kind); localStorage.removeItem('portfolio-music'); } catch (e) {}
+    if (!MU.playing) { musicStart(); return; }
+    MU.kind = kind; toast('Préparation de l\'ambiance…', false, 4000);
+    muBuild(kind).then(function (url) {
+      if (!MU.playing || MU.kind !== kind) return;
+      MU.el.src = url; MU.el.loop = true; MU.el.currentTime = 0; var pr = MU.el.play(); if (pr && pr.catch) pr.catch(function () {});
+      $('toast').hidden = true;
+    }, function () { toast('Cette ambiance n\'a pas pu démarrer.', true); });
+  }
+  function ambiancePicker() {
+    var cur = MU.playing ? muKind() : '', wrap = h('div', { class: 'overlay center', role: 'dialog', 'aria-modal': 'true' }); wrap.style.zIndex = '60';
+    var list = h('div', { class: 'tl-body' }), close = function () { wrap.remove(); };
+    AMB.forEach(function (a) {
+      var b = h('button', { class: 'btn' + (cur === a[0] ? ' solid' : ''), type: 'button', 'aria-pressed': cur === a[0] ? 'true' : 'false', onclick: function () { close(); musicSwitch(a[0]); } },
+        h('span', { text: a[1] }), h('small', { class: 'amb-d', text: a[2] }));
+      b.style.cssText = 'display:grid;gap:4px;text-align:left;width:100%'; list.append(b);
+    });
+    list.append(h('p', { class: 'hint', text: 'Les petits sons de l\'interface se coupent avec le bouton « Musique ».' }), h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', text: 'Fermer', onclick: close })));
+    wrap.append(h('div', { class: 'panel' }, h('div', { class: 'panel-head' }, h('span', { text: 'Ambiance sonore' })), list));
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    wrap.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    document.body.append(wrap); var f = wrap.querySelector('button'); if (f) f.focus();
   }
   /* La musique se lance toute seule à l'entrée. Si le navigateur exige un premier toucher (iPhone), elle démarre dès le premier appui sur l'écran. */
   function musicAfterUnlock(fresh) {
