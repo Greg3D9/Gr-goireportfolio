@@ -508,7 +508,7 @@ html[data-view="phone"] .statusbar { padding: 6px 10px; }
 .tl-row input { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-size: var(--ui-size); }
 .sk-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 .sk-row input, .sk-row select { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-family: var(--f-mono); font-size: var(--ui-size); }
-#musicBtn { position: fixed; right: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 54px); z-index: 30; box-shadow: 3px 3px 0 var(--edge); }
+#musicBtn { padding: 3px 10px; font-size: calc(var(--ui-size) - 1px); }
 .tl-body { padding: 14px; display: grid; gap: 12px; }
 .tl-box { height: min(44vh, 340px); border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--win-bar); overflow: hidden; display: grid; place-items: center; color: var(--mute); }
 .tl-box canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
@@ -703,7 +703,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v40</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v41</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1898,7 +1898,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (MU.playing) { try { localStorage.setItem('portfolio-music', 'off'); } catch (e) {} musicStop(); }
       else { try { localStorage.removeItem('portfolio-music'); } catch (e) {} musicStart(); }
     } });
-    document.body.append(b); muBtn();
+    var bar = document.querySelector('.statusbar'); (bar || document.body).append(b); muBtn();
   }
   /* La musique se lance toute seule à l'entrée. Si le navigateur exige un premier toucher (iPhone), elle démarre dès le premier appui sur l'écran. */
   function musicAfterUnlock(fresh) {
