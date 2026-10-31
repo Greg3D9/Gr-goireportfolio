@@ -111,3 +111,7 @@ Les visiteurs voient une version en lecture seule, sans boutons de modification.
 - La musique se lance à l'entrée dans l'espace propriétaire (sur iPhone, au premier toucher si tu étais déjà connecté).
 - Dans la barre du bas : le bouton **♪ Musique** active ou coupe la musique.
 - Les petits sons d'interface (un tic à chaque appui sur un bouton, une image ou un filtre) jouent quand la musique est **coupée** et se taisent quand elle joue.
+
+## 13. Ouverture d'une œuvre
+
+Quand tu touches une carte, l'image s'agrandit depuis sa place jusqu'à l'écran (environ une demi-seconde). Si ton iPhone est réglé sur « Réduire les animations », l'œuvre s'ouvre directement, sans mouvement.
