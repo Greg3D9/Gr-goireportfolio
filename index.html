@@ -703,7 +703,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v44</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v46</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1810,23 +1810,36 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         el.addEventListener('pause', function () { if (MU.playing && !el.ended && document.visibilityState === 'visible') { setTimeout(function () { if (MU.playing && el.paused) { var pr = el.play(); if (pr && pr.catch) pr.catch(function () { MU.playing = false; muBtn(); }); } }, 400); } });
       }
       var p = MU.el.play(); if (p && p.catch) p.catch(function () {});
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (AC && !MU.ctx) MU.ctx = new AC();
-      if (MU.ctx && MU.ctx.state === 'suspended') MU.ctx.resume();
     } catch (e) {}
   }
-  /* petits sons d'interface (actifs seulement quand la musique est activée) */
+  /* petits sons d'interface : de courts fichiers audio joués comme la musique ; ils sonnent quand la musique est coupée et se taisent quand elle joue */
+  var UI = { pool: {}, idx: {}, urls: {}, last: 0 };
+  function uiBlob(f) {
+    var SR = 22050, n = Math.floor(SR * 0.09), d = new Float32Array(n), i, ph = 0;
+    for (i = 0; i < n; i++) { var t = i / SR, fr = f * (1 + 0.45 * Math.min(1, t / 0.04)); ph += 2 * Math.PI * fr / SR; d[i] = (Math.sin(ph) + 0.3 * Math.sin(2.01 * ph)) * Math.exp(-t * 48) * Math.min(1, t / 0.003); }
+    return URL.createObjectURL(muWav(d, SR));
+  }
+  function uiPool(kind) {
+    if (UI.pool[kind]) return UI.pool[kind];
+    var url = uiBlob(kind === 1 ? 700 : 560), arr = [], k;
+    for (k = 0; k < 4; k++) { var a = new Audio(url); a.preload = 'auto'; a.setAttribute('playsinline', ''); arr.push(a); }
+    UI.idx[kind] = 0; return (UI.pool[kind] = arr);
+  }
   function uiTick(kind) {
     try {
-      if (!MU.playing || !MU.ctx || MU.ctx.state !== 'running') return;
-      var c = MU.ctx, t = c.currentTime, f = kind === 1 ? 660 : 520, g = c.createGain(), o = c.createOscillator(), o2 = c.createOscillator();
-      o.type = 'sine'; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 1.5, t + 0.05);
-      o2.type = 'sine'; o2.frequency.value = f * 2.01;
-      var g2 = c.createGain(); g2.gain.value = 0.3; o2.connect(g2); g2.connect(g);
-      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.035, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-      o.connect(g); g.connect(c.destination); o.start(t); o2.start(t); o.stop(t + 0.2); o2.stop(t + 0.2);
+      if (MU.playing || !$('musicBtn')) return;
+      var now = Date.now(); if (now - UI.last < 90) return; UI.last = now;
+      var arr = uiPool(kind), a = arr[UI.idx[kind]++ % arr.length];
+      try { a.currentTime = 0; } catch (e) {}
+      var pr = a.play(); if (pr && pr.catch) pr.catch(function () {});
     } catch (e) {}
   }
+  document.addEventListener('click', function (e) {
+    var t = e.target; if (!t || !t.closest || MU.playing || !$('musicBtn')) return;
+    if (t.closest('#musicBtn')) return;
+    if (t.closest('.card, .cart, [data-id]')) { uiTick(1); return; }
+    if (t.closest('button, a[href], [role="button"], select, summary, label, .tool, .chip')) uiTick(2);
+  }, true);
   function muNote(ctx, out, f, t, dur, vol, type, att) {
     var o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.value = f;

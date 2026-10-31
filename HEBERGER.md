@@ -110,4 +110,4 @@ Les visiteurs voient une version en lecture seule, sans boutons de modification.
 
 - La musique se lance à l'entrée dans l'espace propriétaire (sur iPhone, au premier toucher si tu étais déjà connecté).
 - Dans la barre du bas : le bouton **♪ Musique** active ou coupe la musique.
-- Les petits sons d'interface (ouverture d'une œuvre, changement de filtre) ne jouent que lorsque la musique est activée.
+- Les petits sons d'interface (un tic à chaque appui sur un bouton, une image ou un filtre) jouent quand la musique est **coupée** et se taisent quand elle joue.
