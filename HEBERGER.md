@@ -106,8 +106,8 @@ Les visiteurs voient une version en lecture seule, sans boutons de modification.
 - Sur iPhone et iPad (Safari), le bouton **Voir en réalité augmentée** pose la frise dans la pièce (environ 4 m de long, 1 m de haut) : marche le long, téléphone en main. Tu peux la réduire en pinçant.
 - Pour changer les étapes : « À propos », « Modifier », rubrique « Frise chronologique » (8 étapes au maximum). Republie ensuite le portfolio pour que les visiteurs voient les changements.
 
-## 12. Musique, ambiances et petits sons
+## 12. Musique et petits sons
 
 - La musique se lance à l'entrée dans l'espace propriétaire (sur iPhone, au premier toucher si tu étais déjà connecté).
-- Dans la barre du bas : **♪ Musique** (activer ou couper) et **♪ Ambiance** (Calme, Pluie douce, Atelier).
+- Dans la barre du bas : le bouton **♪ Musique** active ou coupe la musique.
 - Les petits sons d'interface (ouverture d'une œuvre, changement de filtre) ne jouent que lorsque la musique est activée.
