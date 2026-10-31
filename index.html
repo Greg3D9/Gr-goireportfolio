@@ -508,6 +508,7 @@ html[data-view="phone"] .statusbar { padding: 6px 10px; }
 .tl-row input { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-size: var(--ui-size); }
 .sk-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 .sk-row input, .sk-row select { min-width: 0; border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--panel-2); color: var(--txt); padding: 8px 10px; font-family: var(--f-mono); font-size: var(--ui-size); }
+#musicBtn { position: fixed; right: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 54px); z-index: 30; box-shadow: 3px 3px 0 var(--edge); }
 .tl-body { padding: 14px; display: grid; gap: 12px; }
 .tl-box { height: min(44vh, 340px); border: var(--bw-s) solid var(--edge); border-radius: var(--r-s); background: var(--win-bar); overflow: hidden; display: grid; place-items: center; color: var(--mute); }
 .tl-box canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
@@ -702,7 +703,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v37</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v38</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1797,6 +1798,78 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       pubErr = 'Le fichier portfolio-data.json n\'a pas le bon format : republie le portfolio.'; return null;
     } catch (e) { pubErr = 'Impossible de lire les données publiées (connexion ?).'; return null; }
   }
+  /* ---------- Petite musique d'accueil de l'espace propriétaire (synthétisée, sans fichier) ---------- */
+  var MU = { ctx: null, master: null, playing: false, timers: [], stopT: 0 };
+  function muOff() { try { return localStorage.getItem('portfolio-music') === 'off'; } catch (e) { return false; } }
+  function musicPrime() {
+    try {
+      if (muOff()) return;
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      if (!MU.ctx) MU.ctx = new AC();
+      if (MU.ctx.state === 'suspended') MU.ctx.resume();
+      var b = MU.ctx.createBuffer(1, 1, 22050), src = MU.ctx.createBufferSource(); src.buffer = b; src.connect(MU.ctx.destination); src.start(0);
+    } catch (e) {}
+  }
+  function muNote(ctx, out, f, t, dur, vol, type, att) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.1);
+  }
+  function musicStart() {
+    try {
+      if (muOff() || MU.playing) return;
+      musicPrime(); var ctx = MU.ctx; if (!ctx) return;
+      var master = ctx.createGain(); master.gain.setValueAtTime(0.0001, ctx.currentTime); master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 3);
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
+      var dly = ctx.createDelay(1); dly.delayTime.value = 0.42; var fb = ctx.createGain(); fb.gain.value = 0.38; var wet = ctx.createGain(); wet.gain.value = 0.45;
+      dly.connect(fb); fb.connect(dly); dly.connect(wet);
+      var bus = ctx.createGain(); bus.connect(lp); bus.connect(dly); wet.connect(lp); lp.connect(master); master.connect(ctx.destination);
+      MU.master = master; MU.playing = true;
+      var N = { C3: 130.81, E3: 164.81, G3: 196, A2: 110, F2: 87.31, C4: 261.63, D4: 293.66, E4: 329.63, G4: 392, A4: 440, B3: 246.94, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880 };
+      var chords = [[N.C3, N.G3, N.E4, N.D4], [N.A2, N.E3, N.C4, N.G4], [N.F2, N.C3, N.A4, N.E4], [N.C3, N.G3, N.B3, N.E4]];
+      var scale = [N.C5, N.D5, N.E5, N.G5, N.A5, N.E4, N.G4, N.A4], t0 = ctx.currentTime + 0.2, step = 8, total = 56, k;
+      for (k = 0; k * step < total; k++) {
+        chords[k % chords.length].forEach(function (f, j) { muNote(ctx, bus, f, t0 + k * step + j * 0.12, step + 2.5, 0.07, j < 2 ? 'sine' : 'triangle', 2.2); });
+      }
+      var tt = 1.5, last = -1, r;
+      while (tt < total - 5) {
+        do { r = Math.floor(Math.random() * scale.length); } while (r === last); last = r;
+        muNote(ctx, bus, scale[r], t0 + tt, 3.2, 0.09, 'sine', 0.02);
+        tt += 1.3 + Math.random() * 1.6;
+      }
+      MU.stopT = setTimeout(function () { musicStop(true); }, (total - 2) * 1000);
+      muBtn();
+    } catch (e) { MU.playing = false; }
+  }
+  function musicStop(soft) {
+    try {
+      clearTimeout(MU.stopT);
+      if (MU.master && MU.ctx) { var t = MU.ctx.currentTime; MU.master.gain.cancelScheduledValues(t); MU.master.gain.setValueAtTime(MU.master.gain.value, t); MU.master.gain.linearRampToValueAtTime(0.0001, t + (soft ? 3 : 0.8)); }
+      var m = MU.master; setTimeout(function () { try { m.disconnect(); } catch (e) {} }, soft ? 3600 : 1200);
+    } catch (e) {}
+    MU.playing = false; MU.master = null; muBtn();
+  }
+  function muBtn() {
+    var b = $('musicBtn'); if (!b) return;
+    b.textContent = MU.playing ? '♪ Musique : on' : '♪ Musique : off';
+    b.setAttribute('aria-pressed', MU.playing ? 'true' : 'false');
+  }
+  function musicButton() {
+    if ($('musicBtn')) return;
+    var b = h('button', { class: 'btn', type: 'button', id: 'musicBtn', onclick: function () {
+      if (MU.playing) { try { localStorage.setItem('portfolio-music', 'off'); } catch (e) {} musicStop(false); }
+      else { try { localStorage.removeItem('portfolio-music'); } catch (e) {} musicPrime(); musicStart(); }
+    } });
+    document.body.append(b); muBtn();
+  }
+  function musicAfterUnlock(fresh) {
+    musicButton();
+    if (fresh) { musicStart(); return; }
+    var pend = false; try { pend = sessionStorage.getItem('portfolio-music-pending') === '1'; sessionStorage.removeItem('portfolio-music-pending'); } catch (e) {}
+    if (pend && !muOff()) { var once = function () { document.removeEventListener('pointerdown', once, true); musicStart(); }; document.addEventListener('pointerdown', once, true); }
+  }
+
   /* ---------- Mot de passe de l'espace propriétaire (enregistré sur cet appareil, sous forme brouillée) ---------- */
   function pwHex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
   async function pwHash(pw, salt) {
@@ -1830,7 +1903,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       }
       form.append(actions);
       form.addEventListener('submit', async function (e) {
-        e.preventDefault(); sub.disabled = true; msg.textContent = '';
+        e.preventDefault(); musicPrime(); sub.disabled = true; msg.textContent = '';
         var vals = {}; Object.keys(inputs).forEach(function (k) { vals[k] = inputs[k].value; });
         var err = null; try { err = await cfg.check(vals); } catch (x) { err = 'Une erreur est survenue.'; }
         if (err) { msg.textContent = err; sub.disabled = false; var first = inputs[cfg.fields[0].id]; first.value = ''; first.focus(); return; }
@@ -1864,7 +1937,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
           fails++; return 'Mot de passe incorrect.';
         } });
     }
-    if (ok) { try { sessionStorage.setItem('portfolio-unlocked', '1'); sessionStorage.removeItem('portfolio-guest'); } catch (e) {} return true; }
+    if (ok) { MU.fresh = true; try { sessionStorage.setItem('portfolio-unlocked', '1'); sessionStorage.removeItem('portfolio-guest'); } catch (e) {} return true; }
     return false;
   }
   async function ownerChangePw() {
@@ -1888,7 +1961,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     try {
       if (!(await ownerAuth({ cancelable: true }))) { btn.disabled = false; return; }
       var hasLocal = (await tx('works', 'readonly', function (st) { return st.count(); })) > 0 || !!(await tx('kv', 'readonly', function (st) { return st.get('about'); }));
-      if (hasLocal) { try { localStorage.setItem('portfolio-owner', '1'); sessionStorage.removeItem('portfolio-guest'); } catch (e) {} location.reload(); return; }
+      if (hasLocal) { try { localStorage.setItem('portfolio-owner', '1'); sessionStorage.removeItem('portfolio-guest'); sessionStorage.setItem('portfolio-music-pending', '1'); } catch (e) {} location.reload(); return; }
       var fl = d.files.filter(function (f) { return urls[f.id]; }), ok = 0;
       for (var i = 0; i < fl.length; i++) {
         toast('Copie de ton portfolio sur cet appareil : ' + (i + 1) + ' / ' + fl.length + '…', false, 60000);
@@ -1906,7 +1979,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       }
       if (d.about) { var ab = sanitizeAbout(d.about); await tx('kv', 'readwrite', function (st) { return st.put({ k: 'about', v: ab }); }); }
       if (d.theme) { var th = sanitize(d.theme); await tx('kv', 'readwrite', function (st) { return st.put({ k: 'theme', v: th }); }); theme = th; cacheLocal(); }
-      try { localStorage.setItem('portfolio-owner', '1'); } catch (e) {}
+      try { localStorage.setItem('portfolio-owner', '1'); sessionStorage.setItem('portfolio-music-pending', '1'); } catch (e) {}
       location.reload();
     } catch (e) {
       btn.disabled = false;
@@ -3364,6 +3437,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     if (!failed) {
       var access = await ownerAuth({ cancelable: !guest });
       if (!access) { try { sessionStorage.setItem('portfolio-guest', '1'); } catch (e) {} location.reload(); return; }
+      musicAfterUnlock(!!MU.fresh); MU.fresh = false;
     }
     if (stored && !hadLocal) theme = sanitize(stored);
     applyTheme(theme); cacheLocal();
