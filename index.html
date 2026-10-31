@@ -703,7 +703,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v39</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v40</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1799,15 +1799,17 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     } catch (e) { pubErr = 'Impossible de lire les données publiées (connexion ?).'; return null; }
   }
   /* ---------- Petite musique d'accueil de l'espace propriétaire (synthétisée, sans fichier) ---------- */
-  var MU = { ctx: null, master: null, playing: false, timers: [], stopT: 0 };
+  var MU = { el: null, url: '', building: null, playing: false };
+  var MU_SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
   function muOff() { try { return localStorage.getItem('portfolio-music') === 'off'; } catch (e) { return false; } }
   function musicPrime() {
     try {
       if (muOff()) return;
-      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-      if (!MU.ctx) MU.ctx = new AC();
-      if (MU.ctx.state === 'suspended') MU.ctx.resume();
-      var b = MU.ctx.createBuffer(1, 1, 22050), src = MU.ctx.createBufferSource(); src.buffer = b; src.connect(MU.ctx.destination); src.start(0);
+      if (!MU.el) {
+        var el = new Audio(); el.loop = true; el.preload = 'auto'; el.setAttribute('playsinline', ''); el.src = MU_SILENT; MU.el = el;
+        el.addEventListener('pause', function () { if (MU.playing && !el.ended && document.visibilityState === 'visible') { setTimeout(function () { if (MU.playing && el.paused) { var pr = el.play(); if (pr && pr.catch) pr.catch(function () { MU.playing = false; muBtn(); }); } }, 400); } });
+      }
+      var p = MU.el.play(); if (p && p.catch) p.catch(function () {});
     } catch (e) {}
   }
   function muNote(ctx, out, f, t, dur, vol, type, att) {
@@ -1823,45 +1825,67 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     { chords: [[45, 52, 60, 64], [41, 48, 57, 65], [48, 55, 60, 64], [43, 50, 59, 62]], mel: [69, 72, 74, 76, 79, 64, 60, 62], step: 10 }
   ];
   function muF(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-  function musicTrack(first) {
-    if (!MU.playing || !MU.ctx || !MU.bus) return;
-    var ctx = MU.ctx, t0 = ctx.currentTime + 0.2, pick, i;
-    do { pick = Math.floor(Math.random() * MU_TRACKS.length); } while (pick === MU.last && MU_TRACKS.length > 1);
-    MU.last = pick; var T = MU_TRACKS[pick], step = T.step, total = step * 6;
-    var tg = ctx.createGain(); tg.gain.setValueAtTime(0.0001, t0); tg.gain.linearRampToValueAtTime(1, t0 + (first ? 3 : 5)); tg.gain.setValueAtTime(1, t0 + total - 5); tg.gain.linearRampToValueAtTime(0.0001, t0 + total);
-    tg.connect(MU.bus);
-    for (i = 0; i * step < total; i++) {
-      T.chords[i % T.chords.length].forEach(function (m, j) { muNote(ctx, tg, muF(m), t0 + i * step + j * 0.12, step + 2.5, 0.05, j < 2 ? 'sine' : 'triangle', 2.4); });
-    }
-    var tt = 1.5, last = -1, r;
-    while (tt < total - 6) {
-      do { r = Math.floor(Math.random() * T.mel.length); } while (r === last); last = r;
-      muNote(ctx, tg, muF(T.mel[r]), t0 + tt, 3.4, 0.06, 'sine', 0.03);
-      tt += 1.8 + Math.random() * 2;
-    }
-    clearTimeout(MU.nextT);
-    MU.nextT = setTimeout(function () { musicTrack(false); }, (total - 4) * 1000);
+  function muWav(data, sr) {
+    var n = data.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf), i;
+    var w = function (o, t) { for (var k = 0; k < t.length; k++) v.setUint8(o + k, t.charCodeAt(k)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+    for (i = 0; i < n; i++) { var x = Math.max(-1, Math.min(1, data[i])); v.setInt16(44 + i * 2, x < 0 ? x * 32768 : x * 32767, true); }
+    return new Blob([buf], { type: 'audio/wav' });
+  }
+  /* prépare une longue piste (environ 3 minutes, 4 morceaux calmes enchaînés en fondu) puis la lit en boucle */
+  function muBuild() {
+    if (MU.url) return Promise.resolve(MU.url);
+    if (MU.building) return MU.building;
+    MU.building = new Promise(function (resolve, reject) {
+      try {
+        var SR = 22050, order = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; }), XF = 4, starts = [], t = 0, total, i;
+        order.forEach(function (k) { starts.push(t); t += MU_TRACKS[k].step * 6 - XF; });
+        total = t + XF + 5;
+        var OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, ctx = new OC(1, Math.ceil(total * SR), SR);
+        var master = ctx.createGain(); master.gain.value = 1;
+        var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1900;
+        var dly = ctx.createDelay(1); dly.delayTime.value = 0.42; var fb = ctx.createGain(); fb.gain.value = 0.36; var wet = ctx.createGain(); wet.gain.value = 0.4;
+        dly.connect(fb); fb.connect(dly); dly.connect(wet);
+        var bus = ctx.createGain(); bus.connect(lp); bus.connect(dly); wet.connect(lp); lp.connect(master); master.connect(ctx.destination);
+        order.forEach(function (k, idx) {
+          var T = MU_TRACKS[k], step = T.step, len = step * 6, t0 = starts[idx] + 0.1, tg = ctx.createGain();
+          tg.gain.setValueAtTime(0.0001, t0); tg.gain.linearRampToValueAtTime(1, t0 + (idx ? 5 : 3)); tg.gain.setValueAtTime(1, t0 + len - 5); tg.gain.linearRampToValueAtTime(0.0001, t0 + len); tg.connect(bus);
+          var j, c;
+          for (j = 0; j * step < len; j++) { T.chords[j % T.chords.length].forEach(function (m, q) { muNote(ctx, tg, muF(m), t0 + j * step + q * 0.12, step + 2.5, 0.05, q < 2 ? 'sine' : 'triangle', 2.4); }); }
+          var tt = 1.5, last = -1, r;
+          while (tt < len - 6) { do { r = Math.floor(Math.random() * T.mel.length); } while (r === last); last = r; muNote(ctx, tg, muF(T.mel[r]), t0 + tt, 3.4, 0.06, 'sine', 0.03); tt += 1.8 + Math.random() * 2; }
+        });
+        var done = function (rb) {
+          var d = rb.getChannelData(0), peak = 0, n;
+          for (n = 0; n < d.length; n += 7) { var a = Math.abs(d[n]); if (a > peak) peak = a; }
+          var g = peak > 0 ? 0.3 / peak : 1;
+          for (n = 0; n < d.length; n++) d[n] *= g;
+          MU.url = URL.createObjectURL(muWav(d, SR)); MU.building = null; resolve(MU.url);
+        };
+        var pr = ctx.startRendering();
+        if (pr && pr.then) pr.then(done, reject); else ctx.oncomplete = function (e) { done(e.renderedBuffer); };
+      } catch (e) { MU.building = null; reject(e); }
+    });
+    return MU.building;
   }
   function musicStart() {
     try {
       if (muOff() || MU.playing) return;
-      musicPrime(); var ctx = MU.ctx; if (!ctx) return;
-      var master = ctx.createGain(); master.gain.setValueAtTime(0.0001, ctx.currentTime); master.gain.linearRampToValueAtTime(0.26, ctx.currentTime + 3);
-      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1900;
-      var dly = ctx.createDelay(1); dly.delayTime.value = 0.42; var fb = ctx.createGain(); fb.gain.value = 0.36; var wet = ctx.createGain(); wet.gain.value = 0.4;
-      dly.connect(fb); fb.connect(dly); dly.connect(wet);
-      var bus = ctx.createGain(); bus.connect(lp); bus.connect(dly); wet.connect(lp); lp.connect(master); master.connect(ctx.destination);
-      MU.master = master; MU.bus = bus; MU.playing = true; MU.last = -1;
-      musicTrack(true); muBtn();
+      musicPrime(); if (!MU.el) return;
+      MU.playing = true; muBtn();
+      muBuild().then(function (url) {
+        if (!MU.playing) return;
+        MU.el.src = url; MU.el.loop = true; MU.el.currentTime = 0;
+        var pr = MU.el.play(); if (pr && pr.catch) pr.catch(function () { MU.playing = false; muBtn(); });
+        try { if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: 'Ambiance douce', artist: 'Portfolio de Grégoire' }); } catch (e) {}
+      }, function () { MU.playing = false; muBtn(); });
     } catch (e) { MU.playing = false; }
   }
-  function musicStop(soft) {
-    try {
-      clearTimeout(MU.nextT);
-      if (MU.master && MU.ctx) { var t = MU.ctx.currentTime; MU.master.gain.cancelScheduledValues(t); MU.master.gain.setValueAtTime(MU.master.gain.value, t); MU.master.gain.linearRampToValueAtTime(0.0001, t + (soft ? 3 : 0.8)); }
-      var m = MU.master; setTimeout(function () { try { m.disconnect(); } catch (e) {} }, soft ? 3600 : 1200);
-    } catch (e) {}
-    MU.playing = false; MU.master = null; MU.bus = null; muBtn();
+  function musicStop() {
+    MU.playing = false;
+    try { if (MU.el) MU.el.pause(); } catch (e) {}
+    muBtn();
   }
   function muBtn() {
     var b = $('musicBtn'); if (!b) return;
@@ -1871,16 +1895,19 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   function musicButton() {
     if ($('musicBtn')) return;
     var b = h('button', { class: 'btn', type: 'button', id: 'musicBtn', onclick: function () {
-      if (MU.playing) { try { localStorage.setItem('portfolio-music', 'off'); } catch (e) {} musicStop(false); }
-      else { try { localStorage.removeItem('portfolio-music'); } catch (e) {} musicPrime(); musicStart(); }
+      if (MU.playing) { try { localStorage.setItem('portfolio-music', 'off'); } catch (e) {} musicStop(); }
+      else { try { localStorage.removeItem('portfolio-music'); } catch (e) {} musicStart(); }
     } });
     document.body.append(b); muBtn();
   }
+  /* La musique se lance toute seule à l'entrée. Si le navigateur exige un premier toucher (iPhone), elle démarre dès le premier appui sur l'écran. */
   function musicAfterUnlock(fresh) {
     musicButton();
+    if (muOff()) return;
     if (fresh) { musicStart(); return; }
-    var pend = false; try { pend = sessionStorage.getItem('portfolio-music-pending') === '1'; sessionStorage.removeItem('portfolio-music-pending'); } catch (e) {}
-    if (pend && !muOff()) { var once = function () { document.removeEventListener('pointerdown', once, true); musicStart(); }; document.addEventListener('pointerdown', once, true); }
+    var once = function () { document.removeEventListener('pointerdown', once, true); musicStart(); };
+    document.addEventListener('pointerdown', once, true);
+    try { sessionStorage.removeItem('portfolio-music-pending'); } catch (e) {}
   }
 
   /* ---------- Mot de passe de l'espace propriétaire (enregistré sur cet appareil, sous forme brouillée) ---------- */
