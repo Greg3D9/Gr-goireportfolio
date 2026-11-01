@@ -132,3 +132,10 @@ Quand tu ajoutes une photo (œuvre ou photo de profil dans « À propos »), un 
 - **Redresser** : curseur de -15° à +15°, pratique pour un croquis photographié de travers. Les coins vides restent blancs, recadre pour les enlever.
 - **Luminosité et contraste** : deux curseurs.
 Pour plusieurs images d'un coup, l'écran s'ouvre pour chacune. « Garder tel quel » ajoute l'image sans la changer. Le bouton « Recadrer / retoucher l'image » du formulaire permet de recommencer. Les images GIF et SVG ne sont pas retouchées, pour ne pas perdre l'animation ou la qualité vectorielle.
+
+## 17. Diaporama de veille
+
+Quand tu es connecté à ton espace propriétaire, les œuvres défilent en plein écran après un moment sans toucher l'écran (1 minute par défaut). Un appui n'importe où l'arrête. Dans la barre du bas, deux boutons :
+- **▶ Diaporama** le lance tout de suite.
+- **Veille : 1 min** change le délai (30 s, 1 min, 2 min, 5 min, ou non pour le couper).
+Le diaporama ne démarre pas pendant que tu remplis un formulaire ou que tu modifies ta page « À propos ». Il garde l'écran allumé s'il le peut (iPhone récent et iPad). Les visiteurs de ton site public ne le voient pas démarrer tout seul.

@@ -193,9 +193,9 @@ html[data-glow="1"] .card { box-shadow: var(--so-m) var(--so-m) 0 var(--edge), 0
 .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .thumb.broken img { visibility: hidden; }
 .thumb.broken { background-image: repeating-linear-gradient(135deg, var(--paper-ink) 0 2px, transparent 2px 9px); }
-html[data-fx="gray"] .thumb img, html[data-fx="gray"] .l-thumb, html[data-fx="gray"] .vghost, html[data-fx="gray"] .v-stage img { filter: grayscale(1) contrast(1.05); }
-html[data-fx="sepia"] .thumb img, html[data-fx="sepia"] .l-thumb, html[data-fx="sepia"] .vghost, html[data-fx="sepia"] .v-stage img { filter: sepia(.85) contrast(1.02); }
-html[data-fx="duo"] .thumb img, html[data-fx="duo"] .l-thumb, html[data-fx="duo"] .vghost, html[data-fx="duo"] .v-stage img { filter: url(#duo); }
+html[data-fx="gray"] .thumb img, html[data-fx="gray"] .l-thumb, html[data-fx="gray"] .vghost, html[data-fx="gray"] .ss-fg, html[data-fx="gray"] .v-stage img { filter: grayscale(1) contrast(1.05); }
+html[data-fx="sepia"] .thumb img, html[data-fx="sepia"] .l-thumb, html[data-fx="sepia"] .vghost, html[data-fx="sepia"] .ss-fg, html[data-fx="sepia"] .v-stage img { filter: sepia(.85) contrast(1.02); }
+html[data-fx="duo"] .thumb img, html[data-fx="duo"] .l-thumb, html[data-fx="duo"] .vghost, html[data-fx="duo"] .ss-fg, html[data-fx="duo"] .v-stage img { filter: url(#duo); }
 .tag { position: absolute; left: 0; top: 0; background: var(--edge); color: var(--txt); padding: 4px 9px; font-family: var(--f-mono); font-size: calc(var(--mono-size) - 1px); letter-spacing: .1em; text-transform: uppercase; border-bottom-right-radius: var(--r-s); }
 .cart { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
 .cart-top { display: flex; justify-content: space-between; gap: 8px; color: var(--mute); }
@@ -397,6 +397,20 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .ed-act { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .ed .btn { background: #22222b; color: #f2f1ee; border-color: rgba(242,241,238,.5); }
 .ed .btn.solid { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* Diaporama de veille */
+.ss { position: fixed; inset: 0; z-index: 90; background: #000; cursor: none; overflow: hidden; animation: ovIn .6s ease-out; color: #f2f1ee; }
+.ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s ease; display: grid; place-items: center; }
+.ss-slide.on { opacity: 1; }
+.ss-bg { position: absolute; left: -8%; top: -8%; width: 116%; height: 116%; object-fit: cover; filter: blur(34px) brightness(.45) saturate(1.2); }
+.ss-fg { position: relative; max-width: 86vw; max-height: 72vh; object-fit: contain; border-radius: 4px; box-shadow: 0 22px 60px rgba(0,0,0,.55); animation: ssZoom 9s ease-out both; }
+@keyframes ssZoom { from { transform: scale(1); } to { transform: scale(1.06); } }
+.ss-cap { position: absolute; left: 0; right: 0; bottom: max(26px, env(safe-area-inset-bottom)); text-align: center; padding: 0 20px; text-shadow: 0 2px 14px rgba(0,0,0,.7); }
+.ss-cap b { display: block; font-size: clamp(1.1rem, 3.6vw, 1.9rem); font-weight: 800; }
+.ss-cap span { font-size: .78rem; opacity: .7; letter-spacing: .12em; text-transform: uppercase; }
+.ss-hint { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center; font-size: .75rem; color: rgba(242,241,238,.7); animation: ssHint 1.2s ease 4.5s forwards; }
+@keyframes ssHint { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ss-fg { animation: none; } .ss-slide { transition-duration: .4s; } }
 .overlay:not([hidden]) { animation: ovIn .22s ease-out; }
 @keyframes ovIn { from { opacity: 0; } }
 .center:not([hidden]) .panel { animation: panelIn .38s cubic-bezier(.2, .9, .3, 1.3); }
@@ -732,7 +746,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v51</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v52</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1316,6 +1330,79 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       document.addEventListener('pointerup', once, true);
     } else start();
   })();
+
+  /* ---------- Diaporama de veille : après un moment sans toucher l'écran, les œuvres défilent ---------- */
+  var SS = { on: false, root: null, timer: 0, idx: 0, list: [], last: Date.now(), wl: null, fails: 0 };
+  var SS_OPTS = [0, 30, 60, 120, 300];
+  function ssDelay() {
+    try { var v = localStorage.getItem('portfolio-veille'); if (v === 'off') return 0; var n = parseInt(v, 10); return n > 0 ? n : 60; } catch (e) { return 60; }
+  }
+  function ssLabel() {
+    var b = $('ssBtn'); if (!b) return;
+    var d = ssDelay();
+    b.textContent = 'Veille : ' + (d ? (d < 60 ? d + ' s' : (d / 60) + ' min') : 'non');
+  }
+  function ssButtons() {
+    if ($('ssBtn')) return;
+    var bar = document.querySelector('.statusbar'); if (!bar) return;
+    bar.append(h('button', { class: 'btn', type: 'button', id: 'ssGo', text: '▶ Diaporama', onclick: function () { ssStart(); } }),
+      h('button', { class: 'btn', type: 'button', id: 'ssBtn', title: 'Délai avant le diaporama', onclick: function () {
+        var i = SS_OPTS.indexOf(ssDelay()), n = SS_OPTS[(i + 1) % SS_OPTS.length];
+        try { localStorage.setItem('portfolio-veille', n ? String(n) : 'off'); } catch (e) {}
+        ssLabel();
+        toast(n ? 'Le diaporama démarre après ' + (n < 60 ? n + ' secondes' : (n / 60) + (n === 60 ? ' minute' : ' minutes')) + ' sans toucher l\'écran.' : 'Diaporama automatique désactivé.');
+      } }));
+    ssLabel();
+  }
+  function ssShow() {
+    if (!SS.on || !SS.list.length) return;
+    var w = SS.list[SS.idx++ % SS.list.length], root = SS.root;
+    var bg = h('img', { class: 'ss-bg', src: srcOf(w), alt: '' }), fg = h('img', { class: 'ss-fg', src: srcOf(w), alt: w.title || '' });
+    var cap = h('div', { class: 'ss-cap' }, h('b', { text: w.title || 'Sans titre' }), h('span', { class: 'mono', text: catOf(w.cat).label + (w.year ? ' · ' + w.year : '') }));
+    var sl = h('div', { class: 'ss-slide' }, bg, fg, cap);
+    fg.addEventListener('error', function () { sl.remove(); if (SS.on && ++SS.fails < 6) ssShow(); });
+    fg.addEventListener('load', function () {
+      SS.fails = 0;
+      if (!SS.on) return;
+      root.insertBefore(sl, root.querySelector('.ss-hint'));
+      void sl.offsetWidth; sl.classList.add('on');
+      var olds = Array.prototype.slice.call(root.querySelectorAll('.ss-slide')).filter(function (x) { return x !== sl; });
+      olds.forEach(function (o) { o.classList.remove('on'); setTimeout(function () { o.remove(); }, 2000); });
+    });
+  }
+  function ssKey(e) { e.preventDefault(); e.stopPropagation(); ssStop(); }
+  function ssStart() {
+    if (SS.on) return;
+    var list = visible().filter(function (w) { return srcOf(w); }), i, j, t;
+    if (!list.length) { toast('Aucune œuvre à présenter pour l\'instant.', true); return; }
+    for (i = list.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = list[i]; list[i] = list[j]; list[j] = t; }
+    SS.on = true; SS.list = list; SS.idx = 0; SS.fails = 0;
+    SS.root = h('div', { class: 'ss', role: 'dialog', 'aria-label': 'Diaporama des œuvres' }, h('div', { class: 'ss-hint mono', text: 'Touche l\'écran pour arrêter' }));
+    SS.root.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); ssStop(); });
+    document.body.append(SS.root);
+    document.addEventListener('keydown', ssKey, true);
+    ssShow(); SS.timer = setInterval(ssShow, 7500);
+    try { if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { if (SS.on) SS.wl = l; else l.release(); }).catch(function () {}); } catch (e) {}
+  }
+  function ssStop() {
+    if (!SS.on) return;
+    SS.on = false; clearInterval(SS.timer);
+    document.removeEventListener('keydown', ssKey, true);
+    try { SS.root.remove(); } catch (e) {}
+    try { if (SS.wl) SS.wl.release(); } catch (e) {} SS.wl = null;
+    SS.last = Date.now();
+  }
+  ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(function (n) {
+    window.addEventListener(n, function () { if (!SS.on) SS.last = Date.now(); }, { passive: true, capture: true });
+  });
+  setInterval(function () {
+    var d = ssDelay();
+    if (!d || SS.on || document.hidden || !state.canAdd) return;
+    if (Date.now() - SS.last < d * 1000) return;
+    var a = document.activeElement, busy = document.querySelector('.overlay.center:not([hidden]), .drawer:not([hidden]), .ed');
+    if (busy || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || (typeof editingAbout !== 'undefined' && editingAbout && !$('aboutWrap').hidden)) { SS.last = Date.now(); return; }
+    ssStart();
+  }, 1500);
 
   /* ---------- Visionneuse ---------- */
   function lockScroll(on) { document.body.style.overflow = on ? 'hidden' : ''; }
@@ -2195,7 +2282,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (MU.playing) { try { localStorage.setItem('portfolio-music', 'off'); } catch (e) {} musicStop(); }
       else { try { localStorage.removeItem('portfolio-music'); } catch (e) {} musicStart(); }
     } });
-    var bar = document.querySelector('.statusbar'); (bar || document.body).append(b); muBtn();
+    var bar = document.querySelector('.statusbar'); (bar || document.body).append(b); muBtn(); ssButtons();
   }
   /* La musique se lance toute seule à l'entrée. Si le navigateur exige un premier toucher (iPhone), elle démarre dès le premier appui sur l'écran. */
   function musicAfterUnlock(fresh) {
