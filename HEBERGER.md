@@ -139,3 +139,16 @@ Quand tu es connecté à ton espace propriétaire, les œuvres défilent en plei
 - **▶ Diaporama** le lance tout de suite.
 - **Veille : 1 min** change le délai (30 s, 1 min, 2 min, 5 min, ou non pour le couper).
 Le diaporama ne démarre pas pendant que tu remplis un formulaire ou que tu modifies ta page « À propos ». Il garde l'écran allumé s'il le peut (iPhone récent et iPad). Les visiteurs de ton site public ne le voient pas démarrer tout seul.
+
+## 18. Carte des œuvres
+
+Dans le formulaire d'une œuvre, le champ « Lieu (facultatif) » te laisse écrire le nom du lieu et poser une épingle :
+- **Placer sur la carte** ouvre une carte : touche pour poser l'épingle, cherche une adresse, ou appuie sur « Ma position ». Valide avec « Valider ce lieu ».
+- Si ta photo contient sa position GPS, l'épingle est posée toute seule (vérifie-la). Sur iPhone, au moment de choisir la photo, touche « Options » et garde « Position » activée.
+- Quand tu ajoutes plusieurs images d'un coup, elles reçoivent le même lieu.
+Dès qu'une œuvre a une épingle, un bouton **Carte** apparaît en haut : une épingle ronde (avec la photo de l'œuvre) par lieu. Un appui ouvre la liste des œuvres de ce lieu. La fiche d'une œuvre affiche son lieu et un bouton « Voir sur la carte ». Le fond de carte (OpenStreetMap) a besoin d'une connexion. Hors connexion, les épingles restent visibles sur un fond gris.
+Pense à republier ton portfolio (bouton « Publier le portfolio ») pour que tes visiteurs voient la carte.
+
+## 19. Effet au défilement
+
+Dans la galerie, les cartes situées plus bas arrivent en glissant quand tu fais défiler, et les images bougent très légèrement dans leur cadre. Si ton iPhone est réglé sur « Réduire les animations », l'effet est coupé.
