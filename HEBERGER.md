@@ -123,3 +123,12 @@ Quand tu penches ton iPhone, les images de la galerie bougent très légèrement
 ## 15. Frise chronologique : nouveau look
 
 Chaque étape est une carte sombre avec la période en grand, un numéro en filigrane, le titre, des pastilles pour les détails (lycée, ville, diplôme) et des points de progression. Dans la 3D et en réalité augmentée, les cartes sont encadrées et posées sur un socle, avec une bille sur le rail pour chaque étape. Pour avoir de jolies pastilles, sépare les détails par « · » dans le champ de détail de chaque étape.
+
+## 16. Recadrer et retoucher les images
+
+Quand tu ajoutes une photo (œuvre ou photo de profil dans « À propos »), un écran de retouche s'ouvre :
+- **Recadrer** : tire les coins blancs, ou déplace le cadre avec le doigt. Choisis « Libre », « Original », 1:1, 4:5 ou 3:2. Pour la photo de profil, le format est fixé à 4:5.
+- **Tourner** : boutons ↺ et ↻ (90°).
+- **Redresser** : curseur de -15° à +15°, pratique pour un croquis photographié de travers. Les coins vides restent blancs, recadre pour les enlever.
+- **Luminosité et contraste** : deux curseurs.
+Pour plusieurs images d'un coup, l'écran s'ouvre pour chacune. « Garder tel quel » ajoute l'image sans la changer. Le bouton « Recadrer / retoucher l'image » du formulaire permet de recommencer. Les images GIF et SVG ne sont pas retouchées, pour ne pas perdre l'animation ou la qualité vectorielle.

@@ -374,6 +374,29 @@ html.tilt .card .thumb img, html.tilt .card:hover .thumb img { transform: transl
 html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc(var(--ty, 0px) * -.22), 0); }
 .skeleton { animation: pulse 1.1s ease-in-out infinite alternate; }
 @keyframes pulse { from { opacity: .3; } to { opacity: .7; } }
+
+/* Retouche d'image */
+.ed { position: fixed; inset: 0; z-index: 70; background: #0c0c10; color: #f2f1ee; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); touch-action: none; -webkit-user-select: none; user-select: none; animation: ovIn .2s ease-out; }
+.ed-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; }
+.ed-top b { font-weight: 800; font-size: 1rem; }
+.ed-top small { color: rgba(242,241,238,.6); margin-left: 8px; }
+.ed-area { flex: 1; min-height: 0; position: relative; overflow: hidden; display: grid; place-items: center; padding: 28px; }
+.ed-stage { position: relative; }
+.ed-stage canvas { display: block; width: 100%; height: 100%; background: #fff; }
+.ed-crop { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(8,8,12,.62); cursor: move;
+  background-image: linear-gradient(to right, transparent 33.2%, rgba(255,255,255,.35) 33.3% 33.6%, transparent 33.7% 66.2%, rgba(255,255,255,.35) 66.3% 66.6%, transparent 66.7%), linear-gradient(to bottom, transparent 33.2%, rgba(255,255,255,.35) 33.3% 33.6%, transparent 33.7% 66.2%, rgba(255,255,255,.35) 66.3% 66.6%, transparent 66.7%); }
+.ed-h { position: absolute; width: 48px; height: 48px; margin: -24px 0 0 -24px; display: grid; place-items: center; touch-action: none; }
+.ed-h::after { content: ''; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,.55); }
+.ed-ctl { padding: 10px 14px 14px; display: grid; gap: 9px; background: #15151b; border-top: 1px solid rgba(255,255,255,.12); }
+.ed-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ed-chip { font: inherit; font-size: .8rem; color: #f2f1ee; background: transparent; border: 1.5px solid rgba(242,241,238,.4); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.ed-chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.ed-sl { display: grid; grid-template-columns: 92px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: .78rem; color: rgba(242,241,238,.8); }
+.ed-sl input { width: 100%; accent-color: var(--accent); touch-action: pan-x; }
+.ed-sl output { text-align: right; color: rgba(242,241,238,.6); }
+.ed-act { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.ed .btn { background: #22222b; color: #f2f1ee; border-color: rgba(242,241,238,.5); }
+.ed .btn.solid { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .overlay:not([hidden]) { animation: ovIn .22s ease-out; }
 @keyframes ovIn { from { opacity: 0; } }
 .center:not([hidden]) .panel { animation: panelIn .38s cubic-bezier(.2, .9, .3, 1.3); }
@@ -709,7 +732,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v50</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v51</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -761,6 +784,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
           <small id="fFileName">Image (PNG, JPEG, WebP, GIF, SVG). Plusieurs fichiers possibles.</small>
           <input id="fFile" type="file" accept="image/*" multiple>
         </label>
+        <button id="fEdit" class="btn" type="button" hidden style="margin-top:8px">Recadrer / retoucher l'image</button>
       </div>
       <div class="field">
         <span class="lbl mono">Modèle 3D (facultatif)</span>
@@ -1387,12 +1411,148 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     } catch (e) { toast('La suppression a échoué. Réessaie dans un instant.', true); }
   }
 
+  /* ---------- Retouche d'image : recadrer, tourner, redresser, luminosité ---------- */
+  function imgEdit(file, o) {
+    o = o || {};
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onerror = function () { URL.revokeObjectURL(url); toast('Cette image ne peut pas être retouchée.', true); resolve({ skip: true }); };
+      img.onload = build;
+      img.src = url;
+      function build() {
+        var iw = img.naturalWidth, ih = img.naturalHeight;
+        if (!iw || !ih) { URL.revokeObjectURL(url); resolve({ skip: true }); return; }
+        var st = { q: 0, fine: 0, br: 0, ct: 0, mode: o.lock ? (o.ar || 'free') : 'free' };
+        var sm = document.createElement('canvas'), sk = Math.min(1, 1600 / Math.max(iw, ih));
+        sm.width = Math.max(1, Math.round(iw * sk)); sm.height = Math.max(1, Math.round(ih * sk));
+        sm.getContext('2d').drawImage(img, 0, 0, sm.width, sm.height);
+        var S = { w: 100, h: 100 }, R = { x: 0, y: 0, w: 100, h: 100 }, drag = null, raf = 0, closed = false;
+        function qw() { return st.q % 2 ? ih : iw; }
+        function qh() { return st.q % 2 ? iw : ih; }
+        function curAr() { return st.mode === 'free' ? 0 : st.mode === 'orig' ? qw() / qh() : st.mode; }
+        var wrap = h('div', { class: 'ed', role: 'dialog', 'aria-modal': 'true', 'aria-label': o.title || 'Retoucher l\'image', tabindex: '-1' });
+        var area = h('div', { class: 'ed-area' }), stage = h('div', { class: 'ed-stage' }), cv = document.createElement('canvas'), crop = h('div', { class: 'ed-crop' });
+        ['nw', 'ne', 'sw', 'se'].forEach(function (k) { var d = h('div', { class: 'ed-h' }); d.dataset.k = k; d.style.left = k.charAt(1) === 'e' ? '100%' : '0'; d.style.top = k.charAt(0) === 's' ? '100%' : '0'; crop.append(d); });
+        stage.append(cv, crop); area.append(stage);
+        function finish(v) { if (closed) return; closed = true; window.removeEventListener('resize', layout); document.removeEventListener('keydown', onKey, true); URL.revokeObjectURL(url); wrap.remove(); resolve(v); }
+        function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); finish(null); } }
+        var xBtn = h('button', { class: 'btn', type: 'button', text: o.lock ? 'Annuler' : 'Fermer', onclick: function () { finish(null); } });
+        var top = h('div', { class: 'ed-top' }, h('span', null, h('b', { text: o.title || 'Retoucher l\'image' }), o.step ? h('small', { class: 'mono', text: o.step }) : null), xBtn);
+        var chips = h('div', { class: 'ed-row' });
+        function drawChips() {
+          chips.textContent = '';
+          if (o.lock) { chips.append(h('span', { class: 'mono', style: 'font-size:.78rem;color:rgba(242,241,238,.7)', text: 'Format portrait 4:5, comme sur la page À propos' })); }
+          else [['Libre', 'free'], ['Original', 'orig'], ['1:1', 1], ['4:5', 4 / 5], ['3:2', 3 / 2]].forEach(function (c) {
+            chips.append(h('button', { class: 'ed-chip', type: 'button', text: c[0], 'aria-pressed': String(st.mode === c[1]), onclick: function () { st.mode = c[1]; resetRect(); drawChips(); } }));
+          });
+          chips.append(h('button', { class: 'ed-chip', type: 'button', text: '↺ 90°', 'aria-label': 'Tourner à gauche', onclick: function () { st.q = (st.q + 3) % 4; layout(); } }),
+            h('button', { class: 'ed-chip', type: 'button', text: '↻ 90°', 'aria-label': 'Tourner à droite', onclick: function () { st.q = (st.q + 1) % 4; layout(); } }));
+        }
+        function slider(label, key, min, max, step, fmt) {
+          var inp = h('input', { type: 'range', min: String(min), max: String(max), step: String(step), value: '0', 'aria-label': label }), out = h('output', { text: '0' });
+          inp.addEventListener('input', function () { st[key] = parseFloat(inp.value); out.textContent = fmt(st[key]); sched(); });
+          inp.addEventListener('dblclick', function () { inp.value = '0'; inp.dispatchEvent(new Event('input')); });
+          return h('div', { class: 'ed-sl' }, h('span', { text: label }), inp, out);
+        }
+        var okBtn = h('button', { class: 'btn solid', type: 'button', text: 'Valider', onclick: validate });
+        var act = h('div', { class: 'ed-act' });
+        if (o.skip) act.append(h('button', { class: 'btn', type: 'button', text: 'Garder tel quel', onclick: function () { finish({ skip: true }); } }));
+        act.append(okBtn);
+        var ctl = h('div', { class: 'ed-ctl' }, chips,
+          slider('Redresser', 'fine', -15, 15, 0.5, function (v) { return v + '°'; }),
+          slider('Luminosité', 'br', -50, 50, 1, String),
+          slider('Contraste', 'ct', -50, 50, 1, String), act);
+        wrap.append(top, area, ctl); document.body.append(wrap);
+        function sched() { if (!raf) raf = requestAnimationFrame(function () { raf = 0; paint(); }); }
+        function paint() {
+          var dpr = Math.min(window.devicePixelRatio || 1, 2), ctx = cv.getContext('2d');
+          cv.width = Math.round(S.w * dpr); cv.height = Math.round(S.h * dpr);
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+          var k = S.w / qw() * dpr;
+          ctx.translate(cv.width / 2, cv.height / 2); ctx.rotate((st.q * 90 + st.fine) * Math.PI / 180); ctx.scale(k, k);
+          ctx.drawImage(sm, -iw / 2, -ih / 2, iw, ih);
+          cv.style.filter = (st.br || st.ct) ? 'brightness(' + (1 + st.br / 100) + ') contrast(' + (1 + st.ct / 100) + ')' : '';
+        }
+        function setRect(r) {
+          R = r; crop.style.left = r.x + 'px'; crop.style.top = r.y + 'px'; crop.style.width = r.w + 'px'; crop.style.height = r.h + 'px';
+        }
+        function fit(ar) {
+          if (!ar) return { x: 0, y: 0, w: S.w, h: S.h };
+          var w = S.w, hh = w / ar; if (hh > S.h) { hh = S.h; w = hh * ar; }
+          return { x: (S.w - w) / 2, y: (S.h - hh) / 2, w: w, h: hh };
+        }
+        function resetRect() { setRect(fit(curAr())); }
+        function layout() {
+          var aw = Math.max(80, area.clientWidth - 56), ah = Math.max(80, area.clientHeight - 56), sc = Math.min(aw / qw(), ah / qh());
+          S = { w: Math.max(40, Math.floor(qw() * sc)), h: Math.max(40, Math.floor(qh() * sc)) };
+          stage.style.width = S.w + 'px'; stage.style.height = S.h + 'px';
+          paint(); resetRect();
+        }
+        function pt(e) { var r = stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+        function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+        crop.addEventListener('pointerdown', function (e) {
+          e.preventDefault(); try { crop.setPointerCapture(e.pointerId); } catch (x) {}
+          var k = e.target && e.target.dataset && e.target.dataset.k, p = pt(e);
+          if (k) {
+            var ax = k.charAt(1) === 'e' ? R.x : R.x + R.w, ay = k.charAt(0) === 's' ? R.y : R.y + R.h;
+            drag = { k: k, ax: ax, ay: ay };
+          } else drag = { k: 'move', dx: p.x - R.x, dy: p.y - R.y };
+        });
+        crop.addEventListener('pointermove', function (e) {
+          if (!drag) return; e.preventDefault();
+          var p = pt(e), MIN = 48;
+          if (drag.k === 'move') { setRect({ x: clamp(p.x - drag.dx, 0, S.w - R.w), y: clamp(p.y - drag.dy, 0, S.h - R.h), w: R.w, h: R.h }); return; }
+          var px = clamp(p.x, 0, S.w), py = clamp(p.y, 0, S.h), sx = px >= drag.ax ? 1 : -1, sy = py >= drag.ay ? 1 : -1;
+          var w = Math.abs(px - drag.ax), hh = Math.abs(py - drag.ay), ar = curAr();
+          var maxW = sx > 0 ? S.w - drag.ax : drag.ax, maxH = sy > 0 ? S.h - drag.ay : drag.ay;
+          if (ar) {
+            w = Math.max(w, hh * ar); w = Math.min(w, maxW, maxH * ar); w = Math.max(w, MIN); hh = w / ar;
+            if (hh > maxH) { hh = maxH; w = hh * ar; }
+          } else { w = clamp(w, MIN, maxW); hh = clamp(hh, MIN, maxH); }
+          setRect({ x: sx > 0 ? drag.ax : drag.ax - w, y: sy > 0 ? drag.ay : drag.ay - hh, w: w, h: hh });
+        });
+        function up() { drag = null; }
+        crop.addEventListener('pointerup', up); crop.addEventListener('pointercancel', up);
+        function validate() {
+          okBtn.disabled = true; okBtn.textContent = 'Un instant…';
+          setTimeout(function () {
+            try {
+              var k = qw() / S.w, ow = R.w * k, oh = R.h * k, cap = 2600, f = Math.min(1, cap / Math.max(ow, oh));
+              var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(ow * f)); c.height = Math.max(1, Math.round(oh * f));
+              var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+              x.scale(f, f); x.translate(-R.x * k, -R.y * k); x.translate(qw() / 2, qh() / 2);
+              x.rotate((st.q * 90 + st.fine) * Math.PI / 180); x.drawImage(img, -iw / 2, -ih / 2);
+              if (st.br || st.ct) {
+                var bf = 1 + st.br / 100, cf = 1 + st.ct / 100, lut = new Uint8ClampedArray(256), i;
+                for (i = 0; i < 256; i++) lut[i] = (i * bf - 127.5) * cf + 127.5;
+                var id = x.getImageData(0, 0, c.width, c.height), d = id.data;
+                for (i = 0; i < d.length; i += 4) { d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]]; }
+                x.putImageData(id, 0, 0);
+              }
+              var png = file.type === 'image/png' && file.size < 4e6, type = png ? 'image/png' : 'image/jpeg';
+              c.toBlob(function (b) {
+                if (!b) { okBtn.disabled = false; okBtn.textContent = 'Valider'; toast('La retouche a échoué. Réessaie.', true); return; }
+                var nm = (file.name || 'image').replace(/\.[^.]+$/, '') + (png ? '.png' : '.jpg');
+                var out; try { out = new File([b], nm, { type: type, lastModified: Date.now() }); } catch (e) { out = b; out.name = nm; }
+                finish({ file: out });
+              }, type, 0.92);
+            } catch (e) { okBtn.disabled = false; okBtn.textContent = 'Valider'; toast('La retouche a échoué. Réessaie.', true); }
+          }, 30);
+        }
+        window.addEventListener('resize', layout); document.addEventListener('keydown', onKey, true);
+        drawChips(); layout(); wrap.focus();
+        window.__edTest = { st: st, R: function () { return R; }, S: function () { return S; } };
+      }
+    });
+  }
+
   /* ---------- Formulaire ---------- */
+  var picked = [];
   function openForm(work) {
     editing = work || null;
     lastFocus = document.activeElement;
     $('fHead').textContent = work ? 'Modifier la pièce' : 'Ajouter une œuvre';
-    $('fFile').value = '';
+    $('fFile').value = ''; picked = []; $('fEdit').hidden = true;
     $('fFileName').textContent = work ? 'Laisse vide pour garder l\'image actuelle.' : 'Image (PNG, JPEG, WebP, GIF, SVG). Plusieurs fichiers possibles.';
     $('fFile').multiple = !work;
     $('fTitle').value = work ? (work.title || '') : '';
@@ -1438,7 +1598,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     if (busy || !db || !assetsNS) return;
     var year = parseInt($('fYear').value, 10);
     if (!(year >= 1950 && year <= 2100)) { toast('Indique une année entre 1950 et 2100.', true); $('fYear').focus(); return; }
-    var files = Array.prototype.slice.call($('fFile').files || []);
+    var files = picked.slice();
     var mf = $('fModel').files[0] || null, mext = '';
     if (mf) { mext = modelExt(mf.name); if (!mext) { toast('Format 3D non pris en charge. Utilise .glb, .gltf ou .stl.', true); return; } }
     if (!editing && !files.length && !mf) { toast('Choisis au moins une image ou un modèle 3D.', true); return; }
@@ -1681,17 +1841,37 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     if (w) openForm(w);
   });
   $('qIn').addEventListener('input', function (e) { state.q = e.target.value; renderHero(); renderGrid(); });
+  var FHINT = 'Image (PNG, JPEG, WebP, GIF, SVG). Plusieurs fichiers possibles.';
+  function editable(f) { return f && /^image\/(jpeg|png|webp)$/.test(f.type); }
+  function pickedLabel() {
+    $('fFileName').textContent = picked.length ? (picked.length === 1 ? picked[0].name : picked.length + ' fichiers : ' + picked.map(function (x) { return x.name; }).join(', ')) : FHINT;
+    $('fEdit').hidden = !picked.some(editable);
+  }
+  async function pickFiles(list) {
+    var arr = Array.prototype.slice.call(list || []).filter(Boolean), i, n = arr.filter(editable).length, k = 0;
+    if (!arr.length) return;
+    picked = arr; pickedLabel();
+    for (i = 0; i < arr.length; i++) {
+      if (!editable(arr[i])) continue;
+      k++;
+      var r = await imgEdit(arr[i], { title: 'Retoucher l\'image', step: n > 1 ? k + ' / ' + n : '', skip: true });
+      if (!r) break;
+      if (r.file) { arr[i] = r.file; picked = arr.slice(); pickedLabel(); }
+    }
+  }
   $('fFile').addEventListener('change', function () {
-    var f = $('fFile').files;
-    $('fFileName').textContent = f.length ? (f.length === 1 ? f[0].name : f.length + ' fichiers : ' + Array.prototype.map.call(f, function (x) { return x.name; }).join(', ')) : 'Image (PNG, JPEG, WebP, GIF, SVG). Plusieurs fichiers possibles.';
+    var f = Array.prototype.slice.call($('fFile').files || []);
+    try { $('fFile').value = ''; } catch (e) {}
+    pickFiles(f);
   });
+  $('fEdit').addEventListener('click', function () { pickFiles(picked); });
   $('fModel').addEventListener('change', function () { var f = $('fModel').files[0]; $('fModelName').textContent = f ? f.name : MODEL_HINT; });
   var drop = $('drop');
   ['dragenter', 'dragover'].forEach(function (n) { drop.addEventListener(n, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (n) { drop.addEventListener(n, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
   drop.addEventListener('drop', function (e) {
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
-      try { $('fFile').files = e.dataTransfer.files; $('fFile').dispatchEvent(new Event('change')); } catch (x) {}
+      pickFiles(e.dataTransfer.files);
     }
   });
   document.addEventListener('keydown', function (e) {
@@ -2749,15 +2929,23 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       var src = aboutPhotoChange ? aboutPhotoChange.url : (photoId && urlFor(photoId));
       if (src) prev.append(h('img', { src: src, alt: '' }));
       prev.append(h('button', { class: 'btn', type: 'button', text: src ? 'Changer la photo' : 'Choisir une photo', onclick: function () { file.click(); } }));
+      if (aboutPhotoChange && aboutPhotoChange.file) prev.append(h('button', { class: 'btn', type: 'button', text: 'Recadrer', onclick: function () { editPhoto(aboutPhotoChange.file); } }));
       if (src) prev.append(h('button', { class: 'btn', type: 'button', text: 'Retirer', onclick: function () { if (aboutPhotoChange) URL.revokeObjectURL(aboutPhotoChange.url); aboutPhotoChange = { remove: true }; photoId = ''; drawPrev(); } }));
     };
     file.addEventListener('change', function () {
       var f = file.files[0]; file.value = '';
       if (!f) return;
       if (!/^image\//.test(f.type)) { toast('Choisis une image.', true); return; }
-      if (aboutPhotoChange && aboutPhotoChange.url) URL.revokeObjectURL(aboutPhotoChange.url);
-      aboutPhotoChange = { file: f, url: URL.createObjectURL(f) }; drawPrev();
+      editPhoto(f);
     });
+    var editPhoto = function (f) {
+      imgEdit(f, { ar: 4 / 5, lock: true, title: 'Recadrer ta photo' }).then(function (r) {
+        if (!r) return;
+        var ff = r.file || f;
+        if (aboutPhotoChange && aboutPhotoChange.url) URL.revokeObjectURL(aboutPhotoChange.url);
+        aboutPhotoChange = { file: ff, url: URL.createObjectURL(ff) }; drawPrev();
+      });
+    };
     drawPrev();
     var fld = function (label, input) { return h('div', { class: 'field' }, h('label', { class: 'mono', text: label }), input); };
     var name = h('input', { type: 'text', maxlength: 80, value: a.name || '', placeholder: 'Grégoire', autocomplete: 'off' });
