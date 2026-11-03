@@ -171,10 +171,26 @@ Le bouton « Réalité augmentée » utilise toujours l'orientation affichée à
 
 ## 22. Cartes à collectionner et booster
 
-Un bouton **Booster** (violet et rose) est dans la barre du haut, à côté de « Galerie » et « À propos ». Un second bouton flottant du même nom est en bas à droite de la galerie. Un appui ouvre un paquet de 5 cartes, tirées parmi tes œuvres. Le visiteur retourne les cartes une par une.
+Un bouton **Booster** (violet et rose) est dans la barre du haut, à côté de « Galerie » et « À propos ». Un appui ouvre un paquet de 5 cartes, tirées parmi tes œuvres. Le visiteur retourne les cartes une par une.
 
 Cinq raretés, de la plus courante à la plus rare : Neutre, Normal, Rare, Ultra rare, Légende. L'étiquette est en haut à droite de l'image de la carte, et l'effet holographique brillant est plus fort pour les raretés élevées (il bouge quand on penche le téléphone ou qu'on glisse le doigt).
 
 - **Collection** : le classeur du visiteur. Les cartes trouvées s'affichent, les autres sont des cases avec un « ? ». Il reste sur l'appareil du visiteur.
 - **Voir la carte** : bouton sur la fiche de chaque œuvre. On peut enregistrer la carte en image.
 - **Pour toi** : dans le formulaire d'une œuvre, choisis la rareté et les trois stats (précision, créativité, difficulté). Sans choix, une rareté est attribuée automatiquement et reste la même. Republie ton portfolio pour que les visiteurs voient tes choix.
+
+## 23. Échange de cartes par QR code
+
+Deux amis peuvent s'échanger une carte, sans serveur. La carte donnée disparaît de la collection du donneur et apparaît chez l'autre.
+
+1. **Le donneur** ouvre « Booster », puis « Collection », touche une de ses cartes et appuie sur **Donner cette carte**. Un QR code s'affiche (valable 15 minutes).
+2. **L'ami** le scanne avec l'**appareil photo** de son téléphone : l'application s'ouvre et lui montre la carte. Il appuie sur **Accepter** : la carte entre dans sa collection.
+3. Son téléphone affiche alors un **QR de confirmation**. Le donneur le scanne à son tour.
+4. C'est seulement à ce moment-là que la carte quitte la collection du donneur.
+
+Sans appareil photo, le bouton « Partager le lien » envoie le même code par message, et « Recevoir » (dans la Collection) ou « J'ai un code » permet de coller un lien reçu.
+
+Limites à connaître :
+- Chaque code ne marche qu'une fois par appareil et expire au bout de 15 minutes. Comme il n'y a pas de serveur, rien n'empêche techniquement quelqu'un de bidouiller son propre téléphone. Pour un jeu entre amis, c'est suffisant.
+- Les collections restent dans le navigateur de chaque téléphone. Le donneur doit scanner la confirmation dans la **même application** que celle où il a créé l'offre (même téléphone, même navigateur ; l'application installée sur l'écran d'accueil et Safari ont des collections séparées).
+- Si l'ami possède déjà la carte, il peut l'accepter : elle ne sera pas en double, mais elle aura quitté la collection du donneur.

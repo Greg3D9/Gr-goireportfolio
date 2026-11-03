@@ -503,6 +503,12 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bo-fab[hidden] { display: none; }
 .bo-hd { color: #fff !important; border-color: rgba(255,255,255,.45) !important; background: linear-gradient(120deg, #6a3df0, #d64bd0 45%, #ffb800, #6a3df0) !important; background-size: 250% 250% !important; animation: boFab 6s linear infinite; text-shadow: 0 1px 6px rgba(0,0,0,.45); }
 .bo-hd[hidden] { display: none; }
+.ex-qr { background: #fff; border-radius: 14px; padding: 0; width: min(74vw, 300px); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.ex-qr canvas { display: block; width: 100%; height: auto; }
+.ex-t { max-width: 340px; margin: 0 14px; text-align: center; font-size: 1.02rem; line-height: 1.4; color: #f4f2ee; }
+.ex-t b { color: #ffb800; }
+.ex-s { max-width: 340px; margin: 0 14px; text-align: center; font-size: .82rem; line-height: 1.45; color: rgba(244,242,238,.68); }
+.ex-ta { width: min(86vw, 360px); height: 110px; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font: .8rem/1.4 var(--mono, ui-monospace, monospace); resize: none; }
 @media (prefers-reduced-motion: reduce) { .bo-hd, .bo-fab { animation: none !important; } }
 .bo-fab i { width: 12px; height: 17px; border-radius: 3px; background: linear-gradient(135deg, #fff, #ffe9a0); box-shadow: 3px -2px 0 rgba(255,255,255,.55); transform: rotate(-8deg); }
 @keyframes boFab { to { background-position: 250% 50%; } }
@@ -748,7 +754,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 (function () {
   var el = document.getElementById('intro');
   var skip = false;
-  try { skip = sessionStorage.getItem('portfolio-intro') === '1' || /apropos|nointro/.test(location.hash); } catch (e) {}
+  try { skip = sessionStorage.getItem('portfolio-intro') === '1' || /apropos|nointro|^#ex=/.test(location.hash); } catch (e) {}
   if (skip) return;
   el.hidden = false;
   document.documentElement.style.overflow = 'hidden';
@@ -914,7 +920,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v59</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v60</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1076,6 +1082,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       var v = p[k];
       if (k === 'class') el.className = v;
       else if (k === 'text') el.textContent = v;
+      else if (k === 'html') el.innerHTML = v;
       else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
       else if (v === true) el.setAttribute(k, '');
       else if (v !== false && v != null) el.setAttribute(k, v);
@@ -2221,14 +2228,14 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       else { var lk = h('div', { class: 'cd-lock', text: '?' }); lk.style.setProperty('--cw', cw + 'px'); grid.append(lk); }
     });
     var stage = h('div', { class: 'bo-stage', style: 'justify-content:flex-start' }, sum, grid);
-    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Fermer', L.close)), stage);
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Recevoir', function () { exPaste(); }), boBtn('Fermer', L.close)), stage);
     if (all) stage.prepend(h('div', { class: 'bo-hint', text: 'Mode propriétaire : toutes les cartes sont visibles' }));
   }
   function openCard(w, o) {
     o = o || {};
     var L = boLayer('bo-one', 'Carte ' + (w.title || '')), cw = Math.round(Math.max(170, Math.min(340, (window.innerWidth || 390) * .8, ((window.innerHeight || 800) - 250) * 63 / 88)));
     var stage = h('div', { class: 'bo-stage' }, cardEl(w, { w: cw }), h('div', { class: 'bo-hint', text: RAR[rarOf(w)].l + ' · incline ton téléphone ou glisse le doigt' }),
-      h('div', { class: 'bo-btns' }, boBtn('Enregistrer en image', function () { saveCard(w); }, true), o.noView ? null : boBtn('Voir l\'œuvre', function () { BO.slice().forEach(function (x) { x.close(); }); openViewer(w.id); })));
+      h('div', { class: 'bo-btns' }, boBtn('Enregistrer en image', function () { saveCard(w); }, true), colGet().indexOf(w.id) >= 0 ? boBtn('Donner cette carte', function () { exGive(w); }) : null, o.noView ? null : boBtn('Voir l\'œuvre', function () { BO.slice().forEach(function (x) { x.close(); }); openViewer(w.id); })));
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: w.title || 'Carte' }), boBtn('Fermer', L.close)), stage);
   }
   function cardPng(w) {
@@ -2283,13 +2290,107 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); toast('Carte enregistrée');
     }).catch(function () { toast('Impossible de créer la carte.', true); });
   }
-  var boFab = h('button', { id: 'boFab', class: 'bo-fab', type: 'button', 'aria-label': 'Ouvrir un booster de cartes', hidden: true, onclick: openBooster }, h('i'), h('span', { text: 'Booster' }));
-  document.body.append(boFab);
-  function boFabUpdate() { if (!boFab) return; var none = !cardPool().length, tb = $('boHd'); boFab.hidden = none; if (tb) tb.hidden = none; }
+  function boFabUpdate() { var tb = $('boHd'); if (tb) tb.hidden = !cardPool().length; }
   $('boHd').addEventListener('click', openBooster);
   boFabUpdate(); setInterval(boFabUpdate, 1500);
   $('vCard').addEventListener('click', function () { var w = shown().filter(function (x) { return x.id === currentId; })[0]; if (w && srcOf(w)) openCard(w, { noView: true }); else toast('Cette pièce n\'a pas d\'image pour la carte.', true); });
   window.__cards = { rarOf: rarOf, statsOf: statsOf, cardPng: cardPng };
+  /* ---------- Échange de cartes par QR code (sans serveur) ----------
+     1. Le donneur montre un QR « offre ». 2. L'ami le scanne avec l'appareil photo, accepte, et reçoit la carte.
+     3. Son téléphone affiche un QR « confirmation ». 4. Le donneur le scanne : seulement là, sa carte disparaît. */
+  var EXK = 'portfolio-echanges', EX_TTL = 15 * 60 * 1000;
+  function exGet() {
+    var o = { pending: {}, used: [] }, k, now = Date.now();
+    try { var r = JSON.parse(localStorage.getItem(EXK) || '{}'); if (r && typeof r === 'object') { if (r.pending && typeof r.pending === 'object') o.pending = r.pending; if (Array.isArray(r.used)) o.used = r.used; } } catch (e) {}
+    for (k in o.pending) if (!o.pending[k] || now - o.pending[k].t > 86400000) delete o.pending[k];
+    return o;
+  }
+  function exSet(o) { try { o.used = o.used.slice(-60); localStorage.setItem(EXK, JSON.stringify(o)); } catch (e) {} }
+  function colDel(id) { var a = colGet().filter(function (x) { return x !== id; }); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} }
+  function b64e(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function b64d(s) { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+  function exNonce() { var a = new Uint8Array(8), i, t = ''; try { crypto.getRandomValues(a); } catch (e) { for (i = 0; i < 8; i++) a[i] = Math.floor(Math.random() * 256); } for (i = 0; i < 8; i++) t += ('0' + a[i].toString(16)).slice(-2); return t; }
+  function exLink(p) { return siteUrl('#ex=' + b64e(p)); }
+  function exCopy(url) { try { navigator.clipboard.writeText(url).then(function () { toast('Lien copié'); }, function () { toast('Copie impossible.', true); }); } catch (e) { toast('Copie impossible.', true); } }
+  function exShare(url, title) { if (navigator.share) { navigator.share({ title: title, url: url }).catch(function () {}); } else exCopy(url); }
+  function exQr(url) {
+    var box = h('div', { class: 'ex-qr' });
+    loadScript('qrcode.js').then(function () {
+      var qr = qrMatrix(url), c = document.createElement('canvas'); c.width = c.height = 420; drawQR(c.getContext('2d'), qr, 0, 0, 420); box.append(c);
+    }).catch(function () { box.append(h('div', { class: 'ex-s', style: 'color:#222;padding:20px', text: 'Le QR code n\'a pas pu être créé. Utilise le bouton « Partager le lien ».' })); });
+    return box;
+  }
+  function exWork(id) { return cardPool().filter(function (w) { return w.id === id; })[0] || null; }
+  function exMsg(title, text) {
+    var L = boLayer('bo-one', title);
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: title }), boBtn('Fermer', L.close)), h('div', { class: 'bo-stage' }, h('div', { class: 'ex-t', text: text }), h('div', { class: 'bo-btns' }, boBtn('OK', L.close, true))));
+  }
+  function exGive(w) {
+    if (colGet().indexOf(w.id) < 0) { toast('Tu ne possèdes pas cette carte.', true); return; }
+    var n = exNonce(), ex = exGet(), p = { v: 1, t: 'o', c: w.id, n: n, ts: Date.now() }, url = exLink(p);
+    ex.pending[n] = { c: w.id, t: p.ts }; exSet(ex); window.__exLast = url;
+    var L = boLayer('bo-one', 'Donner une carte'), cw = Math.round(Math.min(150, (window.innerWidth || 390) * .4));
+    function cancel() { var e2 = exGet(); delete e2.pending[n]; exSet(e2); L.close(); toast('Offre annulée.'); }
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Donner · ' + (w.title || 'carte') }), boBtn('Fermer', L.close)),
+      h('div', { class: 'bo-stage', style: 'justify-content:flex-start;gap:12px;overflow:auto' },
+        h('div', { class: 'ex-t', html: 'Fais scanner ce code à ton ami avec l\'<b>appareil photo</b> de son téléphone. Il est valable <b>15 minutes</b>.' }),
+        exQr(url),
+        h('div', { class: 'ex-s', text: 'Ta carte reste dans ta collection jusqu\'à ce que tu scannes le code de confirmation que ton ami te montrera.' }),
+        h('div', { class: 'bo-btns' }, boBtn('Partager le lien', function () { exShare(url, 'Une carte pour toi'); }, true), boBtn('J\'ai un code', function () { exPaste(); }), boBtn('Annuler l\'offre', cancel))));
+  }
+  function exPaste() {
+    var L = boLayer('bo-one', 'Entrer un code'), ta = h('textarea', { class: 'ex-ta', placeholder: 'Colle ici le lien ou le code reçu', 'aria-label': 'Lien ou code reçu', spellcheck: 'false', autocapitalize: 'off', autocomplete: 'off' });
+    function go() { var v = (ta.value || '').trim(), m = v.match(/ex=([A-Za-z0-9_\-]+)/), code = m ? m[1] : v; if (!code) { toast('Colle d\'abord un code.', true); return; } L.close(); exHandle(code); }
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Recevoir une carte' }), boBtn('Fermer', L.close)),
+      h('div', { class: 'bo-stage', style: 'gap:14px' }, h('div', { class: 'ex-t', text: 'Colle le lien que ton ami t\'a envoyé : une offre de carte, ou la confirmation d\'un échange.' }), ta, h('div', { class: 'bo-btns' }, boBtn('Valider', go, true))));
+  }
+  function exHandle(code) {
+    var p;
+    try { p = b64d(code); } catch (e) { p = null; }
+    if (!p || p.v !== 1 || (p.t !== 'o' && p.t !== 'a') || typeof p.c !== 'string' || !/^[0-9a-f]{8,32}$/.test(String(p.n)) || typeof p.ts !== 'number') { exMsg('Code illisible', 'Ce code n\'est pas valide. Demande à ton ami de refaire un code.'); return; }
+    var w = exWork(p.c), ex = exGet();
+    if (p.t === 'o') {
+      if (ex.pending[p.n]) { exMsg('Ton propre code', 'C\'est le code que tu as créé : il doit être scanné par le téléphone de ton ami, pas par le tien.'); return; }
+      if (ex.used.indexOf(p.n) >= 0) { exMsg('Déjà utilisé', 'Tu as déjà reçu une carte avec ce code. Chaque code ne marche qu\'une fois.'); return; }
+      if (Date.now() - p.ts > EX_TTL) { exMsg('Offre expirée', 'Cette offre date de plus de 15 minutes. Demande à ton ami d\'en refaire une.'); return; }
+      if (!w) { exMsg('Carte introuvable', 'Cette carte n\'existe pas (ou plus) sur ce portfolio.'); return; }
+      var dup = colGet().indexOf(w.id) >= 0, L = boLayer('bo-one', 'Offre de carte');
+      L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Une carte pour toi' }), boBtn('Fermer', L.close)),
+        h('div', { class: 'bo-stage' }, cardEl(w, { w: Math.min(200, Math.round((window.innerWidth || 390) * .5)) }),
+          h('div', { class: 'ex-t', html: 'Un ami te donne la carte <b></b> (' + RAR[rarOf(w)].l + ').' }),
+          dup ? h('div', { class: 'ex-s', text: 'Tu possèdes déjà cette carte : tu peux l\'accepter, mais elle ne sera pas en double.' }) : null,
+          h('div', { class: 'bo-btns' }, boBtn('Accepter', function () { L.close(); exAccept(p, w); }, true), boBtn('Refuser', L.close))));
+      L.wrap.querySelector('.ex-t b').textContent = '« ' + (w.title || 'Sans titre') + ' »';
+    } else {
+      var pe = ex.pending[p.n];
+      if (!pe || pe.c !== p.c) { exMsg('Confirmation non reconnue', 'Aucune offre en attente ne correspond à ce code. Ouvre le lien dans la même application que celle où tu as créé l\'offre (même téléphone, même navigateur).'); return; }
+      delete ex.pending[p.n]; exSet(ex); colDel(p.c);
+      var nm = w ? (w.title || 'Sans titre') : 'La carte';
+      toast('Échange validé : « ' + nm + ' » a quitté ta collection.', false, 5000);
+      exMsg('Échange validé', '« ' + nm + ' » a bien été donnée. Elle a quitté ta collection et se trouve chez ton ami.');
+    }
+  }
+  function exAccept(p, w) {
+    var ex = exGet(); ex.used.push(p.n); exSet(ex); colAdd(w.id);
+    var url = exLink({ v: 1, t: 'a', c: p.c, n: p.n, ts: Date.now() }), L = boLayer('bo-one', 'Carte reçue');
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Carte reçue' }), boBtn('Fermer', L.close)),
+      h('div', { class: 'bo-stage', style: 'justify-content:flex-start;gap:12px;overflow:auto' },
+        h('div', { class: 'ex-t', html: 'La carte est dans ta collection. Dernière étape : montre ce code à ton ami, pour qu\'il le scanne et <b>valide l\'échange</b>.' }),
+        exQr(url),
+        h('div', { class: 'bo-btns' }, boBtn('Partager le lien', function () { exShare(url, 'Confirmation d\'échange'); }, true), boBtn('Ma collection', function () { L.close(); openCollection(); }))));
+    window.__exLast = url;
+  }
+  function exBoot() {
+    var m = /^#ex=([A-Za-z0-9_\-]+)/.exec(location.hash), tries = 0, code;
+    if (!m) return;
+    code = m[1];
+    try { history.replaceState(null, '', siteUrl()); } catch (e) {}
+    (function wait() { if (cardPool().length || tries++ > 30) { setTimeout(function () { exHandle(code); }, 400); } else setTimeout(wait, 500); })();
+  }
+  window.addEventListener('hashchange', function () { if (/^#ex=/.test(location.hash)) exBoot(); });
+  exBoot();
+  window.__ex = { give: exGive, handle: exHandle, get: exGet, last: function () { return window.__exLast; } };
+
 
   /* ---------- Formulaire ---------- */
   var picked = [], fPlace = null;
