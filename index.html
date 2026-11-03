@@ -410,21 +410,27 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 
 /* Diaporama de veille : mosaïque animée */
 .ss { position: fixed; inset: 0; z-index: 90; background: #050507; cursor: none; overflow: hidden; animation: ovIn .6s ease-out; color: #f2f1ee; }
-.ms-grid { position: absolute; inset: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); display: grid; gap: 6px; }
-.ms-tile { position: relative; overflow: hidden; background: #111118; border-radius: 6px; transition: opacity .7s ease; min-width: 0; min-height: 0; }
-.ms-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease; animation: msKb 16s ease-in-out infinite alternate; }
+.ms-grid { position: absolute; inset: 0; display: grid; gap: 3px; background: #050507; grid-auto-flow: dense; }
+.ms-tile { position: relative; overflow: hidden; background: #0c0c11; transition: opacity .9s ease; min-width: 0; min-height: 0; }
+.ms-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.4s ease; animation: msKb 22s ease-in-out infinite alternate; filter: saturate(1.06) contrast(1.03); }
 .ms-img.on { opacity: 1; }
-@keyframes msKb { from { transform: scale(1); } to { transform: scale(1.1); } }
-.ss.dim .ms-tile { opacity: .12; }
-.ms-ghost { position: absolute; margin: 0; overflow: hidden; border-radius: 6px; background: #000; box-shadow: 0 26px 80px rgba(0,0,0,.75); z-index: 3; }
+@keyframes msKb { from { transform: scale(1.02); } to { transform: scale(1.13); } }
+.ss.dim .ms-tile { opacity: .1; }
+.ss::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%), linear-gradient(transparent 70%, rgba(0,0,0,.6)); }
+.ss::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: .07; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.ms-ghost { position: absolute; margin: 0; overflow: hidden; background: #000; box-shadow: 0 40px 120px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06); z-index: 4; }
 .ms-ghost img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.ms-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 48px 18px 16px; background: linear-gradient(transparent, rgba(0,0,0,.78)); opacity: 0; transition: opacity .7s ease; text-align: center; }
-.ms-ghost.cap .ms-cap { opacity: 1; }
-.ms-cap b { display: block; font-size: clamp(1.05rem, 3.4vw, 1.8rem); font-weight: 800; }
-.ms-cap span { font-size: .76rem; opacity: .75; letter-spacing: .12em; text-transform: uppercase; }
-.ss-hint { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 4; padding: 6px 14px; border-radius: 999px; background: rgba(0,0,0,.6); font-size: .74rem; color: rgba(242,241,238,.85); white-space: nowrap; animation: ssHint 1.2s ease 4.5s forwards; }
+.ms-cap { position: absolute; z-index: 5; opacity: 0; transform: translateY(8px); transition: opacity .8s ease, transform .8s ease; text-align: left; pointer-events: none; }
+.ms-cap.on { opacity: 1; transform: none; }
+.ms-cap i { display: block; font-style: normal; font-family: var(--mono, ui-monospace, monospace); font-size: .68rem; letter-spacing: .28em; color: #ffa800; margin-bottom: 8px; }
+.ms-cap b { display: block; font-size: clamp(1.3rem, 4.2vw, 2.6rem); font-weight: 300; letter-spacing: -.01em; line-height: 1.1; }
+.ms-cap span { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.35); font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; opacity: .72; }
+.ms-sig, .ms-clock { position: absolute; z-index: 5; bottom: max(16px, env(safe-area-inset-bottom)); font-family: var(--mono, ui-monospace, monospace); color: rgba(242,241,238,.82); text-shadow: 0 1px 14px rgba(0,0,0,.7); pointer-events: none; }
+.ms-sig { left: max(18px, env(safe-area-inset-left)); font-size: .64rem; letter-spacing: .3em; text-transform: uppercase; }
+.ms-clock { right: max(18px, env(safe-area-inset-right)); font-size: clamp(1.3rem, 3.6vw, 2.2rem); font-weight: 200; letter-spacing: .04em; font-family: inherit; }
+.ss-hint { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 5; padding: 6px 14px; background: rgba(0,0,0,.45); font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: rgba(242,241,238,.8); white-space: nowrap; animation: ssHint 1.2s ease 4.5s forwards; }
 @keyframes ssHint { to { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .ms-img { animation: none; } .ms-img, .ms-tile { transition-duration: .3s; } }
+@media (prefers-reduced-motion: reduce) { .ms-img { animation: none; } .ms-img, .ms-tile, .ms-cap { transition-duration: .3s; } }
 
 /* Carte et lieux */
 .pp { position: fixed; inset: 0; z-index: 72; background: var(--win); color: var(--txt); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); animation: ovIn .2s ease-out; }
@@ -795,7 +801,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v56</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v57</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1388,7 +1394,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   })();
 
   /* ---------- Diaporama de veille : après un moment sans toucher l'écran, les œuvres défilent ---------- */
-  var SS = { on: false, root: null, timer: 0, ft: 0, idx: 0, list: [], shown: {}, tiles: [], ghost: null, lastTile: -1, last: Date.now(), wl: null };
+  var SS = { clock: null, on: false, root: null, timer: 0, ft: 0, idx: 0, list: [], shown: {}, tiles: [], ghost: null, lastTile: -1, last: Date.now(), wl: null };
   var SS_OPTS = [0, 30, 60, 120, 300];
   function ssDelay() {
     try { var v = localStorage.getItem('portfolio-veille'); if (v === 'off') return 0; var n = parseInt(v, 10); return n > 0 ? n : 60; } catch (e) { return 60; }
@@ -1413,9 +1419,22 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   /* Mosaïque : plusieurs œuvres à la fois, qui se remplacent une à une ; de temps en temps l'une d'elles passe en grand. */
   function ssGrid() {
     var W = window.innerWidth || 390, H = window.innerHeight || 800;
-    var cols = Math.max(2, Math.min(6, Math.round(W / 190))), tw = W / cols, rows = Math.max(2, Math.round(H / (tw * 1.15)));
-    while (cols * rows > 24 && rows > 2) rows--;
+    var cols = Math.max(2, Math.min(6, Math.round(W / 260))), tw = W / cols, rows = Math.max(2, Math.round(H / (tw * 1.1)));
+    while (cols * rows > 20 && rows > 2) rows--;
     return { cols: cols, rows: rows };
+  }
+  /* Mise en page « éditoriale » : quelques grandes cases (2×2, 2×1, 1×2) parmi des petites, sans trou. */
+  function ssSpans(cols, rows) {
+    var occ = [], r, c, out = [], big = (cols >= 3 && rows >= 3) ? Math.max(1, Math.round(cols * rows / 9)) : 0, k, tries, w, hh, ok, x, y, kinds = [[2, 2], [2, 1], [1, 2], [2, 2]];
+    for (r = 0; r < rows; r++) { occ.push([]); for (c = 0; c < cols; c++) occ[r].push(0); }
+    function free(r0, c0, ww, hh2) { if (r0 + hh2 > rows || c0 + ww > cols) return false; for (y = r0; y < r0 + hh2; y++) for (x = c0; x < c0 + ww; x++) if (occ[y][x]) return false; return true; }
+    function take(r0, c0, ww, hh2) { for (y = r0; y < r0 + hh2; y++) for (x = c0; x < c0 + ww; x++) occ[y][x] = 1; }
+    for (k = 0; k < big; k++) {
+      for (tries = 0; tries < 30; tries++) { var kd = kinds[Math.floor(Math.random() * kinds.length)]; w = kd[0]; hh = kd[1]; r = Math.floor(Math.random() * rows); c = Math.floor(Math.random() * cols); if (free(r, c, w, hh)) { take(r, c, w, hh); out.push([w, hh]); break; } }
+    }
+    for (r = 0; r < rows; r++) for (c = 0; c < cols; c++) if (!occ[r][c]) { occ[r][c] = 1; out.push([1, 1]); }
+    for (k = out.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)), t = out[k]; out[k] = out[j]; out[j] = t; }
+    return out;
   }
   function ssPick(avoid) {
     var L = SS.list, n = L.length, i, w;
@@ -1451,23 +1470,26 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var t = SS.tiles[Math.floor(Math.random() * SS.tiles.length)], w = t && t._w, im = t && t._img;
     if (RM || !w || !im || !im.naturalWidth || !t.animate) { ssSched(); return; }
     var r = t.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
-    var maxW = W * 0.92, maxH = H * 0.8, asp = im.naturalWidth / im.naturalHeight, fw = maxW, fh = fw / asp;
+    var maxW = W * 0.9, maxH = H * 0.72, asp = im.naturalWidth / im.naturalHeight, fw = maxW, fh = fw / asp;
     if (fh > maxH) { fh = maxH; fw = fh * asp; }
-    var fx = (W - fw) / 2, fy = (H - fh) / 2 - H * 0.02;
-    var g = h('div', { class: 'ms-ghost' }, h('img', { src: srcOf(w), alt: '' }),
-      h('div', { class: 'ms-cap' }, h('b', { text: w.title || 'Sans titre' }), h('span', { class: 'mono', text: catOf(w.cat).label + (w.year ? ' · ' + w.year : '') })));
+    var fx = (W - fw) / 2, fy = Math.max(H * 0.04, (H - fh) / 2 - H * 0.06);
+    var g = h('div', { class: 'ms-ghost' }, h('img', { src: srcOf(w), alt: '' }));
+    var pos = SS.list.indexOf(w) + 1, num = (pos < 10 ? '0' : '') + pos + ' / ' + (SS.list.length < 10 ? '0' : '') + SS.list.length;
+    var cap = h('div', { class: 'ms-cap' }, h('i', { text: num }), h('b', { text: w.title || 'Sans titre' }), h('span', { text: catOf(w.cat).label + (w.year ? '  ·  ' + w.year : '') }));
     var A = { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }, B = { left: fx + 'px', top: fy + 'px', width: fw + 'px', height: fh + 'px' };
     g.style.left = A.left; g.style.top = A.top; g.style.width = A.width; g.style.height = A.height;
-    SS.root.append(g); SS.ghost = g; SS.root.classList.add('dim');
+    var capY = fy + fh + 18, capLow = capY + 90 > H; cap.style.left = fx + 'px'; cap.style.maxWidth = fw + 'px'; if (capLow) { cap.style.top = '18px'; cap.style.left = '18px'; } else cap.style.top = capY + 'px';
+    SS.root.append(g, cap); SS.ghost = g; g._cap = cap; SS.root.classList.add('dim');
     g.animate([A, B], { duration: 850, easing: 'cubic-bezier(.22,.8,.2,1)', fill: 'forwards' });
-    setTimeout(function () { if (SS.ghost === g) g.classList.add('cap'); }, 650);
+    setTimeout(function () { if (SS.ghost === g) cap.classList.add('on'); }, 750);
     SS.ft = setTimeout(function () {
       if (!SS.on || SS.ghost !== g) return;
-      g.classList.remove('cap');
+      cap.classList.remove('on');
       var back = g.animate([B, A], { duration: 750, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' });
-      back.onfinish = function () { if (SS.ghost === g) { g.remove(); SS.ghost = null; SS.root.classList.remove('dim'); ssSched(); } };
+      back.onfinish = function () { if (SS.ghost === g) { g.remove(); cap.remove(); SS.ghost = null; SS.root.classList.remove('dim'); ssSched(); } };
     }, 850 + 4600);
   }
+  function ssTick() { if (!SS.on || !SS.clock) return; var d = new Date(); SS.clock.textContent = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
   function ssKey(e) { e.preventDefault(); e.stopPropagation(); ssStop(); }
   function ssStart() {
     if (SS.on) return;
@@ -1480,15 +1502,18 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       var W = window.innerWidth || 390, H = window.innerHeight || 800, cols = Math.max(1, Math.min(g.cols, Math.round(Math.sqrt(n * W / H))));
       g = { cols: cols, rows: Math.max(1, Math.floor(n / cols)) }; n = Math.min(list.length, g.cols * g.rows);
     }
+    if (n > list.length) { /* peu d'œuvres : pas de cases en double */ while (g.cols * g.rows > list.length && g.rows > 1) g.rows--; while (g.cols * g.rows > list.length && g.cols > 1) g.cols--; }
     SS.on = true; SS.list = list; SS.idx = 0; SS.shown = {}; SS.tiles = []; SS.ghost = null; SS.lastTile = -1;
-    var grid = h('div', { class: 'ms-grid' });
+    var grid = h('div', { class: 'ms-grid' }), spans = ssSpans(g.cols, g.rows);
     grid.style.gridTemplateColumns = 'repeat(' + g.cols + ', minmax(0, 1fr))'; grid.style.gridTemplateRows = 'repeat(' + g.rows + ', minmax(0, 1fr))';
-    SS.root = h('div', { class: 'ss', role: 'dialog', 'aria-label': 'Diaporama des œuvres' }, grid, h('div', { class: 'ss-hint mono', text: 'Touche l\'écran pour arrêter' }));
+    SS.root = h('div', { class: 'ss', role: 'dialog', 'aria-label': 'Diaporama des œuvres' }, grid, h('div', { class: 'ms-sig', text: 'Grégoire · Portfolio' }), SS.clock = h('div', { class: 'ms-clock' }), h('div', { class: 'ss-hint mono', text: 'Touche l\'écran pour arrêter' }));
+    ssTick();
     SS.root.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); ssStop(); });
     document.body.append(SS.root);
     document.addEventListener('keydown', ssKey, true);
-    for (i = 0; i < n; i++) { var tile = h('div', { class: 'ms-tile' }); grid.append(tile); SS.tiles.push(tile); ssSet(tile, ssPick(null), 120 + i * 110); }
-    SS.timer = setInterval(ssSwap, 1600);
+    n = spans.length;
+    for (i = 0; i < n; i++) { var tile = h('div', { class: 'ms-tile' }); tile.style.gridColumn = 'span ' + spans[i][0]; tile.style.gridRow = 'span ' + spans[i][1]; grid.append(tile); SS.tiles.push(tile); ssSet(tile, ssPick(null), 120 + i * 110); }
+    SS.timer = setInterval(function () { ssSwap(); ssTick(); }, 1700);
     ssSched();
     try { if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { if (SS.on) SS.wl = l; else l.release(); }).catch(function () {}); } catch (e) {}
   }

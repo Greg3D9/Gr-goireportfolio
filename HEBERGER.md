@@ -133,12 +133,15 @@ Quand tu ajoutes une photo (œuvre ou photo de profil dans « À propos »), un 
 - **Luminosité et contraste** : deux curseurs.
 Pour plusieurs images d'un coup, l'écran s'ouvre pour chacune. « Garder tel quel » ajoute l'image sans la changer. Le bouton « Recadrer / retoucher l'image » du formulaire permet de recommencer. Les images GIF et SVG ne sont pas retouchées, pour ne pas perdre l'animation ou la qualité vectorielle.
 
-## 17. Diaporama de veille
+## 17. Diaporama de veille (style fond d'écran)
 
-Quand tu es connecté à ton espace propriétaire, tes œuvres s'affichent en mosaïque animée après un moment sans toucher l'écran (1 minute par défaut). Plusieurs œuvres sont visibles en même temps ; elles se remplacent une à une en fondu, et de temps en temps l'une d'elles s'agrandit au centre avec son titre, puis retourne à sa place. Un appui n'importe où l'arrête. Dans la barre du bas, deux boutons :
+Quand tu es connecté à ton espace propriétaire, tes œuvres s'affichent en plein écran après un moment sans toucher l'écran (1 minute par défaut). Un appui ou une touche n'importe où l'arrête. Dans la barre du bas, deux boutons :
 - **▶ Diaporama** le lance tout de suite.
 - **Veille : 1 min** change le délai (30 s, 1 min, 2 min, 5 min, ou non pour le couper).
-Le diaporama ne démarre pas pendant que tu remplis un formulaire ou que tu modifies ta page « À propos ». Il garde l'écran allumé s'il le peut (iPhone récent et iPad). Les visiteurs de ton site public ne le voient pas démarrer tout seul.
+
+Le style est celui d'un fond d'écran de designer : une mosaïque sans marges, avec des cases de tailles différentes, un grain fin et une légère vignette. Les œuvres se remplacent une à une en fondu lent, avec un zoom très doux. Toutes les 10 à 14 secondes, une œuvre s'agrandit au centre avec son numéro, son titre, sa catégorie et son année, puis retourne à sa place. En bas : « Grégoire · Portfolio » à gauche et l'heure à droite.
+
+Le diaporama ne démarre pas pendant que tu remplis un formulaire ou que tu modifies ta page « À propos ». Il garde l'écran allumé s'il le peut (iPhone récent et iPad). Les visiteurs de ton site public ne le voient pas démarrer tout seul. Si tu as peu d'œuvres, il y a moins de cases, pour éviter les doublons.
 
 ## 18. Carte des œuvres
 
