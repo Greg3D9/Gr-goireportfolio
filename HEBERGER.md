@@ -230,3 +230,5 @@ Le booster est maintenant un vrai sachet brillant en volume, avec les bords pinc
 Les cartes du paquet sont tirées au moment où le sachet apparaît : fermer et rouvrir le booster ne sert pas à relancer le tirage... sauf si tu quittes avant de le déchirer, auquel cas un nouveau tirage a lieu à la prochaine ouverture.
 
 Note v64 : après la déchirure, le sachet disparaît complètement (le haut déchiré s'envole, le reste s'efface en 0,2 s, les cartes arrivent à 0,8 s).
+
+Note v65 : sachet refait avec un vrai volume 3D (12 tranches empilées en profondeur = sachet gonflé qui pivote doucement, on voit l'épaisseur), et à la déchirure tout le sachet est retiré (plus de contour fantôme), seul le haut déchiré s'envole.

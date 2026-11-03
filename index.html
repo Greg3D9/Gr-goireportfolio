@@ -507,23 +507,28 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bo-pack3 { --pw: min(250px, 62vw); --tp: 0; --lift: 0; --rx: 0; --ry: 0; --mx: 50; --my: 50; position: relative; width: var(--pw); aspect-ratio: 5 / 8; perspective: 900px; cursor: grab; touch-action: none; font-size: calc(var(--pw) / 17); color: #fff; user-select: none; -webkit-user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
 .bo-pack3:not(.drag):not(.torn) { animation: boFloat 4s ease-in-out infinite; }
 .bo-pack3.drag { cursor: grabbing; }
+.pk .bo-name { text-shadow: 0 .06em .14em rgba(0,0,0,.5); }
+.pk-sway { position: absolute; inset: 0; transform-style: preserve-3d; animation: pkSway 5s ease-in-out infinite; }
+.bo-pack3.drag .pk-sway, .bo-pack3.torn .pk-sway { animation-play-state: paused; }
+@keyframes pkSway { 0%,100% { transform: rotateY(-24deg) rotateX(6deg); } 50% { transform: rotateY(24deg) rotateX(-4deg); } }
 .pk { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(calc(var(--ry) * -1deg)) rotateY(calc(var(--rx) * 1deg)); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.pk-sl { position: absolute; inset: 0; border-radius: .6em; }
 .bo-pack3.live .pk { transition: transform .1s linear; }
 .pk-shadow { position: absolute; left: 8%; right: 8%; bottom: -9%; height: 9%; background: radial-gradient(ellipse, rgba(120,60,255,.6), transparent 70%); filter: blur(.5em); pointer-events: none; }
-.pk-lay { position: absolute; inset: 0; border-radius: .45em; background: linear-gradient(90deg, #2b1a78, #4b2cba 50%, #2b1a78); }
-.pk-back { background: linear-gradient(200deg, #2e1d86, #6a35d0 60%, #c53db8); }
-.pk-part { position: absolute; inset: 0; }
+.pk-part { position: absolute; inset: 0; transform: translateZ(1.05em) scale(.94); }
 .pk-foil { position: absolute; inset: 0; border-radius: .45em; overflow: hidden; background: repeating-linear-gradient(90deg, rgba(255,255,255,.45) 0 .2em, rgba(0,0,0,.22) .2em .4em) top / 100% 1.4em no-repeat, repeating-linear-gradient(90deg, rgba(255,255,255,.45) 0 .2em, rgba(0,0,0,.22) .2em .4em) bottom / 100% 1.4em no-repeat, radial-gradient(ellipse at 50% 55%, rgba(255,255,255,.34), transparent 62%), linear-gradient(160deg, #3a2a8f, #7b3fe4 32%, #e04bd0 62%, #ffb800); box-shadow: inset 0 0 1.5em rgba(0,0,0,.4); }
+.pk-foil::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.45), transparent 16%, rgba(255,255,255,.22) 34%, transparent 52%, rgba(0,0,0,.18) 84%, rgba(0,0,0,.5)); }
 .pk-foil::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 15%, rgba(255,255,255,.6) 30%, transparent 45%, rgba(255,255,255,.32) 60%, transparent 75%); background-size: 300% 300%; background-position: calc(var(--mx) * 1%) calc(var(--my) * 1%); mix-blend-mode: overlay; }
 .pk-att { clip-path: inset(0 0 0 calc(var(--tp) * 100%)); }
-.pk-tor { clip-path: inset(0 calc((1 - var(--tp)) * 100%) 0 0); transform-origin: calc(var(--tp) * 100%) 14%; transform: translateZ(1px) rotate(calc(var(--lift) * 24deg)) translateY(calc(var(--lift) * -.5em)); }
-.pk-guide { position: absolute; left: 6%; right: 6%; top: 14%; height: 0; border-top: .14em dashed rgba(255,255,255,.8); transform: translateZ(2px); pointer-events: none; transition: opacity .3s; }
+.pk-tor { clip-path: inset(0 calc((1 - var(--tp)) * 100%) 0 0); transform-origin: calc(var(--tp) * 100%) 14%; transform: translateZ(1.1em) scale(.94) rotate(calc(var(--lift) * 24deg)) translateY(calc(var(--lift) * -.5em)); }
+.pk-guide { position: absolute; left: 6%; right: 6%; top: 14%; height: 0; border-top: .14em dashed rgba(255,255,255,.8); transform: translateZ(1.15em); pointer-events: none; transition: opacity .3s; }
 .pk-guide::after { content: ""; position: absolute; top: -.7em; left: 0; width: 1.2em; height: 1.2em; border-radius: 50%; background: #fff; box-shadow: 0 0 1em .3em rgba(255,255,255,.8); animation: pkDot 2.4s ease-in-out infinite; }
 @keyframes pkDot { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 1.2em); opacity: 0; } }
 .bo-pack3.drag .pk-guide, .bo-pack3.torn .pk-guide { opacity: 0; }
-.pk-leak { position: absolute; left: 0; top: calc(14% - .4em); height: .8em; width: calc(var(--tp) * 100%); background: linear-gradient(90deg, transparent, var(--bc), #fff); filter: blur(.35em); opacity: calc(var(--tp) * 1.15); transform: translateZ(3px); pointer-events: none; mix-blend-mode: screen; }
+.pk-leak { position: absolute; left: 0; top: calc(14% - .4em); height: .8em; width: calc(var(--tp) * 100%); background: linear-gradient(90deg, transparent, var(--bc), #fff); filter: blur(.35em); opacity: calc(var(--tp) * 1.15); transform: translateZ(1.15em) scale(.94); pointer-events: none; mix-blend-mode: screen; }
 .bo-pack3.off .pk-tor { transition: transform .85s cubic-bezier(.4,0,.9,.5), opacity .85s ease; transform: translateZ(40px) translate(-45%, -280%) rotate(-42deg); opacity: 0; }
-.bo-pack3.gone .pk > *:not(.pk-tor), .bo-pack3.gone .pk-shadow { opacity: 0 !important; visibility: hidden; transition: opacity .2s linear, visibility 0s linear .2s; }
+.bo-pack3.off .pk-sway > .pk > *:not(.pk-tor), .bo-pack3.off .pk-shadow { animation: pkVanish .22s ease-in forwards; }
+@keyframes pkVanish { to { opacity: 0; transform: translateZ(0) scale(.9); } }
 .bo-pack3.gone { pointer-events: none; }
 .bo-hint.bye { opacity: 0; transition: opacity .25s; }
 .pk-burst { position: fixed; z-index: 130; width: min(150vw, 640px); aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%) scale(.1); opacity: 0; mix-blend-mode: screen; background: radial-gradient(circle, #fff 0, var(--bc2) 9%, var(--bc) 24%, transparent 58%), repeating-conic-gradient(from 0deg, rgba(255,255,255,.7) 0 3deg, transparent 3deg 12deg); -webkit-mask: radial-gradient(circle, #000 16%, transparent 66%); mask: radial-gradient(circle, #000 16%, transparent 66%); animation: pkBurst 1.3s ease-out forwards; }
@@ -969,7 +974,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v64</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v65</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2217,13 +2222,18 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       var bodyClip = 'polygon(' + pts.map(f).join(',') + ',100% 100%,0% 100%)';
       var stripClip = 'polygon(0% 0%,100% 0%,' + pts.slice().reverse().map(f).join(',') + ')';
       function foil(clip) { var d = h('div', { class: 'pk-foil' }); d.style.clipPath = clip; d.style.webkitClipPath = clip; return d; }
-      var pk = h('div', { class: 'pk' });
-      for (i = 8; i >= 1; i--) { var ly = h('div', { class: 'pk-lay' }); ly.style.transform = 'translateZ(-' + (i * 1.1).toFixed(1) + 'px)'; pk.append(ly); }
-      var back = h('div', { class: 'pk-lay pk-back' }); back.style.transform = 'translateZ(-10px) rotateY(180deg)'; pk.append(back);
+      var pk = h('div', { class: 'pk' }), NS = 12;
+      for (i = 0; i < NS; i++) {
+        var k = i / (NS - 1), zz = -1 + k * 2, sc = 1 - 0.06 * zz * zz, sl = h('div', { class: 'pk-sl' });
+        sl.style.transform = 'translateZ(' + zz.toFixed(3) + 'em) scale(' + sc.toFixed(3) + ')';
+        sl.style.background = i === 0 ? 'linear-gradient(200deg,#2e1d86,#6a35d0 60%,#c53db8)' : 'linear-gradient(90deg, hsl(256 62% ' + (22 + 12 * (1 - Math.abs(zz))).toFixed(0) + '%), hsl(290 55% ' + (30 + 14 * (1 - Math.abs(zz))).toFixed(0) + '%) 50%, hsl(256 62% ' + (20 + 10 * (1 - Math.abs(zz))).toFixed(0) + '%))';
+        sl.style.clipPath = bodyClip; sl.style.webkitClipPath = bodyClip;
+        pk.append(sl);
+      }
       var guide = h('div', { class: 'pk-guide' });
       pk.append(h('div', { class: 'pk-part pk-body' }, foil(bodyClip), h('div', { class: 'bo-name' }, h('small', { text: 'BOOSTER' }), h('b', { text: 'Portfolio de Grégoire' }), h('em', { text: cards.length + (cards.length > 1 ? ' cartes' : ' carte') }))),
         h('div', { class: 'pk-part pk-att' }, foil(stripClip)), h('div', { class: 'pk-part pk-tor' }, foil(stripClip)), guide);
-      var pack = h('div', { class: 'bo-pack3', role: 'button', tabindex: '0', 'aria-label': 'Déchirer le booster : glisse le doigt le long du haut, ou touche le sachet' }, pk, h('div', { class: 'pk-shadow' }));
+      var pack = h('div', { class: 'bo-pack3', role: 'button', tabindex: '0', 'aria-label': 'Déchirer le booster : glisse le doigt le long du haut, ou touche le sachet' }, h('div', { class: 'pk-sway' }, pk), h('div', { class: 'pk-shadow' }));
       if (glow) { var lk = h('div', { class: 'pk-leak' }); lk.style.setProperty('--bc', RAR[best].a); pk.append(lk); }
       cardTilt(pack);
       var tp = 0, drag = false, down = null, finished = false;
@@ -2248,7 +2258,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         animateTo(1, ms || 240, function () {
           pack.classList.add('off'); burst();
           stage.querySelectorAll('.bo-hint').forEach(function (x) { x.classList.add('bye'); });
-          setTimeout(function () { pack.classList.add('gone'); }, 150);
+          setTimeout(function () { pk.querySelectorAll(':scope > *:not(.pk-tor)').forEach(function (x) { x.remove(); }); var sh = pack.querySelector('.pk-shadow'); if (sh) sh.remove(); }, 260);
           setTimeout(function () { deal(cards); }, 800);
         });
       }
