@@ -168,3 +168,13 @@ Les fichiers SolidWorks ou CATIA n'ont pas toujours le même « haut » que l'iP
 - **Origine** annule les changements.
 - **Enregistrer** retient l'orientation pour cette pièce, pour l'aperçu et pour la réalité augmentée. Pense à republier le portfolio pour que tes visiteurs la voient aussi.
 Le bouton « Réalité augmentée » utilise toujours l'orientation affichée à l'écran, même avant d'enregistrer : tu peux donc essayer avant de valider.
+
+## 22. Cartes à collectionner et booster
+
+Un bouton **Booster** (violet et rose) est dans la barre du haut, à côté de « Galerie » et « À propos ». Un second bouton flottant du même nom est en bas à droite de la galerie. Un appui ouvre un paquet de 5 cartes, tirées parmi tes œuvres. Le visiteur retourne les cartes une par une.
+
+Cinq raretés, de la plus courante à la plus rare : Neutre, Normal, Rare, Ultra rare, Légende. L'étiquette est en haut à droite de l'image de la carte, et l'effet holographique brillant est plus fort pour les raretés élevées (il bouge quand on penche le téléphone ou qu'on glisse le doigt).
+
+- **Collection** : le classeur du visiteur. Les cartes trouvées s'affichent, les autres sont des cases avec un « ? ». Il reste sur l'appareil du visiteur.
+- **Voir la carte** : bouton sur la fiche de chaque œuvre. On peut enregistrer la carte en image.
+- **Pour toi** : dans le formulaire d'une œuvre, choisis la rareté et les trois stats (précision, créativité, difficulté). Sans choix, une rareté est attribuée automatiquement et reste la même. Republie ton portfolio pour que les visiteurs voient tes choix.
