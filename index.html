@@ -554,10 +554,21 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .cd-bar span { padding: .35em .5em; border-radius: .4em; background: linear-gradient(100deg, rgba(255,255,255,.32), rgba(255,255,255,.1)); color: #fff; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cd-copy { display: flex; justify-content: space-between; margin-top: .45em; font-family: var(--mono, ui-monospace, monospace); font-size: .5em; letter-spacing: .1em; color: rgba(255,255,255,.7); text-transform: uppercase; }
 .cd.graded .cd-face { box-shadow: inset 0 0 0 .22em #ffcf4a, inset 0 0 1.2em rgba(255,207,74,.5); }
+.cd-hm { font-style: normal; font-size: .75em; font-weight: 700; opacity: .85; margin-left: -.15em; }
+.cd.hurt .cd-hp b, .cd.hurt .cd-top span { color: #ffd166; }
+.cd.crit .cd-hp b, .cd.crit .cd-top span { color: #ff6b6b; }
+.cd.hpflash .cd-hp b, .cd.hpflash .cd-top span { animation: cdHp .6s ease; }
+@keyframes cdHp { 30% { transform: scale(1.5); } }
+.cd-hp b, .cd-top span { display: inline-block; transform-origin: right center; }
+.bt-slot .cd-top span { font-size: 1em; font-weight: 700; opacity: 1; letter-spacing: .04em; }
 .cd-gr { position: absolute; z-index: 12; right: .35em; top: 46%; width: 3em; height: 3em; border-radius: 50%; display: grid; place-content: center; text-align: center; color: #3a2a00; background: radial-gradient(circle at 35% 28%, #fff4c2, #ffcf4a 50%, #c58a00); box-shadow: 0 0 0 .14em rgba(0,0,0,.5), 0 .2em .8em rgba(0,0,0,.6); pointer-events: none; }
 .cd-gr small { font-size: .36em; font-weight: 800; letter-spacing: .06em; line-height: 1; }
 .cd-gr b { font-size: 1.5em; font-weight: 800; line-height: 1; }
-.bo-bat .bt-stage { justify-content: flex-start; gap: 8px; overflow: auto; align-items: center; padding-bottom: 12px; }
+.bo-bat .bt-stage { justify-content: flex-start; gap: 10px; overflow: hidden auto; align-items: center; padding: 12px 12px 16px; }
+.bt-row { display: flex; justify-content: center; align-items: center; gap: 6vw; width: 100%; }
+.bt-row .bt-side { width: auto; }
+.bo-bat .bt-stage > :first-child { margin-top: auto; }
+.bo-bat .bt-stage > :last-child { margin-bottom: auto; }
 .bt-rules { width: min(92vw, 420px); font-size: .8rem; line-height: 1.5; color: rgba(244,242,238,.78); }
 .bt-rules b { color: #ffcf4a; }
 .bt-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(94vw, 460px); }
@@ -1078,7 +1089,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v70</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v71</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2243,6 +2254,61 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     });
   }
 
+  /* ---------- Sons du jeu (synthétisés, sans fichier) ---------- */
+  var SND = { ctx: null, on: true, nb: null };
+  try { SND.on = localStorage.getItem('portfolio-son') !== '0'; } catch (e) {}
+  function sndCtx() {
+    if (!SND.ctx) { try { var C = window.AudioContext || window.webkitAudioContext; if (C) SND.ctx = new C(); } catch (e) {} }
+    if (SND.ctx && SND.ctx.state === 'suspended') { try { SND.ctx.resume(); } catch (e) {} }
+    return SND.ctx;
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function (n) { window.addEventListener(n, function () { if (SND.on) sndCtx(); }, { passive: true, capture: true }); });
+  function tone(f, d, type, v, to, at) {
+    var c = sndCtx(); if (!c) return; var t = c.currentTime + (at || 0), o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (to) o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, v || .2), t + Math.min(.02, d / 4)); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + .05);
+  }
+  function noiz(d, v, f0, f1, type, at) {
+    var c = sndCtx(); if (!c) return; if (!SND.nb) { SND.nb = c.createBuffer(1, c.sampleRate, c.sampleRate); var a = SND.nb.getChannelData(0), i; for (i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1; }
+    var t = c.currentTime + (at || 0), s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = SND.nb; f.type = type || 'bandpass'; f.frequency.setValueAtTime(f0, t); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, v || .3), t + Math.min(.03, d / 3)); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    s.connect(f); f.connect(g); g.connect(c.destination); s.start(t); s.stop(t + d + .05);
+  }
+  function sfx(n, a) {
+    if (!SND.on) return; var i;
+    try {
+      switch (n) {
+        case 'tap': tone(620, .06, 'triangle', .12, 820); break;
+        case 'select': tone(520, .07, 'triangle', .14); tone(780, .09, 'triangle', .12, 0, .05); break;
+        case 'tick': tone(1500, .03, 'square', .05); break;
+        case 'tear': noiz(.45, .35, 700, 5200, 'bandpass'); noiz(.3, .2, 3000, 6000, 'highpass', .08); break;
+        case 'flip': noiz(.12, .2, 1200, 3200, 'bandpass'); tone(300, .08, 'triangle', .08, 520); break;
+        case 'rare': [0, 1, 2, 3].forEach(function (k) { tone([660, 830, 990, 1320][k] * (1 + (a - 2) * .12), .35 + (a >= 3 ? .25 : 0), 'sine', .13, 0, k * .07); }); if (a >= 4) { tone(220, 1, 'sawtooth', .05, 440); [1320, 1660, 1980].forEach(function (f, k) { tone(f, .6, 'triangle', .08, 0, .3 + k * .1); }); } break;
+        case 'badge': [523, 659, 784, 1047].forEach(function (f, k) { tone(f, .3, 'triangle', .13, 0, k * .09); }); break;
+        case 'stamp': tone(140, .25, 'sine', .35, 45); noiz(.1, .3, 900, 300, 'lowpass'); tone(1318, .5, 'triangle', .12, 0, .12); tone(1760, .6, 'triangle', .1, 0, .2); break;
+        case 'coin': for (i = 0; i < 14; i++) tone(1700 + (i % 3) * 120, .025, 'square', .04, 0, i * .12 * (1 - i * .02)); break;
+        case 'coinland': tone(1400, .5, 'sine', .2, 1380); tone(2100, .4, 'sine', .12, 2060, .02); tone(900, .08, 'triangle', .15, 0, .01); break;
+        case 'turn': tone(740, .1, 'triangle', .14); tone(988, .16, 'triangle', .14, 0, .09); break;
+        case 'whoosh': noiz(.28, .3, 350, 2600, 'bandpass'); break;
+        case 'hit': noiz(.18, .45, 1800, 200, 'lowpass'); tone(150, .22, 'sine', .4, 55); break;
+        case 'crit': noiz(.2, .5, 2400, 200, 'lowpass'); tone(150, .25, 'sine', .45, 50); [880, 1175, 1568].forEach(function (f, k) { tone(f, .3, 'triangle', .13, 0, .08 + k * .07); }); break;
+        case 'weak': noiz(.12, .25, 1200, 300, 'lowpass'); tone(190, .14, 'sine', .22, 90); break;
+        case 'miss': noiz(.22, .18, 2800, 900, 'bandpass'); tone(330, .25, 'triangle', .1, 200, .05); break;
+        case 'ko': tone(330, .7, 'sawtooth', .16, 55); noiz(.5, .35, 900, 120, 'lowpass'); tone(110, .5, 'sine', .35, 40, .1); break;
+        case 'win': [523, 659, 784, 1047, 784, 1047, 1319].forEach(function (f, k) { tone(f, k > 3 ? .45 : .22, 'triangle', .16, 0, k * .16); tone(f / 2, k > 3 ? .45 : .22, 'sine', .08, 0, k * .16); }); break;
+        case 'lose': [392, 349, 311, 262].forEach(function (f, k) { tone(f, .5, 'triangle', .15, f * .96, k * .26); }); break;
+      }
+    } catch (e) {}
+  }
+  function sndBtn() {
+    var b = h('button', { class: 'btn', type: 'button' });
+    function lab() { b.textContent = SND.on ? '♪ Son : oui' : '♪ Son : non'; }
+    b.addEventListener('click', function () { SND.on = !SND.on; try { localStorage.setItem('portfolio-son', SND.on ? '1' : '0'); } catch (e) {} if (SND.on) { sndCtx(); sfx('tap'); } lab(); });
+    lab(); return b;
+  }
+
   /* ---------- Cartes à collectionner : booster, raretés, effet holographique ---------- */
   var RAR = [
     { k: 'neutre', l: 'Neutre', w: 40, a: '#8f929c', b: '#d2d4db' },
@@ -2304,6 +2370,14 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     CT.list = CT.list.filter(function (el) { return el.isConnected; });
     CT.list.forEach(function (el) { if (!el._ptr) { el.classList.add('live'); el._set(CT.x, CT.y); } });
   });
+  function setCardHp(el, cur, mx) {
+    if (!el) return;
+    var b = el.querySelector('.cd-hp b'), t = el.querySelector('.cd-top span');
+    if (b) { b.textContent = String(cur); var m = el.querySelector('.cd-hm'); if (!m) { m = h('em', { class: 'cd-hm' }); b.after(m); } m.textContent = '/' + mx; }
+    if (t) t.textContent = 'PV ' + cur + ' / ' + mx;
+    el.classList.toggle('hurt', cur < mx); el.classList.toggle('crit', cur / mx < .35);
+    el.classList.remove('hpflash'); void el.offsetWidth; el.classList.add('hpflash');
+  }
   function cardNo(w) { var i = cardPool().map(function (x) { return x.id; }).indexOf(w.id) + 1, n = cardPool().length, z = function (v) { return (v < 10 ? '00' : v < 100 ? '0' : '') + v; }; return z(i || 1) + '/' + z(n || 1); }
   function cardEl(w, o) {
     o = o || {};
@@ -2433,8 +2507,9 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         if (finished) return; finished = true; drag = false;
         pack.classList.remove('drag'); pack.classList.add('torn'); boMark(); stBooster(cards);
         try { navigator.vibrate && navigator.vibrate(18); } catch (e) {}
+        sfx('tear');
         animateTo(1, ms || 240, function () {
-          pack.classList.add('off'); burst();
+          pack.classList.add('off'); burst(); if (glow) sfx('rare', best);
           stage.querySelectorAll('.bo-hint').forEach(function (x) { x.classList.add('bye'); });
           setTimeout(function () { pk.querySelectorAll(':scope > *:not(.pk-tor)').forEach(function (x) { x.remove(); }); var sh = pack.querySelector('.pk-shadow'); if (sh) sh.remove(); }, 260);
           setTimeout(function () { deal(cards); }, 800);
@@ -2486,7 +2561,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       function step() {
         var w = cards[idx], c = els[idx], r = rarOf(w);
         if (!flipped) {
-          flipped = true; c.classList.add('flipped'); stFlip(w, !!fresh[w.id]); colAdd(w.id); scUnlock('booster'); upd();
+          flipped = true; c.classList.add('flipped'); sfx('flip'); if (r >= 2) setTimeout(function () { sfx('rare', r); }, 160); stFlip(w, !!fresh[w.id]); colAdd(w.id); scUnlock('booster'); upd();
           var msg = [null, null, 'Rare !', 'Ultra rare !!', 'Légende !!!'][r];
           if (msg || fresh[w.id]) { say.textContent = (msg || '') + (fresh[w.id] ? (msg ? ' · ' : '') + 'Nouvelle !' : ''); say.style.color = RAR[r].b; say.classList.remove('on'); void say.offsetWidth; say.classList.add('on'); }
           else { say.classList.remove('on'); say.textContent = ''; }
@@ -2526,7 +2601,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     });
     var stage = h('div', { class: 'bo-stage', style: 'justify-content:flex-start' }, sum, grid);
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Fermer', L.close)), stage);
-    scCheck(); stage.prepend(h('div', { class: 'bo-btns', style: 'margin:0 0 10px;flex-wrap:wrap;justify-content:center' }, boBtn('Succès ' + scCount() + ' / ' + SC.length, function () { openSucces(); }, true), boBtn('Combat ⚔', function () { openCombat(); }, true), boBtn('Recevoir une carte', function () { exPaste(); }), boBtn('Sauvegarder', function () { bkSave(); }), boBtn('Restaurer', function () { bkRestore(); })));
+    scCheck(); stage.prepend(h('div', { class: 'bo-btns', style: 'margin:0 0 10px;flex-wrap:wrap;justify-content:center' }, boBtn('Succès ' + scCount() + ' / ' + SC.length, function () { openSucces(); }, true), boBtn('Combat ⚔', function () { openCombat(); }, true), sndBtn(), boBtn('Recevoir une carte', function () { exPaste(); }), boBtn('Sauvegarder', function () { bkSave(); }), boBtn('Restaurer', function () { bkRestore(); })));
     if (all) stage.prepend(h('div', { class: 'bo-hint', text: 'Mode propriétaire : toutes les cartes sont visibles' }));
   }
   function openCard(w, o) {
@@ -2543,6 +2618,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         h('div', { class: 'ex-s', text: 'La note est calculée toute seule à partir de la rareté, des stats, du soin du dossier et de l\'usure. Une carte gradée est protégée mais ne peut plus combattre.' })));
     var i = 0, stage = box;
     c.parts.forEach(function (q, n) {
+      setTimeout(function () { sfx('tick'); sfx('tap'); }, 500 + n * 550);
       var row = h('div', { class: 'gr-row' }, h('span', { text: q.l }), h('b', { text: (q.v >= 0 ? '+' : '') + q.v.toFixed(1) })); row.style.animationDelay = (.5 + n * .55) + 's'; stage.append(row);
     });
     var done = false;
@@ -2550,7 +2626,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (done) return; done = true;
       var g = grGet(); g[w.id] = { g: c.g, ts: Date.now() }; lsSet('portfolio-gradees', g);
       stInc('graded'); if (c.g >= 10) { var st = stGet(); st.grade10 = 1; stSet(st); scCheck(); }
-      slab.innerHTML = '<small>NOTE</small><b>' + c.g + '</b><small>/ 10</small>'; slab.classList.add('on');
+      slab.innerHTML = '<small>NOTE</small><b>' + c.g + '</b><small>/ 10</small>'; slab.classList.add('on'); sfx('stamp'); if (c.g >= 9) sfx('rare', 3);
       try { navigator.vibrate && navigator.vibrate([20, 40, 30]); } catch (e) {}
       setTimeout(function () { L.close(); BO.slice().forEach(function (x) { if (x.wrap && x.wrap.classList.contains('bo-one')) x.close(); }); openCard(w, o); }, 1800);
     }, 600 + c.parts.length * 550 + 500);
@@ -2721,7 +2797,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     if (scBusy || !scQueue.length) return;
     scBusy = true;
     var b = scQueue.shift(), el = h('div', { class: 'sc-pop', role: 'status' }, h('div', { class: 'sc-medal', text: b.g }), h('div', null, h('small', { text: 'Succès débloqué !' }), h('b', { text: b.n })));
-    document.body.append(el); void el.offsetWidth; el.classList.add('on');
+    document.body.append(el); void el.offsetWidth; el.classList.add('on'); sfx('badge');
     try { if (navigator.vibrate) navigator.vibrate([25, 50, 25]); } catch (e) {}
     setTimeout(function () { el.classList.remove('on'); }, 3600);
     setTimeout(function () { el.remove(); scBusy = false; scNext(); }, 4400);
@@ -2929,7 +3005,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var L = boLayer('bo-bat', 'Combat de cartes'), stage = h('div', { class: 'bo-stage bt-stage' }), origClose = L.close;
     var bt = { started: false, done: false, me: 'A', S: null, mode: null, peer: null, conn: null, team: [], busy: false, queue: [], alive: true, el: null, cw: 130 };
     L.close = function () { bt.alive = false; if (bt.started && !bt.done) btFinish(true); try { if (bt.conn) bt.conn.close(); } catch (e) {} try { if (bt.peer) bt.peer.destroy(); } catch (e) {} origClose(); };
-    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Combat de cartes' }), boBtn('Fermer', function () { L.close(); })), stage);
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Combat' }), h('span', { style: 'margin-left:auto' }, sndBtn()), boBtn('Fermer', function () { L.close(); })), stage);
     function later(fn, ms) { setTimeout(function () { if (bt.alive && L.wrap.isConnected) fn(); }, ms); }
     function reset() { bt.started = false; bt.done = false; bt.S = null; bt.mode = null; bt.busy = false; bt.queue = []; bt.team = []; try { if (bt.conn) bt.conn.close(); } catch (e) {} try { if (bt.peer) bt.peer.destroy(); } catch (e) {} bt.conn = null; bt.peer = null; }
     function screenMode() {
@@ -2948,7 +3024,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (!el.length) { stage.append(h('div', { class: 'ex-t', text: 'Aucune carte jouable' }), h('div', { class: 'ex-s', text: 'Il te faut au moins une carte non gradée. Ouvre un booster !' }), h('div', { class: 'bo-btns' }, boBtn('Retour', screenMode))); return; }
       var cnt = h('div', { class: 'ex-t' }), go = boBtn('Combattre !', function () { if (sel.length) { bt.team = sel.slice(); cb(sel.slice()); } }, true), grid = h('div', { class: 'bt-pick' });
       function upd() { cnt.textContent = 'Cartes en jeu : ' + sel.length + ' / 3'; go.disabled = !sel.length; go.style.opacity = sel.length ? 1 : .4; [].forEach.call(grid.children, function (d) { d.classList.toggle('sel', sel.indexOf(d.dataset.id) >= 0); }); }
-      el.forEach(function (w) { var d = h('div', { 'data-id': w.id }, cardEl(w, { w: cw })); d.addEventListener('click', function () { var i = sel.indexOf(w.id); if (i >= 0) sel.splice(i, 1); else if (sel.length < 3) sel.push(w.id); else { sel.shift(); sel.push(w.id); } upd(); }); grid.append(d); });
+      el.forEach(function (w) { var d = h('div', { 'data-id': w.id }, cardEl(w, { w: cw })); d.addEventListener('click', function () { sfx('select'); var i = sel.indexOf(w.id); if (i >= 0) sel.splice(i, 1); else if (sel.length < 3) sel.push(w.id); else { sel.shift(); sel.push(w.id); } upd(); }); grid.append(d); });
       stage.append(cnt, h('div', { class: 'bo-hint', text: 'Les cartes choisies peuvent être détruites : assume ton choix.' }),
         h('div', { class: 'bo-btns' }, boBtn('Pioche aléatoire', function () { sel = shuf(el.map(function (w) { return w.id; })).slice(0, 3); upd(); }), go, boBtn('Retour', screenMode)), grid);
       upd();
@@ -2957,12 +3033,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     function sideOf(w) { return bt.S[w === 'me' ? bt.me : (bt.me === 'A' ? 'B' : 'A')]; }
     function mk(which) {
       var root = h('div', { class: 'bt-side' }), slot = h('div', { class: 'bt-slot' }), pile = h('div', { class: 'bt-pile' }), hp = h('div', { class: 'bt-hp' }, h('i'), h('b')), col = h('div', { class: 'bt-col' }, slot, hp);
-      root.append(pile, col); return { root: root, slot: slot, pile: pile, hp: hp, which: which };
+      col.style.setProperty('--cw', bt.cw + 'px'); root.append(pile, col); return { root: root, slot: slot, pile: pile, hp: hp, which: which };
     }
     function fill(o) {
       var side = sideOf(o.which), w = side.act && wById(side.act);
       o.slot.className = 'bt-slot'; o.slot.innerHTML = '';
-      if (w) o.slot.append(cardEl(w, { w: bt.cw }));
+      if (w) { o.slot.append(cardEl(w, { w: bt.cw })); setCardHp(o.slot.querySelector('.cd'), side.hp[side.act], hpOf(w)); o.slot.querySelector('.cd').classList.remove('hpflash'); }
       else o.slot.append(h('div', { style: 'width:' + bt.cw + 'px;height:' + Math.round(bt.cw * 1.4) + 'px;display:grid;place-items:center;opacity:.5', text: 'Plus de carte' }));
       setHp(o, side);
       o.pile.innerHTML = ''; var backs = h('div', { class: 'bt-backs' }), n = side.pile.length, i;
@@ -2975,20 +3051,22 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       o.hp.firstChild.style.width = Math.round(cur / mx * 100) + '%'; o.hp.classList.toggle('low', cur / mx < .35); o.hp.lastChild.textContent = id ? cur + ' / ' + mx + ' PV' : '—';
     }
     function draw() {
-      stage.innerHTML = ''; bt.cw = Math.round(Math.max(96, Math.min(150, ((window.innerHeight || 800) - 330) / 2 / 1.4)));
+      stage.innerHTML = ''; var W = window.innerWidth || 390, H = window.innerHeight || 800, wide = W > H * 1.25;
+      bt.cw = wide ? Math.round(Math.max(120, Math.min(300, (H - 250) / 1.4, W * .2))) : Math.round(Math.max(96, Math.min(230, (H - 300) / 2 / 1.4, W * .36)));
       var opp = mk('opp'), me = mk('me'); bt.el = { opp: opp, me: me, msg: h('div', { class: 'bt-msg' }), atk: h('div', { class: 'bt-atk' }) };
-      stage.append(opp.root, bt.el.msg, me.root, bt.el.atk); fill(opp); fill(me);
+      if (wide) stage.append(h('div', { class: 'bt-row' }, opp.root, me.root), bt.el.msg, bt.el.atk); else stage.append(opp.root, bt.el.msg, me.root, bt.el.atk);
+      fill(opp); fill(me);
     }
     function atkButtons() {
       var w = wById(sideOf('me').act); bt.el.atk.innerHTML = '';
       [0, 1, 2].forEach(function (i) {
-        var b = h('button', { class: 'bt-ab', type: 'button' }, h('b', { text: String(w ? dmgOf(w, i) : 0) }), h('span', { text: ATK[i].n }), h('small', { text: ATK[i].e })); b.disabled = true; b.addEventListener('click', function () { myAttack(i); }); bt.el.atk.append(b);
+        var b = h('button', { class: 'bt-ab', type: 'button' }, h('b', { text: String(w ? dmgOf(w, i) : 0) }), h('span', { text: ATK[i].n }), h('small', { text: ATK[i].e })); b.disabled = true; b.addEventListener('click', function () { sfx('tap'); myAttack(i); }); bt.el.atk.append(b);
       });
     }
     function lock(on) { [].forEach.call(bt.el.atk.children, function (b) { b.disabled = on; }); }
     function coin(first, cb) {
       var ov = h('div', { class: 'bt-coin' }, h('i', { text: 'G' }), h('b', { text: first === bt.me ? 'Le jeton tombe… tu commences !' : 'Le jeton tombe… ton adversaire commence.' }));
-      document.body.append(ov); later(function () { ov.remove(); cb(); }, 3300); setTimeout(function () { try { ov.remove(); } catch (e) {} }, 4200);
+      document.body.append(ov); sfx('coin'); setTimeout(function () { sfx('coinland'); }, 1500); later(function () { ov.remove(); cb(); }, 3300); setTimeout(function () { try { ov.remove(); } catch (e) {} }, 4200);
     }
     function begin() {
       bt.started = true; draw(); atkButtons(); lock(true); bt.el.msg.textContent = 'Les cartes sont tirées…';
@@ -2996,7 +3074,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     }
     function turnStart() {
       if (bt.S.over) { btFinish(false); return; }
-      if (bt.S.turn === bt.me) { bt.el.msg.textContent = 'À toi : choisis une attaque.'; lock(false); }
+      if (bt.S.turn === bt.me) { bt.el.msg.textContent = 'À toi : choisis une attaque.'; lock(false); sfx('turn'); }
       else {
         lock(true); bt.el.msg.textContent = bt.mode === 'solo' ? 'L\'ordinateur réfléchit…' : 'Ton ami joue…';
         if (bt.mode === 'solo') later(function () { act('B', btAI(bt.S)); }, 1100);
@@ -3016,27 +3094,27 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     }
     function play(S2) {
       bt.busy = true; var ev = S2.ev, mine = ev.who === bt.me, att = mine ? bt.el.me : bt.el.opp, tgt = mine ? bt.el.opp : bt.el.me, tside = S2[mine ? (bt.me === 'A' ? 'B' : 'A') : bt.me];
-      lock(true);
+      lock(true); if (ev.coin) sfx('coin');
       bt.el.msg.textContent = (mine ? 'Tu utilises' : 'L\'adversaire utilise') + ' « ' + ev.atk + ' »' + (ev.coin ? ' · jeton : ' + (ev.coin === 'face' ? 'FACE ×1,6' : 'PILE ×0,6') : '');
-      later(function () { att.slot.classList.add(mine ? 'bt-lunge-me' : 'bt-lunge-opp'); }, 350);
+      later(function () { att.slot.classList.add(mine ? 'bt-lunge-me' : 'bt-lunge-opp'); sfx('whoosh'); }, ev.coin ? 1000 : 350);
       later(function () {
         att.slot.classList.remove('bt-lunge-me', 'bt-lunge-opp');
-        tgt.slot.classList.add('bt-hit'); tgt.slot.append(h('div', { class: 'bt-pop', text: ev.hit ? '−' + ev.dmg : 'RATÉ' }));
+        tgt.slot.classList.add('bt-hit'); tgt.slot.append(h('div', { class: 'bt-pop', text: ev.hit ? '−' + ev.dmg : 'RATÉ' })); sfx(!ev.hit ? 'miss' : ev.coin === 'face' ? 'crit' : ev.coin === 'pile' ? 'weak' : 'hit');
         var w = wById(ev.target), mx = w ? hpOf(w) : 1, cur = tside.hp[ev.target];
-        tgt.hp.firstChild.style.width = Math.round(cur / mx * 100) + '%'; tgt.hp.classList.toggle('low', cur / mx < .35); tgt.hp.lastChild.textContent = cur + ' / ' + mx + ' PV';
+        tgt.hp.firstChild.style.width = Math.round(cur / mx * 100) + '%'; tgt.hp.classList.toggle('low', cur / mx < .35); tgt.hp.lastChild.textContent = cur + ' / ' + mx + ' PV'; setCardHp(tgt.slot.querySelector('.cd'), cur, mx);
         try { if (ev.hit && navigator.vibrate) navigator.vibrate(ev.ko ? [40, 40, 80] : 25); } catch (e) {}
-      }, 800);
+      }, ev.coin ? 1450 : 800);
       later(function () {
-        if (ev.ko) { tgt.slot.classList.add('bt-ko'); bt.el.msg.textContent = (mine ? 'Carte adverse détruite !' : 'Ta carte est détruite !'); }
-      }, 1500);
-      later(function () { bt.S = S2; bt.busy = false; if (ev.ko) { fill(bt.el.opp); fill(bt.el.me); } else { tgt.slot.classList.remove('bt-hit'); } atkButtons(); turnStart(); }, ev.ko ? 2500 : 1700);
+        if (ev.ko) { sfx('ko'); tgt.slot.classList.add('bt-ko'); bt.el.msg.textContent = (mine ? 'Carte adverse détruite !' : 'Ta carte est détruite !'); }
+      }, ev.coin ? 2150 : 1500);
+      later(function () { bt.S = S2; bt.busy = false; if (ev.ko) { fill(bt.el.opp); fill(bt.el.me); } else { tgt.slot.classList.remove('bt-hit'); } atkButtons(); turnStart(); }, (ev.coin ? 650 : 0) + (ev.ko ? 2500 : 1700));
     }
     /* ----- fin de combat ----- */
     function btFinish(forfeit) {
       if (bt.done) return; bt.done = true;
       var S = bt.S, mine = S ? S[bt.me] : null; if (!mine) return;
       var won = !forfeit && S.over === bt.me, lost = mine.ko.slice(), names = lost.map(function (id) { var w = wById(id); return w ? w.title || 'Carte' : 'Carte'; });
-      lost.forEach(function (id) { colDel(id); });
+      lost.forEach(function (id) { colDel(id); }); if (!forfeit) sfx(won ? 'win' : 'lose');
       bt.team.forEach(function (id) { if (lost.indexOf(id) < 0) usAdd(id); });
       var st = stGet(); st.fights = (st.fights || 0) + 1; if (won) { st.wins = (st.wins || 0) + 1; if (bt.mode !== 'solo') st.pvp = (st.pvp || 0) + 1; if (!lost.length) st.perfect = 1; } stSet(st); scCheck();
       try { if (bt.conn && bt.alive && !forfeit) { /* garder la connexion un instant pour que l'autre reçoive l'état */ } } catch (e) {}

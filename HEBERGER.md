@@ -248,3 +248,8 @@ Note v69 : diaporama allégé pour la fluidité (fond flou fixe, plus de flou/m�
 - **Ami en direct** : connexion pair à pair (PeerJS embarqué). Le premier téléphone affiche un QR code / un code à 6 lettres, le second le scanne ou le tape. Utilise le service gratuit de PeerJS (0.peerjs.com) uniquement pour mettre en relation les deux téléphones. Peut échouer sur certains réseaux (pas de relais TURN).
 - **Gradation** : « Faire graduer » dans la fiche d'une carte possédée. Note /10 calculée (rareté, stats, soin du dossier, usure). Carte gradée = non jouable en combat, non donnable. « Casser la gradation » la rend jouable ; chaque combat use la carte (note future plus basse).
 - Nouveaux succès : combats, victoires, duel entre amis, gradation, Gem Mint.
+
+## 28. Sons, PV sur la carte, jeu centré (v71)
+- Pendant un combat, les PV restants s'affichent sur la carte (« PV 64 / 90 », en jaune puis rouge quand la carte est en danger) et sous elle (barre de vie).
+- Sons synthétisés par le navigateur (aucun fichier) : déchirure du sachet, retournement de carte, carte rare, jeton, attaques, coups, raté, K.O., victoire, défaite, succès, gradation. Bouton « ♪ Son : oui/non » dans la Collection et dans le combat (mémorisé).
+- Le jeu est centré dans l'écran ; sur ordinateur, les deux cartes se placent côte à côte et en plus grand.
