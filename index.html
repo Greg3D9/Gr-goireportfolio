@@ -532,6 +532,8 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bo-pack3.gone { pointer-events: none; }
 .bo-hint.bye { opacity: 0; transition: opacity .25s; }
 .pk-burst { position: fixed; z-index: 130; width: min(150vw, 640px); aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%) scale(.1); opacity: 0; mix-blend-mode: screen; background: radial-gradient(circle, #fff 0, var(--bc2) 9%, var(--bc) 24%, transparent 58%), repeating-conic-gradient(from 0deg, rgba(255,255,255,.7) 0 3deg, transparent 3deg 12deg); -webkit-mask: radial-gradient(circle, #000 16%, transparent 66%); mask: radial-gradient(circle, #000 16%, transparent 66%); animation: pkBurst 1.3s ease-out forwards; }
+.bo-wait { display: flex; flex-direction: column; align-items: center; gap: 1em; margin: auto; text-align: center; padding: 0 1.5em; }
+.bo-wait-t { font-size: 3.2rem; font-weight: 700; letter-spacing: .05em; color: #fff; }
 .pk-burst.big { animation-duration: 1.8s; filter: saturate(1.4) brightness(1.15); }
 @keyframes pkBurst { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(0); } 16% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25) rotate(26deg); } }
 .bo-deck.rise { animation: boRise .8s cubic-bezier(.2,.9,.25,1) both; }
@@ -974,7 +976,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v65</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v66</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2205,6 +2207,13 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   }
   function boCw() { var W = window.innerWidth || 390, H = window.innerHeight || 800; return Math.round(Math.max(150, Math.min(320, W * .74, (H - 230) * 63 / 88))); }
   function boBtn(t, f, solid) { return h('button', { class: 'btn' + (solid ? ' solid' : ''), type: 'button', text: t, onclick: f }); }
+  var BO_KEY = 'portfolio-booster-dernier', BO_GAP = 30 * 60000;
+  function boWait() {
+    if (state.canAdd) return 0;
+    try { var t = +localStorage.getItem(BO_KEY) || 0, r = t + BO_GAP - Date.now(); return r > 0 && r <= BO_GAP ? r : 0; } catch (e) { return 0; }
+  }
+  function boMark() { try { localStorage.setItem(BO_KEY, String(Date.now())); } catch (e) {} boFabUpdate(); }
+  function boFmt(ms) { var m = Math.floor(ms / 60000), sec = Math.floor(ms / 1000) % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; }
   function openBooster() {
     var pool = cardPool();
     if (!pool.length) { toast('Ajoute des œuvres pour ouvrir un booster.', true); return; }
@@ -2212,9 +2221,21 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     colBtn.style.marginLeft = 'auto';
     L.wrap.append(h('div', { class: 'pp-top' }, count, colBtn, boBtn('Fermer', L.close)), stage);
     function upd() { var have = colGet(); count.textContent = 'Booster · ' + pool.filter(function (w) { return have.indexOf(w.id) >= 0; }).length + ' / ' + pool.length + ' cartes'; }
-    function showPack() {
+    function showWait() {
       upd(); stage.innerHTML = '';
-      var cards = cardDraw(pool, Math.min(5, pool.length)), best = 0, TY = 14, i, pts = [];
+      var big = h('div', { class: 'bo-wait-t mono' }), msg = h('div', { class: 'bo-hint', text: 'Ton prochain booster sera prêt dans' });
+      stage.append(h('div', { class: 'bo-wait' }, msg, big, h('div', { class: 'bo-hint', style: 'opacity:.6', text: 'Un booster toutes les 30 minutes. Tu peux revoir ta collection en attendant.' })));
+      (function tk() {
+        if (!stage.isConnected) return;
+        var r = boWait();
+        if (r <= 0) { showPack(); return; }
+        big.textContent = boFmt(r); setTimeout(tk, 500);
+      })();
+    }
+    function showPack() {
+      if (boWait() > 0) { showWait(); return; }
+      upd(); stage.innerHTML = '';
+      var cards = cardDraw(pool, Math.min(3, pool.length)), best = 0, TY = 14, i, pts = [];
       cards.forEach(function (w) { best = Math.max(best, rarOf(w)); });
       var glow = best >= 2;
       for (i = 0; i <= 25; i++) pts.push([i * 4, (i === 0 || i === 25) ? TY : TY + (Math.random() * 2.6 - 1.3)]);
@@ -2253,7 +2274,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       }
       function finish(ms) {
         if (finished) return; finished = true; drag = false;
-        pack.classList.remove('drag'); pack.classList.add('torn');
+        pack.classList.remove('drag'); pack.classList.add('torn'); boMark();
         try { navigator.vibrate && navigator.vibrate(18); } catch (e) {}
         animateTo(1, ms || 240, function () {
           pack.classList.add('off'); burst();
@@ -2289,7 +2310,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     }
     function deal(cardsIn) {
       if (!L.wrap.isConnected) return;
-      var cards = cardsIn || cardDraw(pool, Math.min(5, pool.length)), cw = boCw(), have = colGet(), idx = 0, flipped = false;
+      var cards = cardsIn || cardDraw(pool, Math.min(3, pool.length)), cw = boCw(), have = colGet(), idx = 0, flipped = false;
       var fresh = {}; cards.forEach(function (w) { if (have.indexOf(w.id) < 0) fresh[w.id] = true; });
       stage.innerHTML = '';
       var flash = h('div', { class: 'bo-flash' }), say = h('div', { class: 'bo-say' }), hint = h('div', { class: 'bo-hint' }), prog = h('div', { class: 'bo-hint mono' });
@@ -2410,7 +2431,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); toast('Carte enregistrée');
     }).catch(function () { toast('Impossible de créer la carte.', true); });
   }
-  function boFabUpdate() { var tb = $('boHd'); if (tb) tb.hidden = !cardPool().length; }
+  function boFabUpdate() { var tb = $('boHd'); if (!tb) return; tb.hidden = !cardPool().length; var r = boWait(); tb.textContent = r > 0 ? 'Booster · ' + Math.ceil(r / 60000) + ' min' : 'Booster'; }
   $('boHd').addEventListener('click', openBooster);
   boFabUpdate(); setInterval(boFabUpdate, 1500);
   $('vCard').addEventListener('click', function () { var w = shown().filter(function (x) { return x.id === currentId; })[0]; if (w && srcOf(w)) openCard(w, { noView: true }); else toast('Cette pièce n\'a pas d\'image pour la carte.', true); });

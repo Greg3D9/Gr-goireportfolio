@@ -232,3 +232,5 @@ Les cartes du paquet sont tirées au moment où le sachet apparaît : fermer et 
 Note v64 : après la déchirure, le sachet disparaît complètement (le haut déchiré s'envole, le reste s'efface en 0,2 s, les cartes arrivent à 0,8 s).
 
 Note v65 : sachet refait avec un vrai volume 3D (12 tranches empilées en profondeur = sachet gonflé qui pivote doucement, on voit l'épaisseur), et à la déchirure tout le sachet est retiré (plus de contour fantôme), seul le haut déchiré s'envole.
+
+Note v66 : 3 cartes par booster ; pour les visiteurs, 1 booster toutes les 30 min (compte à rebours dans le bouton Booster et dans l'écran d'attente, mémorisé dans le navigateur). Espace propriétaire : illimité.
