@@ -194,3 +194,15 @@ Limites à connaître :
 - Chaque code ne marche qu'une fois par appareil et expire au bout de 15 minutes. Comme il n'y a pas de serveur, rien n'empêche techniquement quelqu'un de bidouiller son propre téléphone. Pour un jeu entre amis, c'est suffisant.
 - Les collections restent dans le navigateur de chaque téléphone. Le donneur doit scanner la confirmation dans la **même application** que celle où il a créé l'offre (même téléphone, même navigateur ; l'application installée sur l'écran d'accueil et Safari ont des collections séparées).
 - Si l'ami possède déjà la carte, il peut l'accepter : elle ne sera pas en double, mais elle aura quitté la collection du donneur.
+
+## 24. Succès à débloquer
+
+Dans la Collection, le bouton **Succès** ouvre la liste des 5 badges. Un badge gagné devient une médaille dorée ; les autres sont grisés avec un cadenas. Au moment où un badge est débloqué, une annonce brillante « Succès débloqué ! » descend du haut de l'écran.
+
+- **Premier booster** : ouvrir son premier paquet et retourner une carte.
+- **Chasseur de Légende** : obtenir une carte de rareté Légende.
+- **Échangeur** : réussir un échange de carte (en donnant ou en recevant).
+- **Collectionneur** : posséder la moitié des cartes du portfolio.
+- **Collection complète** : posséder toutes les cartes (à partir de 3 œuvres).
+
+Les succès sont enregistrés sur l'appareil du visiteur, comme sa collection. Si tu ajoutes des œuvres, « Collectionneur » et « Collection complète » se recalculent : un badge déjà gagné reste gagné.

@@ -503,6 +503,25 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bo-fab[hidden] { display: none; }
 .bo-hd { color: #fff !important; border-color: rgba(255,255,255,.45) !important; background: linear-gradient(120deg, #6a3df0, #d64bd0 45%, #ffb800, #6a3df0) !important; background-size: 250% 250% !important; animation: boFab 6s linear infinite; text-shadow: 0 1px 6px rgba(0,0,0,.45); }
 .bo-hd[hidden] { display: none; }
+.sc-pop { position: fixed; left: 50%; top: max(14px, env(safe-area-inset-top)); z-index: 400; transform: translate(-50%, -160%); display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 10px; border-radius: 18px; background: #15151d; border: 1px solid rgba(255,196,60,.7); color: #fff; box-shadow: 0 12px 44px rgba(0,0,0,.65), 0 0 34px rgba(255,184,0,.4); overflow: hidden; transition: transform .7s cubic-bezier(.2,.9,.25,1.12); pointer-events: none; width: max-content; max-width: 92vw; }
+.sc-pop.on { transform: translate(-50%, 0); }
+.sc-pop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%); transform: translateX(-120%); }
+.sc-pop.on::after { animation: scSweep 1.4s ease .5s 1; }
+@keyframes scSweep { to { transform: translateX(120%); } }
+.sc-medal { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 1.35rem; font-weight: 800; color: #3a2600; background: radial-gradient(circle at 35% 30%, #fff4b8, #ffc233 55%, #d98a00); box-shadow: inset 0 -3px 6px rgba(120,60,0,.4), 0 0 18px rgba(255,190,40,.55); }
+.sc-pop small { display: block; font: 700 .62rem var(--mono, ui-monospace, monospace); letter-spacing: .22em; text-transform: uppercase; color: #ffc233; margin-bottom: 3px; }
+.sc-pop b { font-size: 1.05rem; font-weight: 700; }
+.sc-list { width: min(92vw, 420px); display: flex; flex-direction: column; gap: 10px; }
+.sc-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,196,60,.55); color: #f4f2ee; }
+.sc-row .sc-medal { width: 52px; height: 52px; font-size: 1.5rem; }
+.sc-row b { display: block; font-size: 1.02rem; }
+.sc-row span { display: block; font-size: .8rem; line-height: 1.35; color: rgba(244,242,238,.72); margin-top: 2px; }
+.sc-row em { display: block; font: normal .64rem var(--mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; color: #ffc233; margin-top: 5px; }
+.sc-row.lock { border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.035); }
+.sc-row.lock .sc-medal { background: #2a2a33; color: #777a86; box-shadow: none; }
+.sc-row.lock b { color: rgba(244,242,238,.6); }
+.sc-row.lock em { color: rgba(244,242,238,.5); }
+@media (prefers-reduced-motion: reduce) { .sc-pop { transition: none; } .sc-pop::after { display: none; } }
 .ex-qr { background: #fff; border-radius: 14px; padding: 0; width: min(74vw, 300px); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
 .ex-qr canvas { display: block; width: 100%; height: auto; }
 .ex-t { max-width: 340px; margin: 0 14px; text-align: center; font-size: 1.02rem; line-height: 1.4; color: #f4f2ee; }
@@ -920,7 +939,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v60</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v61</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2126,7 +2145,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     return el;
   }
   function colGet() { try { var a = JSON.parse(localStorage.getItem('portfolio-cartes') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function colAdd(id) { var a = colGet(); if (a.indexOf(id) < 0) { a.push(id); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} } }
+  function colAdd(id) { var a = colGet(); if (a.indexOf(id) < 0) { a.push(id); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} } scCheck(); }
   function cardPool() { return visible().filter(function (w) { return srcOf(w); }); }
   function cardDraw(pool, n) {
     var out = [], left = pool.slice(), k;
@@ -2189,7 +2208,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       function step() {
         var w = cards[idx], c = els[idx], r = rarOf(w);
         if (!flipped) {
-          flipped = true; c.classList.add('flipped'); colAdd(w.id); upd();
+          flipped = true; c.classList.add('flipped'); colAdd(w.id); scUnlock('booster'); upd();
           var msg = [null, null, 'Rare !', 'Ultra rare !!', 'Légende !!!'][r];
           if (msg || fresh[w.id]) { say.textContent = (msg || '') + (fresh[w.id] ? (msg ? ' · ' : '') + 'Nouvelle !' : ''); say.style.color = RAR[r].b; say.classList.remove('on'); void say.offsetWidth; say.classList.add('on'); }
           else { say.classList.remove('on'); say.textContent = ''; }
@@ -2228,7 +2247,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       else { var lk = h('div', { class: 'cd-lock', text: '?' }); lk.style.setProperty('--cw', cw + 'px'); grid.append(lk); }
     });
     var stage = h('div', { class: 'bo-stage', style: 'justify-content:flex-start' }, sum, grid);
-    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Recevoir', function () { exPaste(); }), boBtn('Fermer', L.close)), stage);
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Fermer', L.close)), stage);
+    scCheck(); stage.prepend(h('div', { class: 'bo-btns', style: 'margin:0 0 10px' }, boBtn('Succès ' + scCount() + ' / ' + SC.length, function () { openSucces(); }, true), boBtn('Recevoir une carte', function () { exPaste(); })));
     if (all) stage.prepend(h('div', { class: 'bo-hint', text: 'Mode propriétaire : toutes les cartes sont visibles' }));
   }
   function openCard(w, o) {
@@ -2295,6 +2315,50 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   boFabUpdate(); setInterval(boFabUpdate, 1500);
   $('vCard').addEventListener('click', function () { var w = shown().filter(function (x) { return x.id === currentId; })[0]; if (w && srcOf(w)) openCard(w, { noView: true }); else toast('Cette pièce n\'a pas d\'image pour la carte.', true); });
   window.__cards = { rarOf: rarOf, statsOf: statsOf, cardPng: cardPng };
+
+  /* ---------- Succès à débloquer ---------- */
+  var SC = [
+    { k: 'booster', n: 'Premier booster', d: 'Ouvre ton premier paquet de cartes.', g: '✦' },
+    { k: 'legende', n: 'Chasseur de Légende', d: 'Obtiens une carte Légende.', g: '★' },
+    { k: 'echange', n: 'Échangeur', d: 'Réussis ton premier échange de carte avec un ami.', g: '⇄' },
+    { k: 'moitie', n: 'Collectionneur', d: 'Possède la moitié des cartes du portfolio.', g: '◐' },
+    { k: 'complete', n: 'Collection complète', d: 'Possède toutes les cartes du portfolio.', g: '♛' }
+  ], scQueue = [], scBusy = false;
+  function scGet() { try { var o = JSON.parse(localStorage.getItem('portfolio-succes') || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
+  function scCount() { var o = scGet(); return SC.filter(function (b) { return o[b.k]; }).length; }
+  function scUnlock(k) {
+    var o = scGet(), b = SC.filter(function (x) { return x.k === k; })[0];
+    if (!b || o[k]) return;
+    o[k] = Date.now(); try { localStorage.setItem('portfolio-succes', JSON.stringify(o)); } catch (e) {}
+    scQueue.push(b); scNext();
+  }
+  function scNext() {
+    if (scBusy || !scQueue.length) return;
+    scBusy = true;
+    var b = scQueue.shift(), el = h('div', { class: 'sc-pop', role: 'status' }, h('div', { class: 'sc-medal', text: b.g }), h('div', null, h('small', { text: 'Succès débloqué !' }), h('b', { text: b.n })));
+    document.body.append(el); void el.offsetWidth; el.classList.add('on');
+    try { if (navigator.vibrate) navigator.vibrate([25, 50, 25]); } catch (e) {}
+    setTimeout(function () { el.classList.remove('on'); }, 3600);
+    setTimeout(function () { el.remove(); scBusy = false; scNext(); }, 4400);
+  }
+  function scCheck() {
+    var pool = cardPool(), have = colGet(), owned = pool.filter(function (w) { return have.indexOf(w.id) >= 0; });
+    if (owned.some(function (w) { return rarOf(w) === 4; })) scUnlock('legende');
+    if (pool.length >= 2 && owned.length * 2 >= pool.length) scUnlock('moitie');
+    if (pool.length >= 3 && owned.length === pool.length) scUnlock('complete');
+  }
+  function openSucces() {
+    scCheck();
+    var o = scGet(), pool = cardPool(), have = colGet(), n = pool.filter(function (w) { return have.indexOf(w.id) >= 0; }).length, L = boLayer('bo-one', 'Succès'), list = h('div', { class: 'sc-list' });
+    SC.forEach(function (b) {
+      var ok = !!o[b.k], extra = '';
+      if (ok) { try { extra = 'Débloqué le ' + new Date(o[b.k]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }); } catch (e) { extra = 'Débloqué'; } }
+      else if (b.k === 'moitie' || b.k === 'complete') extra = n + ' / ' + pool.length + ' cartes';
+      list.append(h('div', { class: 'sc-row' + (ok ? '' : ' lock') }, h('div', { class: 'sc-medal', text: ok ? b.g : '🔒' }), h('div', null, h('b', { text: b.n }), h('span', { text: b.d }), extra ? h('em', { text: extra }) : null)));
+    });
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Succès · ' + scCount() + ' / ' + SC.length }), boBtn('Fermer', L.close)), h('div', { class: 'bo-stage', style: 'justify-content:flex-start;overflow:auto' }, list));
+  }
+
   /* ---------- Échange de cartes par QR code (sans serveur) ----------
      1. Le donneur montre un QR « offre ». 2. L'ami le scanne avec l'appareil photo, accepte, et reçoit la carte.
      3. Son téléphone affiche un QR « confirmation ». 4. Le donneur le scanne : seulement là, sa carte disparaît. */
@@ -2364,14 +2428,14 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     } else {
       var pe = ex.pending[p.n];
       if (!pe || pe.c !== p.c) { exMsg('Confirmation non reconnue', 'Aucune offre en attente ne correspond à ce code. Ouvre le lien dans la même application que celle où tu as créé l\'offre (même téléphone, même navigateur).'); return; }
-      delete ex.pending[p.n]; exSet(ex); colDel(p.c);
+      delete ex.pending[p.n]; exSet(ex); colDel(p.c); scUnlock('echange');
       var nm = w ? (w.title || 'Sans titre') : 'La carte';
       toast('Échange validé : « ' + nm + ' » a quitté ta collection.', false, 5000);
       exMsg('Échange validé', '« ' + nm + ' » a bien été donnée. Elle a quitté ta collection et se trouve chez ton ami.');
     }
   }
   function exAccept(p, w) {
-    var ex = exGet(); ex.used.push(p.n); exSet(ex); colAdd(w.id);
+    var ex = exGet(); ex.used.push(p.n); exSet(ex); colAdd(w.id); scUnlock('echange');
     var url = exLink({ v: 1, t: 'a', c: p.c, n: p.n, ts: Date.now() }), L = boLayer('bo-one', 'Carte reçue');
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Carte reçue' }), boBtn('Fermer', L.close)),
       h('div', { class: 'bo-stage', style: 'justify-content:flex-start;gap:12px;overflow:auto' },
@@ -2389,6 +2453,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   }
   window.addEventListener('hashchange', function () { if (/^#ex=/.test(location.hash)) exBoot(); });
   exBoot();
+  window.__sc = { unlock: scUnlock, get: scGet, check: scCheck, open: openSucces };
   window.__ex = { give: exGive, handle: exHandle, get: exGet, last: function () { return window.__exLast; } };
 
 
