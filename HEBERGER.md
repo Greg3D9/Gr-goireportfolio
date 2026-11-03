@@ -240,3 +240,11 @@ Note v67 : 20 nouveaux succès (25 au total) avec barres de progression (x / N) 
 Note v68 : diaporama refait en style fond d'écran animé — fond flou aux couleurs de l'œuvre, lueurs qui bougent, grand titre en lettres creuses qui défile, particules, œuvre en cadre flottant qui pivote doucement avec reflet lumineux, 3 entrées différentes, titre révélé mot par mot, couleur d'accent tirée de l'œuvre.
 
 Note v69 : diaporama allégé pour la fluidité (fond flou fixe, plus de flou/mélange coûteux, animations uniquement en déplacement/transparence, décodage de l'image avant affichage, moins de particules).
+
+## 27. Combats, PV, plein cadre, gradation (v70)
+- Formulaire d'œuvre : champ **PV** (vide = automatique selon la rareté : 50 / 80 / 120 / 180 / 250 + petite variation) et case **Image plein cadre** (carte sans cadre, style carte spéciale).
+- Les 3 stats deviennent 3 attaques : Trait précis (ne rate jamais), Coup de génie (pile ou face ×1,6 / ×0,6), Défi technique (65 % de réussite).
+- **Combat** : bouton « Combat ⚔ » dans la Collection. Contre l'ordinateur ou contre un ami en direct. On met jusqu'à 3 cartes en jeu (pioche cachée, jeton pile ou face). Une carte à 0 PV est **détruite** (retirée de la collection).
+- **Ami en direct** : connexion pair à pair (PeerJS embarqué). Le premier téléphone affiche un QR code / un code à 6 lettres, le second le scanne ou le tape. Utilise le service gratuit de PeerJS (0.peerjs.com) uniquement pour mettre en relation les deux téléphones. Peut échouer sur certains réseaux (pas de relais TURN).
+- **Gradation** : « Faire graduer » dans la fiche d'une carte possédée. Note /10 calculée (rareté, stats, soin du dossier, usure). Carte gradée = non jouable en combat, non donnable. « Casser la gradation » la rend jouable ; chaque combat use la carte (note future plus basse).
+- Nouveaux succès : combats, victoires, duel entre amis, gradation, Gem Mint.
