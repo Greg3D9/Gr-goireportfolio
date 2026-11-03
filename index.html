@@ -503,6 +503,33 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bo-fab[hidden] { display: none; }
 .bo-hd { color: #fff !important; border-color: rgba(255,255,255,.45) !important; background: linear-gradient(120deg, #6a3df0, #d64bd0 45%, #ffb800, #6a3df0) !important; background-size: 250% 250% !important; animation: boFab 6s linear infinite; text-shadow: 0 1px 6px rgba(0,0,0,.45); }
 .bo-hd[hidden] { display: none; }
+/* Sachet de booster en 3D */
+.bo-pack3 { --pw: min(250px, 62vw); --tp: 0; --lift: 0; --rx: 0; --ry: 0; --mx: 50; --my: 50; position: relative; width: var(--pw); aspect-ratio: 5 / 8; perspective: 900px; cursor: grab; touch-action: none; font-size: calc(var(--pw) / 17); color: #fff; user-select: none; -webkit-user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
+.bo-pack3:not(.drag):not(.torn) { animation: boFloat 4s ease-in-out infinite; }
+.bo-pack3.drag { cursor: grabbing; }
+.pk { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(calc(var(--ry) * -1deg)) rotateY(calc(var(--rx) * 1deg)); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.bo-pack3.live .pk { transition: transform .1s linear; }
+.pk-shadow { position: absolute; left: 8%; right: 8%; bottom: -9%; height: 9%; background: radial-gradient(ellipse, rgba(120,60,255,.6), transparent 70%); filter: blur(.5em); pointer-events: none; }
+.pk-lay { position: absolute; inset: 0; border-radius: .45em; background: linear-gradient(90deg, #2b1a78, #4b2cba 50%, #2b1a78); }
+.pk-back { background: linear-gradient(200deg, #2e1d86, #6a35d0 60%, #c53db8); }
+.pk-part { position: absolute; inset: 0; }
+.pk-foil { position: absolute; inset: 0; border-radius: .45em; overflow: hidden; background: repeating-linear-gradient(90deg, rgba(255,255,255,.45) 0 .2em, rgba(0,0,0,.22) .2em .4em) top / 100% 1.4em no-repeat, repeating-linear-gradient(90deg, rgba(255,255,255,.45) 0 .2em, rgba(0,0,0,.22) .2em .4em) bottom / 100% 1.4em no-repeat, radial-gradient(ellipse at 50% 55%, rgba(255,255,255,.34), transparent 62%), linear-gradient(160deg, #3a2a8f, #7b3fe4 32%, #e04bd0 62%, #ffb800); box-shadow: inset 0 0 1.5em rgba(0,0,0,.4); }
+.pk-foil::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 15%, rgba(255,255,255,.6) 30%, transparent 45%, rgba(255,255,255,.32) 60%, transparent 75%); background-size: 300% 300%; background-position: calc(var(--mx) * 1%) calc(var(--my) * 1%); mix-blend-mode: overlay; }
+.pk-att { clip-path: inset(0 0 0 calc(var(--tp) * 100%)); }
+.pk-tor { clip-path: inset(0 calc((1 - var(--tp)) * 100%) 0 0); transform-origin: calc(var(--tp) * 100%) 14%; transform: translateZ(1px) rotate(calc(var(--lift) * 24deg)) translateY(calc(var(--lift) * -.5em)); }
+.pk-guide { position: absolute; left: 6%; right: 6%; top: 14%; height: 0; border-top: .14em dashed rgba(255,255,255,.8); transform: translateZ(2px); pointer-events: none; transition: opacity .3s; }
+.pk-guide::after { content: ""; position: absolute; top: -.7em; left: 0; width: 1.2em; height: 1.2em; border-radius: 50%; background: #fff; box-shadow: 0 0 1em .3em rgba(255,255,255,.8); animation: pkDot 2.4s ease-in-out infinite; }
+@keyframes pkDot { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 1.2em); opacity: 0; } }
+.bo-pack3.drag .pk-guide, .bo-pack3.torn .pk-guide { opacity: 0; }
+.pk-leak { position: absolute; left: 0; top: calc(14% - .4em); height: .8em; width: calc(var(--tp) * 100%); background: linear-gradient(90deg, transparent, var(--bc), #fff); filter: blur(.35em); opacity: calc(var(--tp) * 1.15); transform: translateZ(3px); pointer-events: none; mix-blend-mode: screen; }
+.bo-pack3.off .pk-tor { transition: transform .85s cubic-bezier(.4,0,.9,.5), opacity .85s ease; transform: translateZ(40px) translate(-45%, -280%) rotate(-42deg); opacity: 0; }
+.bo-pack3.gone .pk { transition: transform .7s ease, opacity .6s ease .1s; transform: translateY(26%) scale(.86); opacity: 0; }
+.pk-burst { position: fixed; z-index: 130; width: min(150vw, 640px); aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%) scale(.1); opacity: 0; mix-blend-mode: screen; background: radial-gradient(circle, #fff 0, var(--bc2) 9%, var(--bc) 24%, transparent 58%), repeating-conic-gradient(from 0deg, rgba(255,255,255,.7) 0 3deg, transparent 3deg 12deg); -webkit-mask: radial-gradient(circle, #000 16%, transparent 66%); mask: radial-gradient(circle, #000 16%, transparent 66%); animation: pkBurst 1.3s ease-out forwards; }
+.pk-burst.big { animation-duration: 1.8s; filter: saturate(1.4) brightness(1.15); }
+@keyframes pkBurst { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(0); } 16% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25) rotate(26deg); } }
+.bo-deck.rise { animation: boRise .8s cubic-bezier(.2,.9,.25,1) both; }
+@keyframes boRise { from { opacity: 0; transform: translateY(16%) scale(.86); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .bo-pack3 { animation: none !important; } .pk-guide::after { animation: none; opacity: 1; left: 45%; } .bo-deck.rise { animation: none; } }
 .bk-code { width: min(90vw, 400px); height: 120px; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; font: .72rem/1.35 var(--mono, ui-monospace, monospace); resize: none; word-break: break-all; }
 .sc-pop { position: fixed; left: 50%; top: max(14px, env(safe-area-inset-top)); z-index: 400; transform: translate(-50%, -160%); display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 10px; border-radius: 18px; background: #15151d; border: 1px solid rgba(255,196,60,.7); color: #fff; box-shadow: 0 12px 44px rgba(0,0,0,.65), 0 0 34px rgba(255,184,0,.4); overflow: hidden; transition: transform .7s cubic-bezier(.2,.9,.25,1.12); pointer-events: none; width: max-content; max-width: 92vw; }
 .sc-pop.on { transform: translate(-50%, 0); }
@@ -940,7 +967,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v62</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v63</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2180,21 +2207,80 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     function upd() { var have = colGet(); count.textContent = 'Booster · ' + pool.filter(function (w) { return have.indexOf(w.id) >= 0; }).length + ' / ' + pool.length + ' cartes'; }
     function showPack() {
       upd(); stage.innerHTML = '';
-      var pack = h('button', { class: 'bo-pack', type: 'button', 'aria-label': 'Ouvrir le booster' },
-        h('i', { class: 'bo-part bo-body' }), h('i', { class: 'bo-part bo-top' }),
-        h('div', { class: 'bo-name' }, h('small', { text: 'BOOSTER' }), h('b', { text: 'Portfolio de Grégoire' }), h('em', { text: Math.min(5, pool.length) + (pool.length > 1 ? ' cartes' : ' carte') })));
+      var cards = cardDraw(pool, Math.min(5, pool.length)), best = 0, TY = 14, i, pts = [];
+      cards.forEach(function (w) { best = Math.max(best, rarOf(w)); });
+      var glow = best >= 2;
+      for (i = 0; i <= 25; i++) pts.push([i * 4, (i === 0 || i === 25) ? TY : TY + (Math.random() * 2.6 - 1.3)]);
+      function f(p) { return p[0].toFixed(1) + '% ' + p[1].toFixed(2) + '%'; }
+      var bodyClip = 'polygon(' + pts.map(f).join(',') + ',100% 100%,0% 100%)';
+      var stripClip = 'polygon(0% 0%,100% 0%,' + pts.slice().reverse().map(f).join(',') + ')';
+      function foil(clip) { var d = h('div', { class: 'pk-foil' }); d.style.clipPath = clip; d.style.webkitClipPath = clip; return d; }
+      var pk = h('div', { class: 'pk' });
+      for (i = 8; i >= 1; i--) { var ly = h('div', { class: 'pk-lay' }); ly.style.transform = 'translateZ(-' + (i * 1.1).toFixed(1) + 'px)'; pk.append(ly); }
+      var back = h('div', { class: 'pk-lay pk-back' }); back.style.transform = 'translateZ(-10px) rotateY(180deg)'; pk.append(back);
+      var guide = h('div', { class: 'pk-guide' });
+      pk.append(h('div', { class: 'pk-part pk-body' }, foil(bodyClip), h('div', { class: 'bo-name' }, h('small', { text: 'BOOSTER' }), h('b', { text: 'Portfolio de Grégoire' }), h('em', { text: cards.length + (cards.length > 1 ? ' cartes' : ' carte') }))),
+        h('div', { class: 'pk-part pk-att' }, foil(stripClip)), h('div', { class: 'pk-part pk-tor' }, foil(stripClip)), guide);
+      var pack = h('div', { class: 'bo-pack3', role: 'button', tabindex: '0', 'aria-label': 'Déchirer le booster : glisse le doigt le long du haut, ou touche le sachet' }, pk, h('div', { class: 'pk-shadow' }));
+      if (glow) { var lk = h('div', { class: 'pk-leak' }); lk.style.setProperty('--bc', RAR[best].a); pk.append(lk); }
       cardTilt(pack);
-      var go = function () { pack.classList.add('open'); try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} setTimeout(deal, 950); };
-      pack.addEventListener('click', go);
-      stage.append(pack, h('div', { class: 'bo-hint', text: 'Touche le booster pour l\'ouvrir' }));
+      var tp = 0, drag = false, down = null, finished = false;
+      function setTp(v) { tp = v; pack.style.setProperty('--tp', v.toFixed(4)); pack.style.setProperty('--lift', Math.min(1, v * 14).toFixed(3)); }
+      function animateTo(target, ms, cb) {
+        var s0 = tp, t0 = performance.now();
+        (function fr(t) { var k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; setTp(s0 + (target - s0) * e); if (k < 1) requestAnimationFrame(fr); else if (cb) cb(); })(t0);
+      }
+      function burst() {
+        if (RM || !glow) return;
+        var r = pack.getBoundingClientRect(), bs = h('div', { class: 'pk-burst' + (best >= 4 ? ' big' : '') });
+        bs.style.setProperty('--bc', RAR[best].a); bs.style.setProperty('--bc2', RAR[best].b);
+        bs.style.left = (r.left + r.width / 2) + 'px'; bs.style.top = (r.top + r.height * TY / 100) + 'px';
+        document.body.append(bs); setTimeout(function () { bs.remove(); }, 2000);
+        try { navigator.vibrate && navigator.vibrate(best >= 3 ? [25, 40, 60] : [25, 30, 25]); } catch (e) {}
+        if (best >= 3) { stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
+      }
+      function finish(ms) {
+        if (finished) return; finished = true; drag = false;
+        pack.classList.remove('drag'); pack.classList.add('torn');
+        try { navigator.vibrate && navigator.vibrate(18); } catch (e) {}
+        animateTo(1, ms || 240, function () {
+          pack.classList.add('off'); burst();
+          setTimeout(function () { pack.classList.add('gone'); }, 420);
+          setTimeout(function () { deal(cards); }, 1250);
+        });
+      }
+      pack.addEventListener('pointerdown', function (e) {
+        if (finished) return;
+        var r = pack.getBoundingClientRect();
+        down = { x: e.clientX, y: e.clientY, moved: false };
+        try { pack.setPointerCapture(e.pointerId); } catch (er) {}
+        if (e.clientY - r.top < r.height * 0.42) { drag = true; pack.classList.add('drag'); }
+      });
+      pack.addEventListener('pointermove', function (e) {
+        if (!down || finished) return;
+        if (Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) > 8) down.moved = true;
+        if (drag && down.moved) {
+          var r = pack.getBoundingClientRect(), v = Math.max(tp, Math.min(1, (e.clientX - r.left) / r.width));
+          setTp(v); if (v >= 0.97) finish(120);
+        }
+      });
+      pack.addEventListener('pointerup', function () {
+        if (!down || finished) { down = null; return; }
+        var d = down; down = null; pack.classList.remove('drag');
+        if (!d.moved) { drag = false; finish(650); }
+        else if (drag) { drag = false; if (tp > 0.5) finish(240); else animateTo(0, 380); }
+      });
+      pack.addEventListener('pointercancel', function () { down = null; if (!finished) { drag = false; pack.classList.remove('drag'); animateTo(0, 300); } });
+      pack.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finish(650); } });
+      stage.append(pack, h('div', { class: 'bo-hint', text: 'Glisse le doigt le long du haut, de gauche à droite, pour déchirer le sachet' }), h('div', { class: 'bo-hint', style: 'opacity:.6', text: 'ou touche le sachet' }));
     }
-    function deal() {
+    function deal(cardsIn) {
       if (!L.wrap.isConnected) return;
-      var cards = cardDraw(pool, Math.min(5, pool.length)), cw = boCw(), have = colGet(), idx = 0, flipped = false;
+      var cards = cardsIn || cardDraw(pool, Math.min(5, pool.length)), cw = boCw(), have = colGet(), idx = 0, flipped = false;
       var fresh = {}; cards.forEach(function (w) { if (have.indexOf(w.id) < 0) fresh[w.id] = true; });
       stage.innerHTML = '';
       var flash = h('div', { class: 'bo-flash' }), say = h('div', { class: 'bo-say' }), hint = h('div', { class: 'bo-hint' }), prog = h('div', { class: 'bo-hint mono' });
-      var deck = h('div', { class: 'bo-deck' }); deck.style.setProperty('--cw', cw + 'px');
+      var deck = h('div', { class: 'bo-deck' + (RM ? '' : ' rise') }); deck.style.setProperty('--cw', cw + 'px');
       var els = cards.map(function (w, i) {
         var c = h('div', { class: 'bo-c', role: 'button', tabindex: i === 0 ? '0' : '-1', 'aria-label': 'Carte ' + (i + 1) }, h('div', { class: 'bo-flip' }, h('div', { class: 'bo-fr' }, cardEl(w, { w: cw })), h('div', { class: 'bo-bk' }, h('i', { text: 'G' }))));
         c.style.setProperty('--o', String(Math.min(4, cards.length - 1 - i))); c.style.zIndex = String(50 - i);

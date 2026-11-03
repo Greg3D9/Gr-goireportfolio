@@ -217,3 +217,14 @@ La collection de cartes, les succès et les échanges en cours sont gardés dans
 La restauration **ajoute** les cartes et les succès de la sauvegarde à ceux de l'appareil, sans rien effacer. Conséquence : une carte donnée à un ami depuis la sauvegarde peut réapparaître. Fais donc une nouvelle sauvegarde après chaque échange important.
 
 Ce code ne sauvegarde pas tes œuvres : pour ça, utilise Style, puis Sauvegarde, puis « Publier le portfolio ».
+
+## 26. Booster : le sachet en 3D
+
+Le booster est maintenant un vrai sachet brillant en volume, avec les bords pincés en haut et en bas. Il se penche quand on bouge le doigt ou le téléphone.
+
+- **Pour l'ouvrir** : glisse le doigt de gauche à droite le long du haut du sachet (suis la ligne en pointillés). Le haut se déchire et se soulève au fur et à mesure. Si tu relâches trop tôt, le sachet se referme. Un simple appui sur le sachet le déchire aussi tout seul.
+- **L'éclat de lumière** jaillit de la déchirure seulement s'il y a au moins une carte **Rare, Ultra rare ou Légende** dans le paquet. Sa couleur suit la meilleure rareté du paquet (bleu, violet ou or), et une Légende ajoute des rayons plus forts et une secousse. Pendant la déchirure, une lueur apparaît le long de la découpe, seulement si une carte rare est cachée dedans.
+- **Sans carte rare** (seulement des cartes Neutre ou Normal) : le sachet s'ouvre simplement, sans éclat ni lueur.
+- Les cartes sortent ensuite du sachet et se retournent une par une, comme avant.
+
+Les cartes du paquet sont tirées au moment où le sachet apparaît : fermer et rouvrir le booster ne sert pas à relancer le tirage... sauf si tu quittes avant de le déchirer, auquel cas un nouveau tirage a lieu à la prochaine ouverture.
