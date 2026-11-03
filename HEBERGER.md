@@ -206,3 +206,14 @@ Dans la Collection, le bouton **Succès** ouvre la liste des 5 badges. Un badge 
 - **Collection complète** : posséder toutes les cartes (à partir de 3 œuvres).
 
 Les succès sont enregistrés sur l'appareil du visiteur, comme sa collection. Si tu ajoutes des œuvres, « Collectionneur » et « Collection complète » se recalculent : un badge déjà gagné reste gagné.
+
+## 25. Sauvegarder et restaurer sa collection
+
+La collection de cartes, les succès et les échanges en cours sont gardés dans le navigateur de chaque visiteur : ils disparaissent si on efface les données du site ou si on change de téléphone. Pour ne rien perdre :
+
+- **Sauvegarder** (dans la Collection) : donne un code qui commence par « GC1. ». « Partager le code » l'envoie par WhatsApp, mail ou notes ; « Copier le code » le met dans le presse-papiers. Garde ce message.
+- **Restaurer** (dans la Collection, sur n'importe quel appareil) : colle le code (on peut le coller au milieu d'un message) puis appuie sur « Restaurer ».
+
+La restauration **ajoute** les cartes et les succès de la sauvegarde à ceux de l'appareil, sans rien effacer. Conséquence : une carte donnée à un ami depuis la sauvegarde peut réapparaître. Fais donc une nouvelle sauvegarde après chaque échange important.
+
+Ce code ne sauvegarde pas tes œuvres : pour ça, utilise Style, puis Sauvegarde, puis « Publier le portfolio ».
