@@ -204,9 +204,9 @@ html[data-glow="1"] .card { box-shadow: var(--so-m) var(--so-m) 0 var(--edge), 0
 .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .thumb.broken img { visibility: hidden; }
 .thumb.broken { background-image: repeating-linear-gradient(135deg, var(--paper-ink) 0 2px, transparent 2px 9px); }
-html[data-fx="gray"] .thumb img, html[data-fx="gray"] .l-thumb, html[data-fx="gray"] .vghost, html[data-fx="gray"] .ss-fg, html[data-fx="gray"] .v-stage img { filter: grayscale(1) contrast(1.05); }
-html[data-fx="sepia"] .thumb img, html[data-fx="sepia"] .l-thumb, html[data-fx="sepia"] .vghost, html[data-fx="sepia"] .ss-fg, html[data-fx="sepia"] .v-stage img { filter: sepia(.85) contrast(1.02); }
-html[data-fx="duo"] .thumb img, html[data-fx="duo"] .l-thumb, html[data-fx="duo"] .vghost, html[data-fx="duo"] .ss-fg, html[data-fx="duo"] .v-stage img { filter: url(#duo); }
+html[data-fx="gray"] .thumb img, html[data-fx="gray"] .l-thumb, html[data-fx="gray"] .vghost, html[data-fx="gray"] .ms-img, html[data-fx="gray"] .ms-ghost img, html[data-fx="gray"] .v-stage img { filter: grayscale(1) contrast(1.05); }
+html[data-fx="sepia"] .thumb img, html[data-fx="sepia"] .l-thumb, html[data-fx="sepia"] .vghost, html[data-fx="sepia"] .ms-img, html[data-fx="sepia"] .ms-ghost img, html[data-fx="sepia"] .v-stage img { filter: sepia(.85) contrast(1.02); }
+html[data-fx="duo"] .thumb img, html[data-fx="duo"] .l-thumb, html[data-fx="duo"] .vghost, html[data-fx="duo"] .ms-img, html[data-fx="duo"] .ms-ghost img, html[data-fx="duo"] .v-stage img { filter: url(#duo); }
 .tag { position: absolute; left: 0; top: 0; background: var(--edge); color: var(--txt); padding: 4px 9px; font-family: var(--f-mono); font-size: calc(var(--mono-size) - 1px); letter-spacing: .1em; text-transform: uppercase; border-bottom-right-radius: var(--r-s); }
 .cart { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
 .cart-top { display: flex; justify-content: space-between; gap: 8px; color: var(--mute); }
@@ -408,19 +408,23 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .ed .btn { background: #22222b; color: #f2f1ee; border-color: rgba(242,241,238,.5); }
 .ed .btn.solid { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 
-/* Diaporama de veille */
-.ss { position: fixed; inset: 0; z-index: 90; background: #000; cursor: none; overflow: hidden; animation: ovIn .6s ease-out; color: #f2f1ee; }
-.ss-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s ease; display: grid; place-items: center; }
-.ss-slide.on { opacity: 1; }
-.ss-bg { position: absolute; left: -8%; top: -8%; width: 116%; height: 116%; object-fit: cover; filter: blur(34px) brightness(.45) saturate(1.2); }
-.ss-fg { position: relative; max-width: 86vw; max-height: 72vh; object-fit: contain; border-radius: 4px; box-shadow: 0 22px 60px rgba(0,0,0,.55); animation: ssZoom 9s ease-out both; }
-@keyframes ssZoom { from { transform: scale(1); } to { transform: scale(1.06); } }
-.ss-cap { position: absolute; left: 0; right: 0; bottom: max(26px, env(safe-area-inset-bottom)); text-align: center; padding: 0 20px; text-shadow: 0 2px 14px rgba(0,0,0,.7); }
-.ss-cap b { display: block; font-size: clamp(1.1rem, 3.6vw, 1.9rem); font-weight: 800; }
-.ss-cap span { font-size: .78rem; opacity: .7; letter-spacing: .12em; text-transform: uppercase; }
-.ss-hint { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center; font-size: .75rem; color: rgba(242,241,238,.7); animation: ssHint 1.2s ease 4.5s forwards; }
+/* Diaporama de veille : mosaïque animée */
+.ss { position: fixed; inset: 0; z-index: 90; background: #050507; cursor: none; overflow: hidden; animation: ovIn .6s ease-out; color: #f2f1ee; }
+.ms-grid { position: absolute; inset: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); display: grid; gap: 6px; }
+.ms-tile { position: relative; overflow: hidden; background: #111118; border-radius: 6px; transition: opacity .7s ease; min-width: 0; min-height: 0; }
+.ms-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease; animation: msKb 16s ease-in-out infinite alternate; }
+.ms-img.on { opacity: 1; }
+@keyframes msKb { from { transform: scale(1); } to { transform: scale(1.1); } }
+.ss.dim .ms-tile { opacity: .12; }
+.ms-ghost { position: absolute; margin: 0; overflow: hidden; border-radius: 6px; background: #000; box-shadow: 0 26px 80px rgba(0,0,0,.75); z-index: 3; }
+.ms-ghost img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ms-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 48px 18px 16px; background: linear-gradient(transparent, rgba(0,0,0,.78)); opacity: 0; transition: opacity .7s ease; text-align: center; }
+.ms-ghost.cap .ms-cap { opacity: 1; }
+.ms-cap b { display: block; font-size: clamp(1.05rem, 3.4vw, 1.8rem); font-weight: 800; }
+.ms-cap span { font-size: .76rem; opacity: .75; letter-spacing: .12em; text-transform: uppercase; }
+.ss-hint { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 4; padding: 6px 14px; border-radius: 999px; background: rgba(0,0,0,.6); font-size: .74rem; color: rgba(242,241,238,.85); white-space: nowrap; animation: ssHint 1.2s ease 4.5s forwards; }
 @keyframes ssHint { to { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .ss-fg { animation: none; } .ss-slide { transition-duration: .4s; } }
+@media (prefers-reduced-motion: reduce) { .ms-img { animation: none; } .ms-img, .ms-tile { transition-duration: .3s; } }
 
 /* Carte et lieux */
 .pp { position: fixed; inset: 0; z-index: 72; background: var(--win); color: var(--txt); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); animation: ovIn .2s ease-out; }
@@ -791,7 +795,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v55</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v56</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1384,7 +1388,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   })();
 
   /* ---------- Diaporama de veille : après un moment sans toucher l'écran, les œuvres défilent ---------- */
-  var SS = { on: false, root: null, timer: 0, idx: 0, list: [], last: Date.now(), wl: null, fails: 0 };
+  var SS = { on: false, root: null, timer: 0, ft: 0, idx: 0, list: [], shown: {}, tiles: [], ghost: null, lastTile: -1, last: Date.now(), wl: null };
   var SS_OPTS = [0, 30, 60, 120, 300];
   function ssDelay() {
     try { var v = localStorage.getItem('portfolio-veille'); if (v === 'off') return 0; var n = parseInt(v, 10); return n > 0 ? n : 60; } catch (e) { return 60; }
@@ -1406,21 +1410,63 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       } }));
     ssLabel();
   }
-  function ssShow() {
-    if (!SS.on || !SS.list.length) return;
-    var w = SS.list[SS.idx++ % SS.list.length], root = SS.root;
-    var bg = h('img', { class: 'ss-bg', src: srcOf(w), alt: '' }), fg = h('img', { class: 'ss-fg', src: srcOf(w), alt: w.title || '' });
-    var cap = h('div', { class: 'ss-cap' }, h('b', { text: w.title || 'Sans titre' }), h('span', { class: 'mono', text: catOf(w.cat).label + (w.year ? ' · ' + w.year : '') }));
-    var sl = h('div', { class: 'ss-slide' }, bg, fg, cap);
-    fg.addEventListener('error', function () { sl.remove(); if (SS.on && ++SS.fails < 6) ssShow(); });
-    fg.addEventListener('load', function () {
-      SS.fails = 0;
+  /* Mosaïque : plusieurs œuvres à la fois, qui se remplacent une à une ; de temps en temps l'une d'elles passe en grand. */
+  function ssGrid() {
+    var W = window.innerWidth || 390, H = window.innerHeight || 800;
+    var cols = Math.max(2, Math.min(6, Math.round(W / 190))), tw = W / cols, rows = Math.max(2, Math.round(H / (tw * 1.15)));
+    while (cols * rows > 24 && rows > 2) rows--;
+    return { cols: cols, rows: rows };
+  }
+  function ssPick(avoid) {
+    var L = SS.list, n = L.length, i, w;
+    for (i = 0; i < n; i++) { w = L[SS.idx++ % n]; if (!SS.shown[w.id] && w !== avoid) return w; }
+    for (i = 0; i < n; i++) { w = L[SS.idx++ % n]; if (w !== avoid) return w; }
+    return L[0];
+  }
+  function ssSet(tile, w, delay) {
+    var img = h('img', { class: 'ms-img', src: srcOf(w), alt: w.title || '' });
+    img.style.transformOrigin = (15 + Math.random() * 70) + '% ' + (15 + Math.random() * 70) + '%';
+    img.style.animationDelay = '-' + (Math.random() * 14).toFixed(1) + 's';
+    img.addEventListener('load', function () {
       if (!SS.on) return;
-      root.insertBefore(sl, root.querySelector('.ss-hint'));
-      void sl.offsetWidth; sl.classList.add('on');
-      var olds = Array.prototype.slice.call(root.querySelectorAll('.ss-slide')).filter(function (x) { return x !== sl; });
-      olds.forEach(function (o) { o.classList.remove('on'); setTimeout(function () { o.remove(); }, 2000); });
+      var old = tile.querySelector('.ms-img');
+      tile.append(img);
+      void img.offsetWidth;
+      setTimeout(function () { img.classList.add('on'); }, delay || 0);
+      if (old) setTimeout(function () { old.remove(); }, (delay || 0) + 1300);
+      if (tile._w) SS.shown[tile._w.id] = Math.max(0, (SS.shown[tile._w.id] || 1) - 1);
+      tile._w = w; tile._img = img; SS.shown[w.id] = (SS.shown[w.id] || 0) + 1;
     });
+  }
+  function ssSwap() {
+    if (!SS.on || SS.ghost || !SS.tiles.length) return;
+    var k, tries = 0;
+    do { k = Math.floor(Math.random() * SS.tiles.length); tries++; } while (k === SS.lastTile && SS.tiles.length > 1 && tries < 5);
+    SS.lastTile = k;
+    var t = SS.tiles[k]; ssSet(t, ssPick(t._w), 0);
+  }
+  function ssSched() { clearTimeout(SS.ft); SS.ft = setTimeout(ssFeature, 9000 + Math.random() * 5000); }
+  function ssFeature() {
+    if (!SS.on) return;
+    var t = SS.tiles[Math.floor(Math.random() * SS.tiles.length)], w = t && t._w, im = t && t._img;
+    if (RM || !w || !im || !im.naturalWidth || !t.animate) { ssSched(); return; }
+    var r = t.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
+    var maxW = W * 0.92, maxH = H * 0.8, asp = im.naturalWidth / im.naturalHeight, fw = maxW, fh = fw / asp;
+    if (fh > maxH) { fh = maxH; fw = fh * asp; }
+    var fx = (W - fw) / 2, fy = (H - fh) / 2 - H * 0.02;
+    var g = h('div', { class: 'ms-ghost' }, h('img', { src: srcOf(w), alt: '' }),
+      h('div', { class: 'ms-cap' }, h('b', { text: w.title || 'Sans titre' }), h('span', { class: 'mono', text: catOf(w.cat).label + (w.year ? ' · ' + w.year : '') })));
+    var A = { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }, B = { left: fx + 'px', top: fy + 'px', width: fw + 'px', height: fh + 'px' };
+    g.style.left = A.left; g.style.top = A.top; g.style.width = A.width; g.style.height = A.height;
+    SS.root.append(g); SS.ghost = g; SS.root.classList.add('dim');
+    g.animate([A, B], { duration: 850, easing: 'cubic-bezier(.22,.8,.2,1)', fill: 'forwards' });
+    setTimeout(function () { if (SS.ghost === g) g.classList.add('cap'); }, 650);
+    SS.ft = setTimeout(function () {
+      if (!SS.on || SS.ghost !== g) return;
+      g.classList.remove('cap');
+      var back = g.animate([B, A], { duration: 750, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' });
+      back.onfinish = function () { if (SS.ghost === g) { g.remove(); SS.ghost = null; SS.root.classList.remove('dim'); ssSched(); } };
+    }, 850 + 4600);
   }
   function ssKey(e) { e.preventDefault(); e.stopPropagation(); ssStop(); }
   function ssStart() {
@@ -1428,19 +1474,30 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var list = visible().filter(function (w) { return srcOf(w); }), i, j, t;
     if (!list.length) { toast('Aucune œuvre à présenter pour l\'instant.', true); return; }
     for (i = list.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = list[i]; list[i] = list[j]; list[j] = t; }
-    SS.on = true; SS.list = list; SS.idx = 0; SS.fails = 0;
-    SS.root = h('div', { class: 'ss', role: 'dialog', 'aria-label': 'Diaporama des œuvres' }, h('div', { class: 'ss-hint mono', text: 'Touche l\'écran pour arrêter' }));
+    var g = ssGrid(), n = g.cols * g.rows;
+    if (list.length < n) { /* peu d'œuvres : moins de cases, pour ne pas répéter les mêmes images */
+      n = Math.max(2, list.length);
+      var W = window.innerWidth || 390, H = window.innerHeight || 800, cols = Math.max(1, Math.min(g.cols, Math.round(Math.sqrt(n * W / H))));
+      g = { cols: cols, rows: Math.max(1, Math.floor(n / cols)) }; n = Math.min(list.length, g.cols * g.rows);
+    }
+    SS.on = true; SS.list = list; SS.idx = 0; SS.shown = {}; SS.tiles = []; SS.ghost = null; SS.lastTile = -1;
+    var grid = h('div', { class: 'ms-grid' });
+    grid.style.gridTemplateColumns = 'repeat(' + g.cols + ', minmax(0, 1fr))'; grid.style.gridTemplateRows = 'repeat(' + g.rows + ', minmax(0, 1fr))';
+    SS.root = h('div', { class: 'ss', role: 'dialog', 'aria-label': 'Diaporama des œuvres' }, grid, h('div', { class: 'ss-hint mono', text: 'Touche l\'écran pour arrêter' }));
     SS.root.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); ssStop(); });
     document.body.append(SS.root);
     document.addEventListener('keydown', ssKey, true);
-    ssShow(); SS.timer = setInterval(ssShow, 7500);
+    for (i = 0; i < n; i++) { var tile = h('div', { class: 'ms-tile' }); grid.append(tile); SS.tiles.push(tile); ssSet(tile, ssPick(null), 120 + i * 110); }
+    SS.timer = setInterval(ssSwap, 1600);
+    ssSched();
     try { if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { if (SS.on) SS.wl = l; else l.release(); }).catch(function () {}); } catch (e) {}
   }
   function ssStop() {
     if (!SS.on) return;
-    SS.on = false; clearInterval(SS.timer);
+    SS.on = false; clearInterval(SS.timer); clearTimeout(SS.ft);
     document.removeEventListener('keydown', ssKey, true);
     try { SS.root.remove(); } catch (e) {}
+    SS.ghost = null;
     try { if (SS.wl) SS.wl.release(); } catch (e) {} SS.wl = null;
     SS.last = Date.now();
   }
