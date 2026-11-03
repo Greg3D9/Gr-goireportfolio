@@ -523,7 +523,9 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bo-pack3.drag .pk-guide, .bo-pack3.torn .pk-guide { opacity: 0; }
 .pk-leak { position: absolute; left: 0; top: calc(14% - .4em); height: .8em; width: calc(var(--tp) * 100%); background: linear-gradient(90deg, transparent, var(--bc), #fff); filter: blur(.35em); opacity: calc(var(--tp) * 1.15); transform: translateZ(3px); pointer-events: none; mix-blend-mode: screen; }
 .bo-pack3.off .pk-tor { transition: transform .85s cubic-bezier(.4,0,.9,.5), opacity .85s ease; transform: translateZ(40px) translate(-45%, -280%) rotate(-42deg); opacity: 0; }
-.bo-pack3.gone .pk { transition: transform .7s ease, opacity .6s ease .1s; transform: translateY(26%) scale(.86); opacity: 0; }
+.bo-pack3.gone .pk > *:not(.pk-tor), .bo-pack3.gone .pk-shadow { opacity: 0 !important; visibility: hidden; transition: opacity .2s linear, visibility 0s linear .2s; }
+.bo-pack3.gone { pointer-events: none; }
+.bo-hint.bye { opacity: 0; transition: opacity .25s; }
 .pk-burst { position: fixed; z-index: 130; width: min(150vw, 640px); aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%) scale(.1); opacity: 0; mix-blend-mode: screen; background: radial-gradient(circle, #fff 0, var(--bc2) 9%, var(--bc) 24%, transparent 58%), repeating-conic-gradient(from 0deg, rgba(255,255,255,.7) 0 3deg, transparent 3deg 12deg); -webkit-mask: radial-gradient(circle, #000 16%, transparent 66%); mask: radial-gradient(circle, #000 16%, transparent 66%); animation: pkBurst 1.3s ease-out forwards; }
 .pk-burst.big { animation-duration: 1.8s; filter: saturate(1.4) brightness(1.15); }
 @keyframes pkBurst { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.1) rotate(0); } 16% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25) rotate(26deg); } }
@@ -967,7 +969,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v63</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v64</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2245,8 +2247,9 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         try { navigator.vibrate && navigator.vibrate(18); } catch (e) {}
         animateTo(1, ms || 240, function () {
           pack.classList.add('off'); burst();
-          setTimeout(function () { pack.classList.add('gone'); }, 420);
-          setTimeout(function () { deal(cards); }, 1250);
+          stage.querySelectorAll('.bo-hint').forEach(function (x) { x.classList.add('bye'); });
+          setTimeout(function () { pack.classList.add('gone'); }, 150);
+          setTimeout(function () { deal(cards); }, 800);
         });
       }
       pack.addEventListener('pointerdown', function (e) {
