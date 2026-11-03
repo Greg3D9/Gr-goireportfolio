@@ -59,7 +59,18 @@
 #intro.out { opacity: 0; pointer-events: none; }
 html.gal-in .card { animation: inCard .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--n, 0) * 70ms + .1s); }
 @keyframes inCard { from { opacity: 0; transform: translateY(26px); } }
-@media (prefers-reduced-motion: reduce) { #intro *, #intro *::before { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; transition-delay: 0s !important; } }
+/* Animations coupées (Windows « Afficher les animations » désactivé, ou animation qui ne démarre pas) : l'accueil s'affiche directement en entier. */
+@media (prefers-reduced-motion: reduce) {
+  #intro .in-grid, #intro .in-top, #intro .in-role, #intro .in-sub, #intro .in-cote, #intro .in-enter, #intro .in-tick { opacity: 1 !important; transform: none !important; }
+  #intro .in-frame { clip-path: none !important; }
+  #intro h1 span { transform: none !important; }
+  #intro.leaving h1 { transform: none !important; }
+}
+#intro.noanim .in-grid, #intro.noanim .in-top, #intro.noanim .in-role, #intro.noanim .in-sub, #intro.noanim .in-cote, #intro.noanim .in-enter, #intro.noanim .in-tick { opacity: 1 !important; transform: none !important; animation: none !important; }
+#intro.noanim .in-frame { clip-path: none !important; animation: none !important; }
+#intro.noanim h1 span { transform: none !important; animation: none !important; }
+#intro.noanim.leaving h1 { transform: none !important; }
+#intro.noanim.leaving .in-top, #intro.noanim.leaving .in-tick, #intro.noanim.leaving .in-main > :not(h1) { opacity: 0 !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -668,6 +679,10 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     }, 750);
     setTimeout(function () { el.hidden = true; }, 1600);
   }
+  /* Filet de sécurité : si les animations ne tournent pas (réglage Windows, pilote graphique…), on affiche tout de suite. */
+  setTimeout(function () {
+    try { var b = document.querySelector('#intro .in-enter'); if (!done && b && parseFloat(getComputedStyle(b).opacity) < 0.9) el.classList.add('noanim'); } catch (e) {}
+  }, 3200);
   document.getElementById('inGo').addEventListener('click', go);
   document.getElementById('inSkip').addEventListener('click', go);
   document.addEventListener('keydown', function (e) { if (!done && (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ')) { e.preventDefault(); go(); } });
@@ -776,7 +791,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v53</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v55</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -790,10 +805,11 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 <div id="viewer" class="overlay viewer" role="dialog" aria-modal="true" aria-labelledby="vTitle" hidden>
   <div class="v-stage">
     <img id="vImg" alt="">
-    <div id="v3dBox" class="v3d-box" hidden><canvas id="v3dCanvas"></canvas><canvas id="planCanvas" hidden></canvas><div id="v3dMsg" class="v3d-msg mono"></div><div id="rdPanel" class="rd-panel" hidden></div><div id="v3dHelp" class="v3d-help mono">Glisse pour tourner · pince pour zoomer · touche pour éclater</div>
+    <div id="v3dBox" class="v3d-box" hidden><canvas id="v3dCanvas"></canvas><canvas id="planCanvas" hidden></canvas><div id="v3dMsg" class="v3d-msg mono"></div><div id="rdPanel" class="rd-panel" hidden></div><div id="orPanel" class="rd-panel" hidden></div><div id="v3dHelp" class="v3d-help mono">Glisse pour tourner · pince pour zoomer · touche pour éclater</div>
       <div class="v3d-tools">
         <button id="tEx" class="btn" type="button" hidden>Éclater</button>
         <button id="tRender" class="btn" type="button" hidden>Rendu</button>
+        <button id="tOrient" class="btn" type="button" hidden>Orientation</button>
         <button id="tPlan" class="btn" type="button" hidden>Plan</button>
         <button id="tAR" class="btn" type="button" hidden>Réalité augmentée</button>
         <button id="tUnit" class="btn" type="button" hidden title="Unité du modèle">mm</button>
@@ -1642,7 +1658,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   /* ---------- Visionneuse ---------- */
   function lockScroll(on) { document.body.style.overflow = on ? 'hidden' : ''; }
   function fillViewer(w) {
-    hide3D(); $('v3d').hidden = !w.model;
+    if (!(v3d && v3d.workId === w.id && w.model && v3d.modelId === w.model)) hide3D();
+    $('v3d').hidden = !w.model;
     var refs = refMap();
     $('vImg').src = srcOf(w);
     $('vImg').alt = w.title || 'Sans titre';
@@ -2965,10 +2982,75 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     v3d.mode = mode;
     $('v3dCanvas').hidden = plan; $('planCanvas').hidden = !plan;
     $('tPlan').textContent = plan ? '3D' : 'Plan';
-    $('tEx').hidden = plan || v3d.parts.length < 2; $('tRender').hidden = plan; if (plan) $('rdPanel').hidden = true;
+    $('tEx').hidden = plan || v3d.parts.length < 2; $('tRender').hidden = plan; if (plan) { $('rdPanel').hidden = true; $('orPanel').hidden = true; $('tOrient').classList.remove('solid'); } $('tOrient').hidden = plan || !v3d.canOrient;
     $('tUnit').hidden = !plan; $('tPng').hidden = !plan; $('tUnit').textContent = UNIT_NAMES[v3d.unit];
     $('v3dHelp').hidden = plan;
   }
+
+  /* ---------- Orientation de la pièce (aperçu et réalité augmentée) ---------- */
+  function validOrient(o) { return Array.isArray(o) && o.length === 4 && o.every(function (n) { return typeof n === 'number' && isFinite(n); }) && Math.abs(Math.hypot(o[0], o[1], o[2], o[3]) - 1) < 0.01; }
+  function orApply(q) {
+    var v = v3d; if (!v) return;
+    v.pivot.quaternion.copy(q).normalize(); v.pivot.updateMatrixWorld(true);
+    if (v.shadow) { var b = new THREE.Box3().setFromObject(v.pivot); v.shadow.position.y = b.min.y - v.radius * 0.004; }
+    if (v.edges) v.edges = null;
+  }
+  /* cherche la face plane la plus large parmi les 6 directions du modèle et la pose en bas */
+  function orAuto() {
+    var v = v3d; if (!v) return null;
+    var keep = v.pivot.quaternion.clone(); v.pivot.quaternion.identity(); v.pivot.updateMatrixWorld(true);
+    var dirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].map(function (a) { return new THREE.Vector3(a[0], a[1], a[2]); });
+    var bb = new THREE.Box3().setFromObject(v.pivot), sz = bb.getSize(new THREE.Vector3());
+    var maxP = [bb.max.x, -bb.min.x, bb.max.y, -bb.min.y, bb.max.z, -bb.min.z], ext = [sz.x, sz.x, sz.y, sz.y, sz.z, sz.z];
+    var tol = ext.map(function (e) { return Math.max(e * 0.012, 1e-6); }), area = [0, 0, 0, 0, 0, 0];
+    var a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), nm = new THREE.Vector3();
+    v.pivot.traverse(function (o) {
+      if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+      var pos = o.geometry.attributes.position, idx = o.geometry.index, m = o.matrixWorld, n = idx ? idx.count : pos.count, i, k;
+      for (i = 0; i + 2 < n; i += 3) {
+        a.fromBufferAttribute(pos, idx ? idx.getX(i) : i).applyMatrix4(m);
+        b.fromBufferAttribute(pos, idx ? idx.getX(i + 1) : i + 1).applyMatrix4(m);
+        c.fromBufferAttribute(pos, idx ? idx.getX(i + 2) : i + 2).applyMatrix4(m);
+        e1.subVectors(b, a); e2.subVectors(c, a); nm.crossVectors(e1, e2);
+        var len = nm.length(); if (len < 1e-12) continue;
+        nm.divideScalar(len);
+        var ar = len / 2, cx = (a.x + b.x + c.x) / 3, cy = (a.y + b.y + c.y) / 3, cz = (a.z + b.z + c.z) / 3;
+        for (k = 0; k < 6; k++) {
+          var d = dirs[k];
+          if (nm.dot(d) > 0.985 && cx * d.x + cy * d.y + cz * d.z >= maxP[k] - tol[k]) area[k] += ar;
+        }
+      }
+    });
+    v.pivot.quaternion.copy(keep); v.pivot.updateMatrixWorld(true);
+    var best = 0, k2; for (k2 = 1; k2 < 6; k2++) if (area[k2] > area[best]) best = k2;
+    if (!(area[best] > 0)) return null;
+    return new THREE.Quaternion().setFromUnitVectors(dirs[best], new THREE.Vector3(0, -1, 0));
+  }
+  function orRound(q) { var r = function (n) { return Math.round(n * 1e6) / 1e6 || 0; }; return [r(q.x), r(q.y), r(q.z), r(q.w)]; }
+  function orInit() {
+    var P = $('orPanel'); P.innerHTML = '';
+    var turn = function (axis) { return function () { if (!v3d) return; var q = new THREE.Quaternion().setFromAxisAngle(axis, Math.PI / 2); orApply(q.multiply(v3d.pivot.quaternion)); }; };
+    var btn = function (text, fn, solid) { return h('button', { class: 'btn' + (solid ? ' solid' : ''), type: 'button', text: text, onclick: fn }); };
+    P.append(h('p', { class: 'mono', style: 'margin:0;font-size:10px;opacity:.8', text: 'Mets la base de la pièce en bas, puis enregistre (aperçu et réalité augmentée).' }),
+      h('div', { class: 'rd-chips' },
+        btn('Poser sur la base (auto)', function () {
+          var q = orAuto();
+          if (!q) { toast('Je n\'ai pas trouvé de face plane. Tourne la pièce avec les boutons.', true); return; }
+          orApply(q);
+        }, true),
+        btn('Basculer ↻ avant', turn(new THREE.Vector3(1, 0, 0))),
+        btn('Basculer ↻ côté', turn(new THREE.Vector3(0, 0, 1))),
+        btn('Pivoter ↻', turn(new THREE.Vector3(0, 1, 0))),
+        btn('Origine', function () { orApply(new THREE.Quaternion()); }),
+        btn('Enregistrer', async function () {
+          if (!v3d || !db || !v3d.workId) return;
+          var q = v3d.pivot.quaternion, ident = Math.abs(q.w) > 0.99999, id = v3d.workId;
+          try { await db.collection('works').doc(id).update({ orient: ident ? null : orRound(q) }); toast('Orientation enregistrée'); }
+          catch (e) { toast('L\'enregistrement a échoué. Réessaie dans un instant.', true); }
+        }, true)));
+  }
+  $('tOrient').addEventListener('click', function () { var P = $('orPanel'); P.hidden = !P.hidden; $('tOrient').classList.toggle('solid', !P.hidden); if (!P.hidden) { $('rdPanel').hidden = true; $('tRender').classList.remove('solid'); } });
+  window.__v3d = function () { return v3d; };
 
   /* réalité augmentée (iPhone : AR Quick Look, fichier USDZ) */
   var AR_OK = (function () { try { var a = document.createElement('a'); return !!(a.relList && a.relList.supports && a.relList.supports('ar')); } catch (e) { return false; } })();
@@ -3010,12 +3092,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     box.hidden = true; $('v3dMsg').textContent = '';
     $('v3dCanvas').hidden = false; $('planCanvas').hidden = true;
     $('vImg').hidden = false; $('v3d').textContent = 'Voir en 3D';
-    ['tEx', 'tPlan', 'tAR', 'tUnit', 'tPng', 'tRender', 'rdPanel'].forEach(function (id) { $(id).hidden = true; });
+    ['tEx', 'tPlan', 'tAR', 'tUnit', 'tPng', 'tRender', 'rdPanel', 'tOrient', 'orPanel'].forEach(function (id) { $(id).hidden = true; });
   }
   async function show3D(w) {
     var tok = ++v3dTok;
     $('vImg').hidden = true; $('v3dBox').hidden = false; $('v3d').textContent = 'Voir l\'image';
-    ['tEx', 'tPlan', 'tAR', 'tUnit', 'tPng', 'tRender', 'rdPanel'].forEach(function (id) { $(id).hidden = true; });
+    ['tEx', 'tPlan', 'tAR', 'tUnit', 'tPng', 'tRender', 'rdPanel', 'tOrient', 'orPanel'].forEach(function (id) { $(id).hidden = true; });
     $('v3dCanvas').hidden = false; $('planCanvas').hidden = true; $('v3dHelp').hidden = false;
     $('v3dMsg').textContent = 'Chargement du modèle…';
     try {
@@ -3042,7 +3124,10 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       });
       ro.observe(box);
       v3d = { renderer: renderer, controls: controls, ro: ro, raf: 0, pivot: sc.pivot, radius: sc.radius, mode: '3d', ex: 0, exTarget: 0, baseDist: 1, camera: sc.camera, scene: sc.scene, lights: sc.lights, parts: [], edges: null, title: w.title || 'piece', unit: (w.modelExt === 'stl') ? 0 : 2 };
-      v3d.parts = collectParts(v3d); rdInit(); $('tRender').hidden = false; $('rdPanel').hidden = true; $('tRender').classList.remove('solid');
+      v3d.workId = w.id; v3d.modelId = w.model; v3d.canOrient = !!(state.canAdd && !w.sample && db);
+      if (validOrient(w.orient)) v3d.pivot.quaternion.set(w.orient[0], w.orient[1], w.orient[2], w.orient[3]);
+      v3d.pivot.updateMatrixWorld(true);
+      v3d.parts = collectParts(v3d); rdInit(); orInit(); $('tOrient').hidden = !v3d.canOrient; $('tRender').hidden = false; $('rdPanel').hidden = true; $('tRender').classList.remove('solid');
       $('tPlan').hidden = false; $('tAR').hidden = !AR_OK; $('tEx').hidden = v3d.parts.length < 2; $('tEx').textContent = 'Éclater';
       var loop = function () {
         if (!v3d) return; v3d.raf = requestAnimationFrame(loop);
@@ -3192,7 +3277,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     }, 'image/png');
     r.setPixelRatio(pr); r.setSize(cw, ch, false); v.scene.background = bg;
   }
-  $('tRender').addEventListener('click', function () { var P = $('rdPanel'); P.hidden = !P.hidden; $('tRender').classList.toggle('solid', !P.hidden); });
+  $('tRender').addEventListener('click', function () { var P = $('rdPanel'); P.hidden = !P.hidden; $('tRender').classList.toggle('solid', !P.hidden); if (!P.hidden) { $('orPanel').hidden = true; $('tOrient').classList.remove('solid'); } });
 
   $('tEx').addEventListener('click', toggleExplode);
   $('tPlan').addEventListener('click', function () { if (v3d) setMode(v3d.mode === 'plan' ? '3d' : 'plan'); });

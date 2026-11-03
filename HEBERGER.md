@@ -152,3 +152,16 @@ Pense à republier ton portfolio (bouton « Publier le portfolio ») pour que te
 ## 19. Effet au défilement
 
 Dans la galerie, les cartes situées plus bas arrivent en glissant quand tu fais défiler, et les images bougent très légèrement dans leur cadre. Si ton iPhone est réglé sur « Réduire les animations », l'effet est coupé.
+
+## 20. Si la page d'accueil reste noire sur un ordinateur
+
+Sur certains PC Windows, les animations sont désactivées (Réglages > Accessibilité > Effets visuels > Effets d'animation). L'application respecte ce réglage : depuis la version 54, la page d'accueil s'affiche alors directement en entier, sans animation, avec le bouton « Entrer ». Si une animation ne démarre pas pour une autre raison, l'accueil s'affiche aussi tout seul après 3 secondes.
+
+## 21. Orientation des pièces 3D
+
+Les fichiers SolidWorks ou CATIA n'ont pas toujours le même « haut » que l'iPhone, et la pièce peut se retrouver couchée en réalité augmentée. Dans la visionneuse 3D de ton espace propriétaire, le bouton **Orientation** ouvre un panneau :
+- **Poser sur la base (auto)** cherche la plus grande face plane de la pièce et la met en bas.
+- **Basculer ↻ avant**, **Basculer ↻ côté** et **Pivoter ↻** tournent la pièce d'un quart de tour dans chaque sens, pour régler à la main.
+- **Origine** annule les changements.
+- **Enregistrer** retient l'orientation pour cette pièce, pour l'aperçu et pour la réalité augmentée. Pense à republier le portfolio pour que tes visiteurs la voient aussi.
+Le bouton « Réalité augmentée » utilise toujours l'orientation affichée à l'écran, même avant d'enregistrer : tu peux donc essayer avant de valider.
