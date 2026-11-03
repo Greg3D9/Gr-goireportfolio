@@ -554,6 +554,8 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .sc-row b { display: block; font-size: 1.02rem; }
 .sc-row span { display: block; font-size: .8rem; line-height: 1.35; color: rgba(244,242,238,.72); margin-top: 2px; }
 .sc-row em { display: block; font: normal .64rem var(--mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; color: #ffc233; margin-top: 5px; }
+.sc-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.12); margin-top: 7px; overflow: hidden; }
+.sc-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ffb800, #ff7a1a); }
 .sc-row.lock { border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.035); }
 .sc-row.lock .sc-medal { background: #2a2a33; color: #777a86; box-shadow: none; }
 .sc-row.lock b { color: rgba(244,242,238,.6); }
@@ -976,7 +978,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v66</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v67</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -1952,7 +1954,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var w = visible().filter(function (x) { return x.id === id; })[0];
     if (!w) return;
     lastFocus = document.activeElement;
-    currentId = id; uiTick(1);
+    currentId = id; uiTick(1); stSeen(id);
     fillViewer(w);
     $('viewer').hidden = false;
     lockScroll(true);
@@ -2274,7 +2276,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       }
       function finish(ms) {
         if (finished) return; finished = true; drag = false;
-        pack.classList.remove('drag'); pack.classList.add('torn'); boMark();
+        pack.classList.remove('drag'); pack.classList.add('torn'); boMark(); stBooster(cards);
         try { navigator.vibrate && navigator.vibrate(18); } catch (e) {}
         animateTo(1, ms || 240, function () {
           pack.classList.add('off'); burst();
@@ -2329,7 +2331,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       function step() {
         var w = cards[idx], c = els[idx], r = rarOf(w);
         if (!flipped) {
-          flipped = true; c.classList.add('flipped'); colAdd(w.id); scUnlock('booster'); upd();
+          flipped = true; c.classList.add('flipped'); stFlip(w, !!fresh[w.id]); colAdd(w.id); scUnlock('booster'); upd();
           var msg = [null, null, 'Rare !', 'Ultra rare !!', 'Légende !!!'][r];
           if (msg || fresh[w.id]) { say.textContent = (msg || '') + (fresh[w.id] ? (msg ? ' · ' : '') + 'Nouvelle !' : ''); say.style.color = RAR[r].b; say.classList.remove('on'); void say.offsetWidth; say.classList.add('on'); }
           else { say.classList.remove('on'); say.textContent = ''; }
@@ -2423,6 +2425,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     });
   }
   function saveCard(w) {
+    stInc('saves');
     toast('Création de la carte…');
     cardPng(w).then(function (blob) {
       var name = 'carte-' + String(w.title || 'oeuvre').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png';
@@ -2443,8 +2446,47 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     { k: 'legende', n: 'Chasseur de Légende', d: 'Obtiens une carte Légende.', g: '★' },
     { k: 'echange', n: 'Échangeur', d: 'Réussis ton premier échange de carte avec un ami.', g: '⇄' },
     { k: 'moitie', n: 'Collectionneur', d: 'Possède la moitié des cartes du portfolio.', g: '◐' },
-    { k: 'complete', n: 'Collection complète', d: 'Possède toutes les cartes du portfolio.', g: '♛' }
+    { k: 'complete', n: 'Collection complète', d: 'Possède toutes les cartes du portfolio.', g: '♛' },
+    { k: 'boost10', n: 'Habitué', d: 'Ouvre 10 boosters.', g: '✧', t: 10, p: function (c) { return c.st.boosters || 0; } },
+    { k: 'boost25', n: 'Accro aux boosters', d: 'Ouvre 25 boosters.', g: '❖', t: 25, p: function (c) { return c.st.boosters || 0; } },
+    { k: 'boost50', n: 'Maître des boosters', d: 'Ouvre 50 boosters.', g: '✪', t: 50, p: function (c) { return c.st.boosters || 0; } },
+    { k: 'boost100', n: 'Légende vivante', d: 'Ouvre 100 boosters. Il va falloir de la patience.', g: '☀', t: 100, p: function (c) { return c.st.boosters || 0; } },
+    { k: 'rare10', n: 'Œil de lynx', d: 'Obtiens 10 cartes Rare ou mieux.', g: '◆', t: 10, p: function (c) { return c.st.rare || 0; } },
+    { k: 'ultra5', n: 'Éclat ultra', d: 'Obtiens 5 cartes Ultra rare ou mieux.', g: '✺', t: 5, p: function (c) { return c.st.ultra || 0; } },
+    { k: 'legende3', n: 'Panthéon', d: 'Obtiens 3 cartes Légende.', g: '♚', t: 3, p: function (c) { return c.st.legend || 0; } },
+    { k: 'jackpot', n: 'Jackpot', d: 'Tombe sur 3 cartes Rare ou mieux dans le même booster.', g: '$', t: 1, p: function (c) { return c.st.jackpot || 0; } },
+    { k: 'doublons', n: 'Déjà vu', d: 'Tire 10 cartes que tu possédais déjà.', g: '⧉', t: 10, p: function (c) { return c.st.dup || 0; } },
+    { k: 'rainbow', n: 'Arc-en-ciel', d: 'Possède au moins une carte de chacune des 5 raretés.', g: '☄', t: 5, p: function (c) { var r = {}; c.owned.forEach(function (w) { r[rarOf(w)] = 1; }); return Object.keys(r).length; } },
+    { k: 'troisq', n: 'Presque complet', d: 'Possède 75 % des cartes du portfolio.', g: '◕', t: function (c) { return c.pool.length >= 4 ? Math.ceil(c.pool.length * 0.75) : 0; }, p: function (c) { return c.owned.length; } },
+    { k: 'jours3', n: 'Fidèle', d: 'Ouvre des boosters pendant 3 jours différents.', g: '☾', t: 3, p: function (c) { return (c.st.days || []).length; } },
+    { k: 'jours7', n: 'Rituel', d: 'Ouvre des boosters pendant 7 jours différents.', g: '☼', t: 7, p: function (c) { return (c.st.days || []).length; } },
+    { k: 'echange3', n: 'Négociateur', d: 'Réussis 3 échanges de cartes.', g: '⇆', t: 3, p: function (c) { return c.st.echanges || 0; } },
+    { k: 'echange10', n: 'Roi de l\'échange', d: 'Réussis 10 échanges de cartes.', g: '♜', t: 10, p: function (c) { return c.st.echanges || 0; } },
+    { k: 'nuit', n: 'Oiseau de nuit', d: 'Ouvre un booster entre minuit et 5 h du matin.', g: '☽', t: 1, p: function (c) { return c.st.nuit || 0; } },
+    { k: 'vues20', n: 'Visiteur curieux', d: 'Ouvre la fiche de 20 œuvres différentes.', g: '◎', t: 20, p: function (c) { return (c.st.seen || []).length; } },
+    { k: 'vues', n: 'Tout voir', d: 'Ouvre la fiche de toutes les œuvres du portfolio.', g: '◉', t: function (c) { var n = visible().length; return n >= 3 ? n : 0; }, p: function (c) { return (c.st.seen || []).length; } },
+    { k: 'photo', n: 'Photographe', d: 'Enregistre 5 cartes en image.', g: '▣', t: 5, p: function (c) { return c.st.saves || 0; } },
+    { k: 'prevoyant', n: 'Prévoyant', d: 'Crée une sauvegarde de ta collection.', g: '⛨', t: 1, p: function (c) { return c.st.bk || 0; } }
   ], scQueue = [], scBusy = false;
+  function stGet() { try { var o = JSON.parse(localStorage.getItem('portfolio-stats') || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
+  function stSet(o) { try { localStorage.setItem('portfolio-stats', JSON.stringify(o)); } catch (e) {} }
+  function stInc(k, n) { var o = stGet(); o[k] = (o[k] || 0) + (n || 1); stSet(o); scCheck(); }
+  function stSeen(id) { var o = stGet(), a = Array.isArray(o.seen) ? o.seen : []; if (a.indexOf(id) >= 0 || a.length > 400) return; a.push(id); o.seen = a; stSet(o); scCheck(); }
+  function stBooster(cards) {
+    var o = stGet(), d = new Date(), key = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(), days = Array.isArray(o.days) ? o.days : [], n = 0;
+    o.boosters = (o.boosters || 0) + 1;
+    if (days.indexOf(key) < 0) days.push(key); o.days = days.slice(-400);
+    if (d.getHours() < 5) o.nuit = 1;
+    cards.forEach(function (w) { if (rarOf(w) >= 2) n++; });
+    if (n >= 3) o.jackpot = 1;
+    stSet(o); scCheck();
+  }
+  function stFlip(w, isNew) {
+    var o = stGet(), r = rarOf(w);
+    if (r >= 2) o.rare = (o.rare || 0) + 1; if (r >= 3) o.ultra = (o.ultra || 0) + 1; if (r === 4) o.legend = (o.legend || 0) + 1;
+    if (!isNew) o.dup = (o.dup || 0) + 1;
+    stSet(o);
+  }
   function scGet() { try { var o = JSON.parse(localStorage.getItem('portfolio-succes') || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
   function scCount() { var o = scGet(); return SC.filter(function (b) { return o[b.k]; }).length; }
   function scUnlock(k) {
@@ -2467,6 +2509,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     if (owned.some(function (w) { return rarOf(w) === 4; })) scUnlock('legende');
     if (pool.length >= 2 && owned.length * 2 >= pool.length) scUnlock('moitie');
     if (pool.length >= 3 && owned.length === pool.length) scUnlock('complete');
+    var c = { pool: pool, owned: owned, st: stGet() };
+    SC.forEach(function (b) { if (!b.p) return; var t = typeof b.t === 'function' ? b.t(c) : b.t; if (t > 0 && b.p(c) >= t) scUnlock(b.k); });
   }
   function openSucces() {
     scCheck();
@@ -2475,7 +2519,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       var ok = !!o[b.k], extra = '';
       if (ok) { try { extra = 'Débloqué le ' + new Date(o[b.k]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }); } catch (e) { extra = 'Débloqué'; } }
       else if (b.k === 'moitie' || b.k === 'complete') extra = n + ' / ' + pool.length + ' cartes';
-      list.append(h('div', { class: 'sc-row' + (ok ? '' : ' lock') }, h('div', { class: 'sc-medal', text: ok ? b.g : '🔒' }), h('div', null, h('b', { text: b.n }), h('span', { text: b.d }), extra ? h('em', { text: extra }) : null)));
+      var bar = null;
+      if (!ok && b.p) {
+        var cx = { pool: pool, owned: pool.filter(function (w) { return have.indexOf(w.id) >= 0; }), st: stGet() }, tt = typeof b.t === 'function' ? b.t(cx) : b.t, pp = b.p(cx);
+        if (tt > 1) { extra = Math.min(pp, tt) + ' / ' + tt; bar = h('div', { class: 'sc-bar' }, h('i', { style: 'width:' + Math.round(Math.min(1, pp / tt) * 100) + '%' })); }
+      }
+      list.append(h('div', { class: 'sc-row' + (ok ? '' : ' lock') }, h('div', { class: 'sc-medal', text: ok ? b.g : '🔒' }), h('div', { style: 'flex:1;min-width:0' }, h('b', { text: b.n }), h('span', { text: b.d }), bar, extra ? h('em', { text: extra }) : null)));
     });
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Succès · ' + scCount() + ' / ' + SC.length }), boBtn('Fermer', L.close)), h('div', { class: 'bo-stage', style: 'justify-content:flex-start;overflow:auto' }, list));
   }
@@ -2483,7 +2532,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 
   /* ---------- Sauvegarde / restauration de la collection ---------- */
   function bkMake() {
-    var ex = exGet(), p = { v: 1, t: 'bk', ts: Date.now(), col: colGet(), sc: scGet(), pe: ex.pending, us: ex.used };
+    var ex = exGet(), p = { v: 1, t: 'bk', ts: Date.now(), col: colGet(), sc: scGet(), pe: ex.pending, us: ex.used, st: stGet() };
     return 'GC1.' + b64e(p);
   }
   function bkParse(text) {
@@ -2494,6 +2543,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     return p;
   }
   function bkSave() {
+    var o0 = stGet(); o0.bk = 1; stSet(o0); scCheck();
     var code = bkMake(), L = boLayer('bo-one', 'Sauvegarder'), ta = h('textarea', { class: 'bk-code', readonly: true, 'aria-label': 'Code de sauvegarde', spellcheck: 'false' });
     ta.value = code;
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Sauvegarder ma collection' }), boBtn('Fermer', L.close)),
@@ -2515,6 +2565,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       try { localStorage.setItem('portfolio-succes', JSON.stringify(o)); } catch (e) {}
       if (p.pe && typeof p.pe === 'object') for (k in p.pe) if (/^[0-9a-f]{8,32}$/.test(k) && p.pe[k] && typeof p.pe[k].c === 'string' && !ex.pending[k]) ex.pending[k] = { c: String(p.pe[k].c), t: Number(p.pe[k].t) || Date.now() };
       if (Array.isArray(p.us)) p.us.forEach(function (n) { if (/^[0-9a-f]{8,32}$/.test(String(n)) && ex.used.indexOf(n) < 0) ex.used.push(n); });
+      if (p.st && typeof p.st === 'object') {
+        var st = stGet(), kk;
+        ['boosters', 'rare', 'ultra', 'legend', 'dup', 'echanges', 'saves', 'jackpot', 'nuit', 'bk'].forEach(function (n) { var v = Number(p.st[n]) || 0; if (v > (st[n] || 0)) st[n] = v; });
+        ['days', 'seen'].forEach(function (n) { if (Array.isArray(p.st[n])) { var a = Array.isArray(st[n]) ? st[n] : []; p.st[n].forEach(function (x) { if (typeof x === 'string' && x.length < 120 && a.indexOf(x) < 0 && a.length < 500) a.push(x); }); st[n] = a; } });
+        stSet(st);
+      }
       exSet(ex);
       L.close(); BO.slice().forEach(function (x) { x.close(); });
       toast(add + ' carte' + (add > 1 ? 's' : '') + ' ajoutée' + (add > 1 ? 's' : '') + ', ' + sn + ' succès retrouvé' + (sn > 1 ? 's' : '') + '.', false, 4500);
@@ -2596,14 +2652,14 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     } else {
       var pe = ex.pending[p.n];
       if (!pe || pe.c !== p.c) { exMsg('Confirmation non reconnue', 'Aucune offre en attente ne correspond à ce code. Ouvre le lien dans la même application que celle où tu as créé l\'offre (même téléphone, même navigateur).'); return; }
-      delete ex.pending[p.n]; exSet(ex); colDel(p.c); scUnlock('echange');
+      delete ex.pending[p.n]; exSet(ex); colDel(p.c); stInc('echanges'); scUnlock('echange');
       var nm = w ? (w.title || 'Sans titre') : 'La carte';
       toast('Échange validé : « ' + nm + ' » a quitté ta collection.', false, 5000);
       exMsg('Échange validé', '« ' + nm + ' » a bien été donnée. Elle a quitté ta collection et se trouve chez ton ami.');
     }
   }
   function exAccept(p, w) {
-    var ex = exGet(); ex.used.push(p.n); exSet(ex); colAdd(w.id); scUnlock('echange');
+    var ex = exGet(); ex.used.push(p.n); exSet(ex); colAdd(w.id); stInc('echanges'); scUnlock('echange');
     var url = exLink({ v: 1, t: 'a', c: p.c, n: p.n, ts: Date.now() }), L = boLayer('bo-one', 'Carte reçue');
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Carte reçue' }), boBtn('Fermer', L.close)),
       h('div', { class: 'bo-stage', style: 'justify-content:flex-start;gap:12px;overflow:auto' },
