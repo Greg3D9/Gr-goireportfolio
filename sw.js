@@ -1,4 +1,4 @@
-const CACHE = 'portfolio-ambre-v57';
+const CACHE = 'portfolio-ambre-v58';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
