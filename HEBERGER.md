@@ -236,3 +236,5 @@ Note v65 : sachet refait avec un vrai volume 3D (12 tranches empilées en profon
 Note v66 : 3 cartes par booster ; pour les visiteurs, 1 booster toutes les 30 min (compte à rebours dans le bouton Booster et dans l'écran d'attente, mémorisé dans le navigateur). Espace propriétaire : illimité.
 
 Note v67 : 20 nouveaux succès (25 au total) avec barres de progression (x / N) : boosters ouverts 10/25/50/100, raretés obtenues, doublons, arc-en-ciel, 75 % de la collection, jours différents, échanges 3/10, œuvres vues, cartes enregistrées, sauvegarde, oiseau de nuit, jackpot. Compteurs dans le navigateur (portfolio-stats), inclus dans la sauvegarde.
+
+Note v68 : diaporama refait en style fond d'écran animé — fond flou aux couleurs de l'œuvre, lueurs qui bougent, grand titre en lettres creuses qui défile, particules, œuvre en cadre flottant qui pivote doucement avec reflet lumineux, 3 entrées différentes, titre révélé mot par mot, couleur d'accent tirée de l'œuvre.
