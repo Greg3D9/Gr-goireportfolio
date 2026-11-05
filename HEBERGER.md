@@ -260,3 +260,9 @@ Note v69 : diaporama allégé pour la fluidité (fond flou fixe, plus de flou/m�
 - **Classeur 3D** (bouton « Classeur ») : couverture qui s'ouvre, pages que l'on tourne (boutons, glisser ou flèches du clavier). Page 1 = **vitrine** (3 cartes préférées, choisies avec « Mettre en vitrine ★ » dans la fiche d'une carte). Les cartes non obtenues apparaissent en « ? ».
 - **Partage de vitrine** : « Partager ma vitrine » crée un lien et un QR code (#vt=…). Un ami voit tes cartes, avec leurs notes de gradation et leurs effets brillants.
 - Tout est enregistré dans le navigateur (pas partagé entre Safari et l'appli installée) ; la sauvegarde (code de secours) inclut pièces, stock, vitrine, brillantes.
+
+## 30. Cartes brillantes = exemplaires à part (v73)
+- Une carte brillante est désormais un **exemplaire séparé** de la carte normale : tu peux avoir la normale, la brillante, ou les deux. Obtenir la brillante ne transforme plus ta carte normale, et les boosters suivants ne sont plus brillants à cause d'elle.
+- Elles ont leurs propres stats d'usure, gradation, vitrine, combat (si elle est détruite, la normale reste). Même rareté, mêmes PV et mêmes attaques que la version normale.
+- Elles apparaissent dans une section « ✦ Cartes brillantes » de la Collection et à la fin du classeur.
+- Les brillantes déjà obtenues en v72 sont converties automatiquement (la normale est conservée).

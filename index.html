@@ -1126,7 +1126,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v72</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v73</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2357,7 +2357,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     { k: 'ultra', l: 'Ultra rare', w: 9, a: '#9b4dff', b: '#f59bff' },
     { k: 'legende', l: 'Légende', w: 3, a: '#e8a800', b: '#fff0a0' }
   ];
-  function hash01(str, salt) { var x = 2166136261, i; str = String(str) + (salt || ''); for (i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 100000) / 100000; }
+  function hash01(str, salt) { var x = 2166136261, i; str = String(str).replace(/#sh$/, '') + (salt || ''); for (i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 100000) / 100000; }
   function rarOf(w) {
     if (w && typeof w.rar === 'number' && w.rar >= 0 && w.rar <= 4) return Math.round(w.rar);
     var r = hash01(w && w.id, 'r') * 100, acc = 0, i;
@@ -2380,9 +2380,10 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   function glyOf(w) { return GLY[catOf(w.cat).id] || '★'; }
   function lsObj(k) { try { var o = JSON.parse(localStorage.getItem(k) || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
   function lsSet(k, o) { try { localStorage.setItem(k, JSON.stringify(o)); } catch (e) {} }
-  function shGet() { return lsObj('portfolio-brillantes'); }
-  function shinyOf(id) { return !!shGet()[id]; }
-  function shAdd(id) { var o = shGet(); if (o[id]) return false; o[id] = Date.now(); lsSet('portfolio-brillantes', o); scCheck(); return true; }
+  function shinyOf(id) { return /#sh$/.test(String(id)); }
+  function shGet() { var o = {}; colGet().forEach(function (id) { if (shinyOf(id)) o[id] = 1; }); return o; }
+  (function () { try { var old = JSON.parse(localStorage.getItem('portfolio-brillantes') || 'null'); if (old && typeof old === 'object') { var a = JSON.parse(localStorage.getItem('portfolio-cartes') || '[]'), k; for (k in old) if (k.length < 100 && a.indexOf(k + '#sh') < 0) a.push(k + '#sh'); localStorage.setItem('portfolio-cartes', JSON.stringify(a)); localStorage.removeItem('portfolio-brillantes'); } } catch (e) {} })();
+  function shOwnedCards() { return colGet().filter(shinyOf).map(wById).filter(Boolean).sort(function (a, b) { return rarOf(b) - rarOf(a) || String(a.title).localeCompare(String(b.title)); }); }
   function numGet(k) { var v = Number(localStorage.getItem(k)); return v > 0 ? Math.floor(v) : 0; }
   function numSet(k, v) { try { localStorage.setItem(k, String(Math.max(0, Math.floor(v)))); } catch (e) {} }
   function coGet() { return numGet('portfolio-pieces'); }
@@ -2425,7 +2426,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     el.classList.toggle('hurt', cur < mx); el.classList.toggle('crit', cur / mx < .35);
     el.classList.remove('hpflash'); void el.offsetWidth; el.classList.add('hpflash');
   }
-  function cardNo(w) { var i = cardPool().map(function (x) { return x.id; }).indexOf(w.id) + 1, n = cardPool().length, z = function (v) { return (v < 10 ? '00' : v < 100 ? '0' : '') + v; }; return z(i || 1) + '/' + z(n || 1); }
+  function cardNo(w) { var i = cardPool().map(function (x) { return x.id; }).indexOf(String(w.id).replace(/#sh$/, '')) + 1, n = cardPool().length, z = function (v) { return (v < 10 ? '00' : v < 100 ? '0' : '') + v; }; return z(i || 1) + '/' + z(n || 1); }
   function cardEl(w, o) {
     o = o || {};
     var r = rarOf(w), R = RAR[r], st = statsOf(w), hp = hpOf(w), gr = o.grade !== undefined ? o.grade : gradeOf(w.id), shn = o.shiny !== undefined ? o.shiny : shinyOf(w.id), face, art;
@@ -2518,7 +2519,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (!bonusMode && boWait() > 0) { showWait(); return; }
       upd(); stage.innerHTML = '';
       var cards = cardDraw(pool, Math.min(3, pool.length)), best = 0, TY = 14, i, pts = [], shin = {}, shn = false;
-      cards.forEach(function (w) { best = Math.max(best, rarOf(w)); if (Math.random() < 1 / 40) { shin[w.id] = 1; shn = true; } });
+      cards = cards.map(function (w) { if (Math.random() < 1 / 40) { var sw = wById(w.id + '#sh'); if (sw) { shin[sw.id] = 1; shn = true; return sw; } } return w; }); cards.forEach(function (w) { best = Math.max(best, rarOf(w)); });
       var bi = shn ? 4 : best, glow = best >= 2 || shn;
       for (i = 0; i <= 25; i++) pts.push([i * 4, (i === 0 || i === 25) ? TY : TY + (Math.random() * 2.6 - 1.3)]);
       function f(p) { return p[0].toFixed(1) + '% ' + p[1].toFixed(2) + '%'; }
@@ -2614,7 +2615,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         if (!flipped) {
           flipped = true; c.classList.add('flipped'); sfx('flip'); if (r >= 2) setTimeout(function () { sfx('rare', r); }, 160); stFlip(w, !!fresh[w.id]); colAdd(w.id); scUnlock('booster'); upd();
           var msg = [null, null, 'Rare !', 'Ultra rare !!', 'Légende !!!'][r], isSh = !!shinIn[w.id];
-          if (isSh) { shAdd(w.id); sfx('shiny'); msg = 'BRILLANTE ✦' + (msg ? ' · ' + msg : ''); }
+          if (isSh) { sfx('shiny'); msg = 'BRILLANTE ✦' + (msg ? ' · ' + msg : ''); }
           if (msg || fresh[w.id]) { say.textContent = (msg || '') + (fresh[w.id] ? (msg ? ' · ' : '') + 'Nouvelle !' : ''); say.style.color = isSh ? '#ffe27a' : RAR[r].b; say.classList.remove('on'); void say.offsetWidth; say.classList.add('on'); }
           else { say.classList.remove('on'); say.textContent = ''; }
           if (isSh) { flash.style.setProperty('--fc', '#ffe27a'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); try { navigator.vibrate && navigator.vibrate([30, 40, 30, 40, 80]); } catch (e) {} }
@@ -2652,8 +2653,10 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (all || have.indexOf(w.id) >= 0) { var d = h('div', null, cardEl(w, { w: cw })); d.addEventListener('click', function () { openCard(w); }); grid.append(d); }
       else { var lk = h('div', { class: 'cd-lock', text: '?' }); lk.style.setProperty('--cw', cw + 'px'); grid.append(lk); }
     });
-    var stage = h('div', { class: 'bo-stage', style: 'justify-content:flex-start' }, sum, grid);
-    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Fermer', L.close)), stage);
+    var shs = shOwnedCards(), shGrid = null;
+    if (shs.length) { shGrid = h('div', { class: 'bo-grid' }); shs.forEach(function (w) { var d = h('div', null, cardEl(w, { w: cw })); d.addEventListener('click', function () { openCard(w); }); shGrid.append(d); }); }
+    var stage = h('div', { class: 'bo-stage', style: 'justify-content:flex-start' }, sum, grid, shGrid ? h('div', { class: 'bo-hint', style: 'margin-top:14px', text: '✦ Cartes brillantes (' + shs.length + ') · exemplaires à part' }) : null, shGrid);
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length + (shs.length ? ' · ✦ ' + shs.length : '') }), boBtn('Fermer', L.close)), stage);
     scCheck(); stage.prepend(h('div', { class: 'bo-btns', style: 'margin:0 0 10px;flex-wrap:wrap;justify-content:center' }, boBtn('Succès ' + scCount() + ' / ' + SC.length, function () { openSucces(); }, true), boBtn('Combat ⚔', function () { openCombat(); }, true), boBtn('Boutique 🪙', function () { openShop(); }), boBtn('Classeur', function () { openClasseur(); }), sndBtn(), boBtn('Recevoir une carte', function () { exPaste(); }), boBtn('Sauvegarder', function () { bkSave(); }), boBtn('Restaurer', function () { bkRestore(); })));
     if (all) stage.prepend(h('div', { class: 'bo-hint', text: 'Mode propriétaire : toutes les cartes sont visibles' }));
   }
@@ -2905,7 +2908,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 
   /* ---------- Sauvegarde / restauration de la collection ---------- */
   function bkMake() {
-    var ex = exGet(), p = { v: 1, t: 'bk', ts: Date.now(), col: colGet(), sc: scGet(), pe: ex.pending, us: ex.used, st: stGet(), x: { pi: coGet(), bo: numGet('portfolio-bonus'), pr: numGet('portfolio-protege'), gr: grGet(), uz: lsObj('portfolio-usure'), sh: shGet(), vt: vtGet() } };
+    var ex = exGet(), p = { v: 1, t: 'bk', ts: Date.now(), col: colGet(), sc: scGet(), pe: ex.pending, us: ex.used, st: stGet(), x: { pi: coGet(), bo: numGet('portfolio-bonus'), pr: numGet('portfolio-protege'), gr: grGet(), uz: lsObj('portfolio-usure'), vt: vtGet() } };
     return 'GC1.' + b64e(p);
   }
   function bkParse(text) {
@@ -2950,8 +2953,8 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         if (x.gr && typeof x.gr === 'object') for (kk2 in x.gr) if (!gg[kk2] && x.gr[kk2] && x.gr[kk2].g >= 1 && x.gr[kk2].g <= 10 && kk2.length < 120) gg[kk2] = { g: x.gr[kk2].g, ts: Number(x.gr[kk2].ts) || Date.now() };
         if (x.uz && typeof x.uz === 'object') for (kk2 in x.uz) if (Number(x.uz[kk2]) > (uu[kk2] || 0) && kk2.length < 120) uu[kk2] = Math.min(99, Number(x.uz[kk2]));
         if (Array.isArray(x.vt) && !vtGet().length) { try { localStorage.setItem('portfolio-vitrine', JSON.stringify(x.vt.filter(function (q) { return typeof q === 'string'; }).slice(0, 3))); } catch (e2) {} }
-        if (x.sh && typeof x.sh === 'object') for (kk2 in x.sh) if (!ss[kk2] && kk2.length < 120) ss[kk2] = Number(x.sh[kk2]) || Date.now();
-        lsSet('portfolio-gradees', gg); lsSet('portfolio-usure', uu); lsSet('portfolio-brillantes', ss);
+        if (x.sh && typeof x.sh === 'object') for (kk2 in x.sh) if (kk2.length < 100 && !shinyOf(kk2) && colGet().indexOf(kk2 + '#sh') < 0) colAdd(kk2 + '#sh');
+        lsSet('portfolio-gradees', gg); lsSet('portfolio-usure', uu);
       }
       exSet(ex);
       L.close(); BO.slice().forEach(function (x) { x.close(); });
@@ -2976,7 +2979,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     return o;
   }
   function exSet(o) { try { o.used = o.used.slice(-60); localStorage.setItem(EXK, JSON.stringify(o)); } catch (e) {} }
-  function colDel(id) { var a = colGet().filter(function (x) { return x !== id; }); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} var g = grGet(); if (g[id]) { delete g[id]; lsSet('portfolio-gradees', g); } var sh = shGet(); if (sh[id]) { delete sh[id]; lsSet('portfolio-brillantes', sh); } }
+  function colDel(id) { var a = colGet().filter(function (x) { return x !== id; }); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} var g = grGet(); if (g[id]) { delete g[id]; lsSet('portfolio-gradees', g); } }
   function b64e(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function b64d(s) { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
   function exNonce() { var a = new Uint8Array(8), i, t = ''; try { crypto.getRandomValues(a); } catch (e) { for (i = 0; i < 8; i++) a[i] = Math.floor(Math.random() * 256); } for (i = 0; i < 8; i++) t += ('0' + a[i].toString(16)).slice(-2); return t; }
@@ -3064,8 +3067,13 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   window.__ex = { give: exGive, handle: exHandle, get: exGet, last: function () { return window.__exLast; } };
 
   /* ---------- Combats de cartes (ordinateur ou ami en direct) ---------- */
-  function wById(id) { var a = visible(), i; for (i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
-  function btEligible() { var have = colGet(), g = grGet(); return cardPool().filter(function (w) { return (state.canAdd || have.indexOf(w.id) >= 0) && !g[w.id]; }); }
+  var SHC = {};
+  function wById(id) {
+    var a = visible(), i, sh = shinyOf(id), bid = sh ? String(id).replace(/#sh$/, '') : id;
+    for (i = 0; i < a.length; i++) if (a[i].id === bid) { if (!sh) return a[i]; var c = Object.create(a[i]); c.id = id; return c; }
+    return null;
+  }
+  function btEligible() { var have = colGet(), g = grGet(); return cardPool().filter(function (w) { return (state.canAdd || have.indexOf(w.id) >= 0) && !g[w.id]; }).concat(shOwnedCards().filter(function (w) { return !g[w.id]; })); }
   function shuf(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function btSide(ids) { var q = shuf(ids), hp = {}; ids.forEach(function (id) { var w = wById(id); hp[id] = w ? hpOf(w) : 60; }); return { team: ids.slice(), act: q.shift() || null, pile: q, hp: hp, ko: [] }; }
   function btNew(a, b, first) { return { A: btSide(a), B: btSide(b), turn: first, over: null, seq: 0, ev: null }; }
@@ -3110,7 +3118,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       body.append(list);
     }
     function restoPick(price, done) {
-      var us = lsObj('portfolio-usure'), have = colGet(), els = cardPool().filter(function (w) { return us[w.id] > 0 && (have.indexOf(w.id) >= 0); });
+      var us = lsObj('portfolio-usure'), have = colGet(), els = cardPool().concat(shOwnedCards()).filter(function (w) { return us[w.id] > 0 && (have.indexOf(w.id) >= 0); });
       if (!els.length) { toast('Aucune carte usée à restaurer.', true); return; }
       var L2 = boLayer('bo-one', 'Restauration'), grid = h('div', { class: 'bt-pick' });
       els.forEach(function (w) { var d = h('div', null, cardEl(w, { w: 100 }), h('div', { class: 'bo-hint', text: 'Usure : ' + us[w.id] })); d.addEventListener('click', function () { if (coGet() < price) return; coAdd(-price); var u2 = lsObj('portfolio-usure'); delete u2[w.id]; lsSet('portfolio-usure', u2); stInc('bought'); sfx('cash'); L2.close(); toast('Carte restaurée'); done(); }); grid.append(d); });
@@ -3167,7 +3175,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   window.addEventListener('hashchange', function () { if (/^#vt=/.test(location.hash)) vtBoot(); });
   function openClasseur() {
     var L = boLayer('bo-one bo-bn', 'Classeur'), W = window.innerWidth || 390, H = window.innerHeight || 800, pw = Math.round(Math.min(W * .92, 440)), cw = Math.floor(Math.max(90, Math.min(150, (pw - 50 - 12) / 2 - 12, (H - 300) / 2 / 1.4)));
-    var pool = cardPool().sort(function (a, b) { return rarOf(b) - rarOf(a) || String(a.title).localeCompare(String(b.title)); }), have = colGet(), all = !!state.canAdd, per = 4, pages = 1 + Math.ceil(pool.length / per), cur = 0, busy = false;
+    var pool = cardPool().sort(function (a, b) { return rarOf(b) - rarOf(a) || String(a.title).localeCompare(String(b.title)); }).concat(shOwnedCards()), have = colGet(), all = !!state.canAdd, per = 4, pages = 1 + Math.ceil(pool.length / per), cur = 0, busy = false;
     var ph = Math.round(cw * 1.4 * 2 + 10 * 2 + 12 + 30 + 40), bn = h('div', { class: 'bn closed' }), nav = h('div', { class: 'bn-nav' }), lab = h('span'), prev = boBtn('◀', function () { go(cur - 1); }), next = boBtn('▶', function () { go(cur + 1); });
     bn.style.width = pw + 'px'; bn.style.height = ph + 'px';
     function slot(w, wd) { var d = h('div', { class: 'bn-sl' }, cardEl(w, { w: wd })); d.addEventListener('click', function () { openCard(w); }); return d; }
@@ -3181,7 +3189,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
           h('div', { class: 'bo-btns', style: 'margin-top:12px;justify-content:center' }, boBtn('Partager ma vitrine', vtShare, true)));
       } else {
         var grid2 = h('div', { class: 'bn-grid' }), sub = pool.slice((i - 1) * per, i * per);
-        sub.forEach(function (w) { if (all || have.indexOf(w.id) >= 0) grid2.append(slot(w, cw)); else { var lk = h('div', { class: 'bn-sl empty', style: 'width:' + (cw + 10) + 'px;height:' + Math.round(cw * 1.4 + 10) + 'px', text: '?' }); grid2.append(lk); } });
+        sub.forEach(function (w) { if ((all && !shinyOf(w.id)) || have.indexOf(w.id) >= 0) grid2.append(slot(w, cw)); else { var lk = h('div', { class: 'bn-sl empty', style: 'width:' + (cw + 10) + 'px;height:' + Math.round(cw * 1.4 + 10) + 'px', text: '?' }); grid2.append(lk); } });
         pg.append(h('div', { class: 'bn-hd' }, h('span', { text: 'Page ' + i }), h('span', { text: Math.min(pool.length, i * per) + ' / ' + pool.length })), grid2);
       }
       return pg;
