@@ -253,3 +253,10 @@ Note v69 : diaporama allégé pour la fluidité (fond flou fixe, plus de flou/m�
 - Pendant un combat, les PV restants s'affichent sur la carte (« PV 64 / 90 », en jaune puis rouge quand la carte est en danger) et sous elle (barre de vie).
 - Sons synthétisés par le navigateur (aucun fichier) : déchirure du sachet, retournement de carte, carte rare, jeton, attaques, coups, raté, K.O., victoire, défaite, succès, gradation. Bouton « ♪ Son : oui/non » dans la Collection et dans le combat (mémorisé).
 - Le jeu est centré dans l'écran ; sur ordinateur, les deux cartes se placent côte à côte et en plus grand.
+
+## 29. Cartes brillantes, pièces, boutique, classeur et vitrine (v72)
+- **Cartes brillantes** : environ 1 carte sur 40 sortie d'un booster est « chromée » (effet métal, son à part, étiquette « ✦ BRILLANTE »). Elles sont conservées (non détruites tant que la carte vit) et comptent dans les succès Chromé.
+- **Pièces 🪙** : +5 par booster, +20 par succès, +25 victoire solo / +40 victoire entre amis / +8 défaite. Se dépensent dans la **Boutique 🪙** : booster bonus (saute l'attente de 30 min), protège-carte (sauve une carte de la destruction, une seule fois, à activer en choisissant ses cartes avant le combat), restauration d'une carte usée.
+- **Classeur 3D** (bouton « Classeur ») : couverture qui s'ouvre, pages que l'on tourne (boutons, glisser ou flèches du clavier). Page 1 = **vitrine** (3 cartes préférées, choisies avec « Mettre en vitrine ★ » dans la fiche d'une carte). Les cartes non obtenues apparaissent en « ? ».
+- **Partage de vitrine** : « Partager ma vitrine » crée un lien et un QR code (#vt=…). Un ami voit tes cartes, avec leurs notes de gradation et leurs effets brillants.
+- Tout est enregistré dans le navigateur (pas partagé entre Safari et l'appli installée) ; la sauvegarde (code de secours) inclut pièces, stock, vitrine, brillantes.

@@ -561,6 +561,13 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 @keyframes cdHp { 30% { transform: scale(1.5); } }
 .cd-hp b, .cd-top span { display: inline-block; transform-origin: right center; }
 .bt-slot .cd-top span { font-size: 1em; font-weight: 700; opacity: 1; letter-spacing: .04em; }
+.cd-chrome, .cd-chrome2 { position: absolute; inset: 0; z-index: 6; pointer-events: none; display: none; }
+.cd.shiny .cd-chrome { display: block; background: linear-gradient(115deg, #ff7ac8 0%, #ffe27a 20%, #7affc9 40%, #7ab8ff 60%, #c97aff 80%, #ff7ac8 100%); background-size: 320% 320%; background-position: calc(var(--mx) * 1%) calc(var(--my) * 1%); mix-blend-mode: color-dodge; opacity: .42; }
+.cd.shiny .cd-chrome2 { display: block; background: radial-gradient(circle at 18% 22%, #fff 0 1.4px, transparent 2.6px), radial-gradient(circle at 72% 14%, #fff 0 1.2px, transparent 2.4px), radial-gradient(circle at 44% 58%, #fff 0 1.6px, transparent 2.8px), radial-gradient(circle at 86% 66%, #fff 0 1.3px, transparent 2.5px), radial-gradient(circle at 28% 86%, #fff 0 1.2px, transparent 2.4px); mix-blend-mode: screen; opacity: .9; animation: cdTw 2.2s ease-in-out infinite alternate; }
+@keyframes cdTw { from { opacity: .25; } to { opacity: 1; } }
+.cd.shiny .cd-face { box-shadow: inset 0 0 0 .18em rgba(255,255,255,.7), inset 0 0 1.5em rgba(180,220,255,.5); }
+.cd-shb { position: absolute; z-index: 13; left: .7em; top: 3.3em; padding: .18em .8em; border-radius: 99px; background: linear-gradient(100deg, #ff7ac8, #ffe27a, #7affc9, #7ab8ff); color: #14141a; font: 800 .58em var(--mono, ui-monospace, monospace); letter-spacing: .1em; white-space: nowrap; box-shadow: 0 .1em .5em rgba(0,0,0,.5); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .cd.shiny .cd-chrome2 { animation: none; } }
 .cd-gr { position: absolute; z-index: 12; right: .35em; top: 46%; width: 3em; height: 3em; border-radius: 50%; display: grid; place-content: center; text-align: center; color: #3a2a00; background: radial-gradient(circle at 35% 28%, #fff4c2, #ffcf4a 50%, #c58a00); box-shadow: 0 0 0 .14em rgba(0,0,0,.5), 0 .2em .8em rgba(0,0,0,.6); pointer-events: none; }
 .cd-gr small { font-size: .36em; font-weight: 800; letter-spacing: .06em; line-height: 1; }
 .cd-gr b { font-size: 1.5em; font-weight: 800; line-height: 1; }
@@ -574,6 +581,36 @@ html.tilt .card .cart { transform: translate3d(calc(var(--tx, 0px) * -.22), calc
 .bt-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(94vw, 460px); }
 .bt-pick > div { position: relative; cursor: pointer; border-radius: 14px; transition: transform .15s; }
 .bt-pick > div.sel { transform: translateY(-4px); }
+.bn { position: relative; perspective: 1700px; margin: 0 auto; }
+.bn.closed { animation: bnSway 5s ease-in-out infinite alternate; transform-origin: left center; }
+@keyframes bnSway { from { transform: rotateY(-16deg) rotateX(3deg); } to { transform: rotateY(-4deg) rotateX(-2deg); } }
+.bn-page { position: absolute; inset: 0; border-radius: 8px 16px 16px 8px; padding: 16px 14px 14px 36px; background: linear-gradient(160deg, #2a2c3a, #181a24); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 22px 60px rgba(0,0,0,.6), inset 8px 0 16px rgba(0,0,0,.4); transform-origin: left center; backface-visibility: hidden; overflow: hidden; color: #f4f2ee; }
+.bn-page::before { content: ""; position: absolute; left: 11px; top: 0; bottom: 0; width: 14px; background: radial-gradient(circle at 50% 50%, #e2e5ee 0 4px, #6a6f80 5px 6.5px, transparent 7.5px) 0 0 / 14px 60px repeat-y; }
+.bn-page.out { z-index: 5; animation: bnOut .8s cubic-bezier(.5,0,.8,.45) forwards; }
+@keyframes bnOut { 0% { transform: none; opacity: 1; } 70% { opacity: 1; } 100% { transform: rotateY(-118deg); opacity: 0; } }
+.bn-page.in { z-index: 6; animation: bnIn .8s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes bnIn { from { transform: rotateY(-118deg); opacity: 0; } 30% { opacity: 1; } to { transform: none; opacity: 1; } }
+.bn-cover { position: absolute; inset: 0; z-index: 10; border-radius: 8px 18px 18px 8px; transform-origin: left center; background: radial-gradient(circle at 70% 25%, rgba(255,255,255,.14), transparent 50%), linear-gradient(145deg, #5b2fd0, #2a1a78 55%, #1c1050); border: 1px solid rgba(255,255,255,.28); box-shadow: 0 26px 70px rgba(0,0,0,.7), inset 0 0 0 7px rgba(255,255,255,.05), inset 16px 0 24px rgba(0,0,0,.35); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; text-align: center; color: #ffe9a0; padding-left: 20px; }
+.bn-cover b { font-size: 2rem; letter-spacing: .18em; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,.5); }
+.bn-cover span { font: .72rem var(--mono, ui-monospace, monospace); letter-spacing: .24em; text-transform: uppercase; opacity: .85; }
+.bn-cover i { font-style: normal; font-size: 3rem; filter: drop-shadow(0 0 14px rgba(255,220,120,.7)); }
+.bn-cover.open { animation: bnOpen 1s cubic-bezier(.5,0,.4,1) forwards; pointer-events: none; }
+@keyframes bnOpen { 0% { transform: none; opacity: 1; } 75% { opacity: 1; } 100% { transform: rotateY(-172deg); opacity: 0; } }
+.bn-hd { display: flex; justify-content: space-between; align-items: center; font: .7rem var(--mono, ui-monospace, monospace); letter-spacing: .22em; color: #ffcf4a; margin-bottom: 10px; text-transform: uppercase; }
+.bn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; justify-items: center; }
+.bn-grid.v3 { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.bn-sl { position: relative; padding: 5px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.22); box-shadow: inset 0 0 14px rgba(255,255,255,.06); cursor: pointer; }
+.bn-sl::after { content: ""; position: absolute; inset: 0; border-radius: 10px; background: linear-gradient(120deg, rgba(255,255,255,.14), transparent 35%); pointer-events: none; z-index: 30; }
+.bn-sl.empty { display: grid; place-items: center; color: rgba(255,255,255,.35); font-size: 2rem; border-style: dashed; }
+.bn-sl.empty small { font: .55rem var(--mono, ui-monospace, monospace); letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 0 6px; }
+.bn-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; font: .72rem var(--mono, ui-monospace, monospace); letter-spacing: .16em; text-transform: uppercase; }
+.vt-row { display: flex; justify-content: center; gap: 14px; perspective: 1200px; flex-wrap: wrap; }
+.vt-row > div { animation: vtFloat 5s ease-in-out infinite alternate; }
+.vt-row > div:nth-child(2) { animation-delay: -1.6s; } .vt-row > div:nth-child(3) { animation-delay: -3.2s; }
+@keyframes vtFloat { from { transform: translateY(4px) rotateY(-5deg); } to { transform: translateY(-8px) rotateY(5deg); } }
+.vt-shelf { width: min(92vw, 520px); height: 14px; border-radius: 4px; background: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.08)); box-shadow: 0 16px 30px rgba(120,160,255,.25); }
+.bt-shield { position: absolute; z-index: 25; left: 50%; bottom: -10px; transform: translateX(-50%); width: 38px; height: 38px; border-radius: 50%; place-items: center; font-size: 1.2rem; border: 2px solid rgba(255,255,255,.5); background: #20222c; color: #fff; cursor: pointer; padding: 0; }
+.bt-shield.on { background: linear-gradient(135deg, #3ddc84, #2a9fd6); border-color: #fff; box-shadow: 0 0 14px rgba(61,220,132,.8); }
 .bt-pick > div.sel::after { content: "✓"; position: absolute; z-index: 20; right: -6px; top: -8px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #3ddc84; color: #06240f; font-weight: 800; box-shadow: 0 0 0 3px rgba(0,0,0,.45); }
 .bt-pick > div.sel .cd { filter: drop-shadow(0 0 10px rgba(61,220,132,.9)); }
 .bt-side { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
@@ -923,7 +960,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 (function () {
   var el = document.getElementById('intro');
   var skip = false;
-  try { skip = sessionStorage.getItem('portfolio-intro') === '1' || /apropos|nointro|^#ex=/.test(location.hash); } catch (e) {}
+  try { skip = sessionStorage.getItem('portfolio-intro') === '1' || /apropos|nointro|^#ex=|^#vt=|^#duel=/.test(location.hash); } catch (e) {}
   if (skip) return;
   el.hidden = false;
   document.documentElement.style.overflow = 'hidden';
@@ -1089,7 +1126,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         </section>
       </aside>
     </div>
-    <div class="statusbar mono"><span>Portfolio de Grégoire · v71</span><span id="footCount"></span></div>
+    <div class="statusbar mono"><span>Portfolio de Grégoire · v72</span><span id="footCount"></span></div>
   </div>
 </div>
 
@@ -2298,6 +2335,9 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         case 'miss': noiz(.22, .18, 2800, 900, 'bandpass'); tone(330, .25, 'triangle', .1, 200, .05); break;
         case 'ko': tone(330, .7, 'sawtooth', .16, 55); noiz(.5, .35, 900, 120, 'lowpass'); tone(110, .5, 'sine', .35, 40, .1); break;
         case 'win': [523, 659, 784, 1047, 784, 1047, 1319].forEach(function (f, k) { tone(f, k > 3 ? .45 : .22, 'triangle', .16, 0, k * .16); tone(f / 2, k > 3 ? .45 : .22, 'sine', .08, 0, k * .16); }); break;
+        case 'shiny': [1568, 1976, 2349, 2637, 3136].forEach(function (f, k) { tone(f, .5, 'sine', .1, f * 1.02, k * .06); }); tone(392, .9, 'triangle', .1, 784); break;
+        case 'cash': tone(1320, .08, 'square', .09); tone(1760, .35, 'triangle', .12, 0, .07); noiz(.12, .15, 5000, 7000, 'highpass', .05); break;
+        case 'page': noiz(.22, .22, 2600, 700, 'bandpass'); tone(260, .12, 'triangle', .05, 180); break;
         case 'lose': [392, 349, 311, 262].forEach(function (f, k) { tone(f, .5, 'triangle', .15, f * .96, k * .26); }); break;
       }
     } catch (e) {}
@@ -2340,6 +2380,13 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   function glyOf(w) { return GLY[catOf(w.cat).id] || '★'; }
   function lsObj(k) { try { var o = JSON.parse(localStorage.getItem(k) || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
   function lsSet(k, o) { try { localStorage.setItem(k, JSON.stringify(o)); } catch (e) {} }
+  function shGet() { return lsObj('portfolio-brillantes'); }
+  function shinyOf(id) { return !!shGet()[id]; }
+  function shAdd(id) { var o = shGet(); if (o[id]) return false; o[id] = Date.now(); lsSet('portfolio-brillantes', o); scCheck(); return true; }
+  function numGet(k) { var v = Number(localStorage.getItem(k)); return v > 0 ? Math.floor(v) : 0; }
+  function numSet(k, v) { try { localStorage.setItem(k, String(Math.max(0, Math.floor(v)))); } catch (e) {} }
+  function coGet() { return numGet('portfolio-pieces'); }
+  function coAdd(n) { if (!n) return; numSet('portfolio-pieces', coGet() + n); if (n > 0) { var st = stGet(); st.earned = (st.earned || 0) + n; stSet(st); scCheck(); } }
   function grGet() { return lsObj('portfolio-gradees'); }
   function gradeOf(id) { var g = grGet()[id]; return g && g.g ? g.g : 0; }
   function usOf(id) { return Number(lsObj('portfolio-usure')[id]) || 0; }
@@ -2381,7 +2428,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   function cardNo(w) { var i = cardPool().map(function (x) { return x.id; }).indexOf(w.id) + 1, n = cardPool().length, z = function (v) { return (v < 10 ? '00' : v < 100 ? '0' : '') + v; }; return z(i || 1) + '/' + z(n || 1); }
   function cardEl(w, o) {
     o = o || {};
-    var r = rarOf(w), R = RAR[r], st = statsOf(w), hp = hpOf(w), gr = gradeOf(w.id), face, art;
+    var r = rarOf(w), R = RAR[r], st = statsOf(w), hp = hpOf(w), gr = o.grade !== undefined ? o.grade : gradeOf(w.id), shn = o.shiny !== undefined ? o.shiny : shinyOf(w.id), face, art;
     function atkRow(i) {
       var dots = h('span', { class: 'cd-en' }); for (var k = 0; k <= i; k++) dots.append(h('i'));
       return h('div', { class: 'cd-at' }, dots, h('span', { class: 'cd-an' }, h('b', { text: ATK[i].n }), h('small', { text: ATK[i].e })), h('b', { class: 'cd-ad', text: String(dmgOf(w, i)) }));
@@ -2393,7 +2440,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         h('div', { class: 'cd-fh' }, h('b', { class: 'cd-fn', text: w.title || 'Sans titre' }), h('div', { class: 'cd-hp' }, h('small', { text: 'PV' }), h('b', { text: String(hp) }), h('i', { class: 'cd-ty', text: glyOf(w) }))),
         h('div', { class: 'cd-fb' }, rows, h('div', { class: 'cd-bar' }, h('span', { text: R.l }), h('span', { text: catOf(w.cat).label }), h('span', { text: String(w.year || '—') })),
           h('div', { class: 'cd-copy' }, h('span', { text: 'Illus. Grégoire' }), h('span', { text: cardNo(w) + ' ' + '★'.repeat(r + 1) }))),
-        h('i', { class: 'cd-holo2' }), h('i', { class: 'cd-glare' }));
+        h('i', { class: 'cd-holo2' }), h('i', { class: 'cd-chrome' }), h('i', { class: 'cd-chrome2' }), h('i', { class: 'cd-glare' }));
     } else {
       art = h('div', { class: 'cd-art' }, h('img', { src: srcOf(w), alt: '', draggable: 'false' }), h('i', { class: 'cd-holo' }), h('i', { class: 'cd-spark' }), h('span', { class: 'cd-tag', text: R.l }));
       var stats = h('div', { class: 'cd-stats' });
@@ -2404,9 +2451,10 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         h('div', { class: 'cd-line', text: [catOf(w.cat).label, w.tech, w.year].filter(Boolean).join(' · ') }),
         stats,
         h('div', { class: 'cd-foot' }, h('span', { text: 'Grégoire · ' + cardNo(w) }), h('span', { class: 'cd-stars', text: '★'.repeat(r + 1) })),
-        h('i', { class: 'cd-holo2' }), h('i', { class: 'cd-glare' }));
+        h('i', { class: 'cd-holo2' }), h('i', { class: 'cd-chrome' }), h('i', { class: 'cd-chrome2' }), h('i', { class: 'cd-glare' }));
     }
-    var el = h('div', { class: 'cd r' + r + (w.full ? ' isfull' : '') + (gr ? ' graded' : '') }, h('div', { class: 'cd-in' }, face));
+    var el = h('div', { class: 'cd r' + r + (w.full ? ' isfull' : '') + (gr ? ' graded' : '') + (shn ? ' shiny' : '') }, h('div', { class: 'cd-in' }, face));
+    if (shn) el.append(h('span', { class: 'cd-shb', text: '✦ BRILLANTE' }));
     if (gr) el.append(h('span', { class: 'cd-gr', title: 'Carte gradée', html: '<small>GRADÉE</small><b>' + gr + '</b>' }));
     el.style.setProperty('--cw', (o.w || 260) + 'px'); el.style.setProperty('--c1', R.a); el.style.setProperty('--c2', R.b);
     cardTilt(el);
@@ -2455,7 +2503,9 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     function showWait() {
       upd(); stage.innerHTML = '';
       var big = h('div', { class: 'bo-wait-t mono' }), msg = h('div', { class: 'bo-hint', text: 'Ton prochain booster sera prêt dans' });
-      stage.append(h('div', { class: 'bo-wait' }, msg, big, h('div', { class: 'bo-hint', style: 'opacity:.6', text: 'Un booster toutes les 30 minutes. Tu peux revoir ta collection en attendant.' })));
+      var nb = numGet('portfolio-bonus');
+      stage.append(h('div', { class: 'bo-wait' }, msg, big, h('div', { class: 'bo-hint', style: 'opacity:.6', text: 'Un booster toutes les 30 minutes. Tu peux revoir ta collection en attendant.' }),
+        nb ? boBtn('Utiliser un booster bonus (' + nb + ')', function () { showPack(true); }, true) : null, boBtn('Boutique 🪙 ' + coGet(), function () { openShop(); })));
       (function tk() {
         if (!stage.isConnected) return;
         var r = boWait();
@@ -2463,12 +2513,13 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         big.textContent = boFmt(r); setTimeout(tk, 500);
       })();
     }
-    function showPack() {
-      if (boWait() > 0) { showWait(); return; }
+    function showPack(bonusMode) {
+      bonusMode = bonusMode === true;
+      if (!bonusMode && boWait() > 0) { showWait(); return; }
       upd(); stage.innerHTML = '';
-      var cards = cardDraw(pool, Math.min(3, pool.length)), best = 0, TY = 14, i, pts = [];
-      cards.forEach(function (w) { best = Math.max(best, rarOf(w)); });
-      var glow = best >= 2;
+      var cards = cardDraw(pool, Math.min(3, pool.length)), best = 0, TY = 14, i, pts = [], shin = {}, shn = false;
+      cards.forEach(function (w) { best = Math.max(best, rarOf(w)); if (Math.random() < 1 / 40) { shin[w.id] = 1; shn = true; } });
+      var bi = shn ? 4 : best, glow = best >= 2 || shn;
       for (i = 0; i <= 25; i++) pts.push([i * 4, (i === 0 || i === 25) ? TY : TY + (Math.random() * 2.6 - 1.3)]);
       function f(p) { return p[0].toFixed(1) + '% ' + p[1].toFixed(2) + '%'; }
       var bodyClip = 'polygon(' + pts.map(f).join(',') + ',100% 100%,0% 100%)';
@@ -2486,7 +2537,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       pk.append(h('div', { class: 'pk-part pk-body' }, foil(bodyClip), h('div', { class: 'bo-name' }, h('small', { text: 'BOOSTER' }), h('b', { text: 'Portfolio de Grégoire' }), h('em', { text: cards.length + (cards.length > 1 ? ' cartes' : ' carte') }))),
         h('div', { class: 'pk-part pk-att' }, foil(stripClip)), h('div', { class: 'pk-part pk-tor' }, foil(stripClip)), guide);
       var pack = h('div', { class: 'bo-pack3', role: 'button', tabindex: '0', 'aria-label': 'Déchirer le booster : glisse le doigt le long du haut, ou touche le sachet' }, h('div', { class: 'pk-sway' }, pk), h('div', { class: 'pk-shadow' }));
-      if (glow) { var lk = h('div', { class: 'pk-leak' }); lk.style.setProperty('--bc', RAR[best].a); pk.append(lk); }
+      if (glow) { var lk = h('div', { class: 'pk-leak' }); lk.style.setProperty('--bc', RAR[bi].a); pk.append(lk); }
       cardTilt(pack);
       var tp = 0, drag = false, down = null, finished = false;
       function setTp(v) { tp = v; pack.style.setProperty('--tp', v.toFixed(4)); pack.style.setProperty('--lift', Math.min(1, v * 14).toFixed(3)); }
@@ -2496,23 +2547,23 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       }
       function burst() {
         if (RM || !glow) return;
-        var r = pack.getBoundingClientRect(), bs = h('div', { class: 'pk-burst' + (best >= 4 ? ' big' : '') });
-        bs.style.setProperty('--bc', RAR[best].a); bs.style.setProperty('--bc2', RAR[best].b);
+        var r = pack.getBoundingClientRect(), bs = h('div', { class: 'pk-burst' + (bi >= 4 ? ' big' : '') });
+        bs.style.setProperty('--bc', RAR[bi].a); bs.style.setProperty('--bc2', RAR[bi].b);
         bs.style.left = (r.left + r.width / 2) + 'px'; bs.style.top = (r.top + r.height * TY / 100) + 'px';
         document.body.append(bs); setTimeout(function () { bs.remove(); }, 2000);
-        try { navigator.vibrate && navigator.vibrate(best >= 3 ? [25, 40, 60] : [25, 30, 25]); } catch (e) {}
-        if (best >= 3) { stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
+        try { navigator.vibrate && navigator.vibrate(bi >= 3 ? [25, 40, 60] : [25, 30, 25]); } catch (e) {}
+        if (bi >= 3) { stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
       }
       function finish(ms) {
         if (finished) return; finished = true; drag = false;
-        pack.classList.remove('drag'); pack.classList.add('torn'); boMark(); stBooster(cards);
+        pack.classList.remove('drag'); pack.classList.add('torn'); if (bonusMode) { numSet('portfolio-bonus', numGet('portfolio-bonus') - 1); boFabUpdate(); } else boMark(); coAdd(5); toast('+5 🪙', false, 1600); stBooster(cards);
         try { navigator.vibrate && navigator.vibrate(18); } catch (e) {}
         sfx('tear');
         animateTo(1, ms || 240, function () {
-          pack.classList.add('off'); burst(); if (glow) sfx('rare', best);
+          pack.classList.add('off'); burst(); if (glow) sfx('rare', bi);
           stage.querySelectorAll('.bo-hint').forEach(function (x) { x.classList.add('bye'); });
           setTimeout(function () { pk.querySelectorAll(':scope > *:not(.pk-tor)').forEach(function (x) { x.remove(); }); var sh = pack.querySelector('.pk-shadow'); if (sh) sh.remove(); }, 260);
-          setTimeout(function () { deal(cards); }, 800);
+          setTimeout(function () { deal(cards, shin); }, 800);
         });
       }
       pack.addEventListener('pointerdown', function (e) {
@@ -2540,15 +2591,15 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       pack.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); finish(650); } });
       stage.append(pack, h('div', { class: 'bo-hint', text: 'Glisse le doigt le long du haut, de gauche à droite, pour déchirer le sachet' }), h('div', { class: 'bo-hint', style: 'opacity:.6', text: 'ou touche le sachet' }));
     }
-    function deal(cardsIn) {
-      if (!L.wrap.isConnected) return;
+    function deal(cardsIn, shinIn) {
+      if (!L.wrap.isConnected) return; shinIn = shinIn || {};
       var cards = cardsIn || cardDraw(pool, Math.min(3, pool.length)), cw = boCw(), have = colGet(), idx = 0, flipped = false;
       var fresh = {}; cards.forEach(function (w) { if (have.indexOf(w.id) < 0) fresh[w.id] = true; });
       stage.innerHTML = '';
       var flash = h('div', { class: 'bo-flash' }), say = h('div', { class: 'bo-say' }), hint = h('div', { class: 'bo-hint' }), prog = h('div', { class: 'bo-hint mono' });
       var deck = h('div', { class: 'bo-deck' + (RM ? '' : ' rise') }); deck.style.setProperty('--cw', cw + 'px');
       var els = cards.map(function (w, i) {
-        var c = h('div', { class: 'bo-c', role: 'button', tabindex: i === 0 ? '0' : '-1', 'aria-label': 'Carte ' + (i + 1) }, h('div', { class: 'bo-flip' }, h('div', { class: 'bo-fr' }, cardEl(w, { w: cw })), h('div', { class: 'bo-bk' }, h('i', { text: 'G' }))));
+        var c = h('div', { class: 'bo-c', role: 'button', tabindex: i === 0 ? '0' : '-1', 'aria-label': 'Carte ' + (i + 1) }, h('div', { class: 'bo-flip' }, h('div', { class: 'bo-fr' }, cardEl(w, { w: cw, shiny: !!(shinIn[w.id] || shinyOf(w.id)) })), h('div', { class: 'bo-bk' }, h('i', { text: 'G' }))));
         c.style.setProperty('--o', String(Math.min(4, cards.length - 1 - i))); c.style.zIndex = String(50 - i);
         c.addEventListener('click', function (e) { if (i === idx) { e.preventDefault(); step(); } });
         c.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && i === idx) { e.preventDefault(); step(); } });
@@ -2562,11 +2613,13 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         var w = cards[idx], c = els[idx], r = rarOf(w);
         if (!flipped) {
           flipped = true; c.classList.add('flipped'); sfx('flip'); if (r >= 2) setTimeout(function () { sfx('rare', r); }, 160); stFlip(w, !!fresh[w.id]); colAdd(w.id); scUnlock('booster'); upd();
-          var msg = [null, null, 'Rare !', 'Ultra rare !!', 'Légende !!!'][r];
-          if (msg || fresh[w.id]) { say.textContent = (msg || '') + (fresh[w.id] ? (msg ? ' · ' : '') + 'Nouvelle !' : ''); say.style.color = RAR[r].b; say.classList.remove('on'); void say.offsetWidth; say.classList.add('on'); }
+          var msg = [null, null, 'Rare !', 'Ultra rare !!', 'Légende !!!'][r], isSh = !!shinIn[w.id];
+          if (isSh) { shAdd(w.id); sfx('shiny'); msg = 'BRILLANTE ✦' + (msg ? ' · ' + msg : ''); }
+          if (msg || fresh[w.id]) { say.textContent = (msg || '') + (fresh[w.id] ? (msg ? ' · ' : '') + 'Nouvelle !' : ''); say.style.color = isSh ? '#ffe27a' : RAR[r].b; say.classList.remove('on'); void say.offsetWidth; say.classList.add('on'); }
           else { say.classList.remove('on'); say.textContent = ''; }
-          if (r >= 2) { flash.style.setProperty('--fc', RAR[r].a); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); try { navigator.vibrate && navigator.vibrate(r * 25); } catch (e) {} }
-          if (r >= 3) { stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
+          if (isSh) { flash.style.setProperty('--fc', '#ffe27a'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); try { navigator.vibrate && navigator.vibrate([30, 40, 30, 40, 80]); } catch (e) {} }
+          else if (r >= 2) { flash.style.setProperty('--fc', RAR[r].a); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); try { navigator.vibrate && navigator.vibrate(r * 25); } catch (e) {} }
+          if (r >= 3 || isSh) { stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
           text();
         } else {
           c.classList.add('gone'); say.classList.remove('on'); say.textContent = ''; idx++; flipped = false;
@@ -2601,14 +2654,14 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     });
     var stage = h('div', { class: 'bo-stage', style: 'justify-content:flex-start' }, sum, grid);
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Collection · ' + owned.length + ' / ' + pool.length }), boBtn('Fermer', L.close)), stage);
-    scCheck(); stage.prepend(h('div', { class: 'bo-btns', style: 'margin:0 0 10px;flex-wrap:wrap;justify-content:center' }, boBtn('Succès ' + scCount() + ' / ' + SC.length, function () { openSucces(); }, true), boBtn('Combat ⚔', function () { openCombat(); }, true), sndBtn(), boBtn('Recevoir une carte', function () { exPaste(); }), boBtn('Sauvegarder', function () { bkSave(); }), boBtn('Restaurer', function () { bkRestore(); })));
+    scCheck(); stage.prepend(h('div', { class: 'bo-btns', style: 'margin:0 0 10px;flex-wrap:wrap;justify-content:center' }, boBtn('Succès ' + scCount() + ' / ' + SC.length, function () { openSucces(); }, true), boBtn('Combat ⚔', function () { openCombat(); }, true), boBtn('Boutique 🪙', function () { openShop(); }), boBtn('Classeur', function () { openClasseur(); }), sndBtn(), boBtn('Recevoir une carte', function () { exPaste(); }), boBtn('Sauvegarder', function () { bkSave(); }), boBtn('Restaurer', function () { bkRestore(); })));
     if (all) stage.prepend(h('div', { class: 'bo-hint', text: 'Mode propriétaire : toutes les cartes sont visibles' }));
   }
   function openCard(w, o) {
     o = o || {};
     var L = boLayer('bo-one', 'Carte ' + (w.title || '')), cw = Math.round(Math.max(170, Math.min(340, (window.innerWidth || 390) * .8, ((window.innerHeight || 800) - 250) * 63 / 88)));
     var stage = h('div', { class: 'bo-stage' }, cardEl(w, { w: cw }), h('div', { class: 'bo-hint', text: RAR[rarOf(w)].l + ' · incline ton téléphone ou glisse le doigt' }),
-      h('div', { class: 'bo-btns' }, boBtn('Enregistrer en image', function () { saveCard(w); }, true), colGet().indexOf(w.id) >= 0 ? boBtn('Donner cette carte', function () { if (gradeOf(w.id)) { toast('Une carte gradée ne peut pas être donnée. Casse d\'abord sa gradation.', true); return; } exGive(w); }) : null, colGet().indexOf(w.id) >= 0 ? (gradeOf(w.id) ? boBtn('Casser la gradation', function () { gradeBreak(w, o); }) : boBtn('Faire graduer', function () { gradeStart(w, o); })) : null, o.noView ? null : boBtn('Voir l\'œuvre', function () { BO.slice().forEach(function (x) { x.close(); }); openViewer(w.id); })));
+      h('div', { class: 'bo-btns' }, boBtn('Enregistrer en image', function () { saveCard(w); }, true), colGet().indexOf(w.id) >= 0 ? boBtn('Donner cette carte', function () { if (gradeOf(w.id)) { toast('Une carte gradée ne peut pas être donnée. Casse d\'abord sa gradation.', true); return; } exGive(w); }) : null, colGet().indexOf(w.id) >= 0 ? (gradeOf(w.id) ? boBtn('Casser la gradation', function () { gradeBreak(w, o); }) : boBtn('Faire graduer', function () { gradeStart(w, o); })) : null, colGet().indexOf(w.id) >= 0 ? boBtn(vtGet().indexOf(w.id) >= 0 ? 'Retirer de la vitrine' : 'Mettre en vitrine ★', function () { vtPress(w, o); }) : null, o.noView ? null : boBtn('Voir l\'œuvre', function () { BO.slice().forEach(function (x) { x.close(); }); openViewer(w.id); })));
     L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: w.title || 'Carte' }), boBtn('Fermer', L.close)), stage);
   }
   function gradeStart(w, o) {
@@ -2639,7 +2692,23 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
         h('div', { class: 'ex-s', text: 'Elle redeviendra jouable en combat, donc elle pourra être détruite. Chaque combat l\'use un peu : si tu la fais regrader plus tard, la note peut être plus basse.' }),
         h('div', { class: 'bo-btns' }, boBtn('Casser la gradation', function () { var o2 = grGet(); delete o2[w.id]; lsSet('portfolio-gradees', o2); L.close(); BO.slice().forEach(function (x) { if (x.wrap && x.wrap.classList.contains('bo-one')) x.close(); }); openCard(w, o); toast('Gradation cassée.'); }, true), boBtn('Garder', L.close))));
   }
-  function cardPng(w) {
+  function shineBlob(blob) {
+    return new Promise(function (resolve) {
+      var img = new Image(), u = URL.createObjectURL(blob);
+      img.onload = function () {
+        var c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; var g = c.getContext('2d'), W = c.width, H = c.height, i;
+        g.drawImage(img, 0, 0);
+        var hg = g.createLinearGradient(0, 0, W, H); ['#ff7ac8', '#ffe27a', '#7affc9', '#7ab8ff', '#c97aff'].forEach(function (col, k) { hg.addColorStop(k / 4, col); });
+        g.save(); g.globalCompositeOperation = 'color-dodge'; g.globalAlpha = .5; g.fillStyle = hg; g.fillRect(0, 0, W, H); g.restore();
+        g.fillStyle = '#fff'; for (i = 0; i < 70; i++) { g.globalAlpha = .3 + Math.random() * .7; g.beginPath(); g.arc(Math.random() * W, Math.random() * H, .8 + Math.random() * 2.2, 0, 6.2832); g.fill(); }
+        g.globalAlpha = 1; g.fillStyle = '#14141a'; g.font = '800 20px ui-monospace, monospace'; g.textAlign = 'center'; var tw = 190; g.fillStyle = hg; g.beginPath(); g.roundRect ? g.roundRect(W / 2 - tw / 2, 18, tw, 34, 17) : g.rect(W / 2 - tw / 2, 18, tw, 34); g.fill(); g.fillStyle = '#14141a'; g.fillText('✦ BRILLANTE', W / 2, 42);
+        URL.revokeObjectURL(u); c.toBlob(function (b) { resolve(b || blob); }, 'image/png');
+      };
+      img.onerror = function () { URL.revokeObjectURL(u); resolve(blob); }; img.src = u;
+    });
+  }
+  function cardPng(w) { var pr = cardPngBase(w); return shinyOf(w.id) ? pr.then(shineBlob) : pr; }
+  function cardPngBase(w) {
     if (w.full) return cardPngFull(w);
     return new Promise(function (resolve, reject) {
       var r = rarOf(w), R = RAR[r], st = statsOf(w), W = 630, H = 880, c = document.createElement('canvas'), g, img = new Image();
@@ -2764,6 +2833,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     { k: 'ami', n: 'Duel entre amis', d: 'Gagne un combat en direct contre un ami.', g: '☍', t: 1, p: function (c) { return c.st.pvp || 0; } },
     { k: 'gradee', n: 'Collectionneur averti', d: 'Fais graduer une carte.', g: '⛨', t: 1, p: function (c) { return c.st.graded || 0; } },
     { k: 'grade10', n: 'Gem Mint', d: 'Obtiens une carte gradée 10 sur 10.', g: '💎', t: 1, p: function (c) { return c.st.grade10 || 0; } },
+    { k: 'chrome1', n: 'Éclat chromé', d: 'Trouve une carte brillante dans un booster (environ 1 chance sur 40).', g: '✦', t: 1, p: function () { return Object.keys(shGet()).length; } },
+    { k: 'chrome5', n: 'Chasseur d\'éclats', d: 'Possède 5 cartes brillantes.', g: '✧', t: 5, p: function () { return Object.keys(shGet()).length; } },
+    { k: 'riche', n: 'Pactole', d: 'Gagne 500 pièces au total.', g: '🪙', t: 500, p: function (c) { return c.st.earned || 0; } },
+    { k: 'achat', n: 'Premier achat', d: 'Achète un article à la boutique.', g: '🛒', t: 1, p: function (c) { return c.st.bought || 0; } },
+    { k: 'vitrine3', n: 'Exposant', d: 'Remplis ta vitrine avec 3 cartes.', g: '▥', t: 3, p: function () { return vtGet().length; } },
+    { k: 'partage', n: 'Vitrine partagée', d: 'Partage ta vitrine avec un ami (lien ou QR code).', g: '⇪', t: 1, p: function (c) { return c.st.shared || 0; } },
     { k: 'prevoyant', n: 'Prévoyant', d: 'Crée une sauvegarde de ta collection.', g: '⛨', t: 1, p: function (c) { return c.st.bk || 0; } }
   ], scQueue = [], scBusy = false;
   function stGet() { try { var o = JSON.parse(localStorage.getItem('portfolio-stats') || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
@@ -2791,12 +2866,12 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     var o = scGet(), b = SC.filter(function (x) { return x.k === k; })[0];
     if (!b || o[k]) return;
     o[k] = Date.now(); try { localStorage.setItem('portfolio-succes', JSON.stringify(o)); } catch (e) {}
-    scQueue.push(b); scNext();
+    scQueue.push(b); coAdd(20); scNext();
   }
   function scNext() {
     if (scBusy || !scQueue.length) return;
     scBusy = true;
-    var b = scQueue.shift(), el = h('div', { class: 'sc-pop', role: 'status' }, h('div', { class: 'sc-medal', text: b.g }), h('div', null, h('small', { text: 'Succès débloqué !' }), h('b', { text: b.n })));
+    var b = scQueue.shift(), el = h('div', { class: 'sc-pop', role: 'status' }, h('div', { class: 'sc-medal', text: b.g }), h('div', null, h('small', { text: 'Succès débloqué ! +20 🪙' }), h('b', { text: b.n })));
     document.body.append(el); void el.offsetWidth; el.classList.add('on'); sfx('badge');
     try { if (navigator.vibrate) navigator.vibrate([25, 50, 25]); } catch (e) {}
     setTimeout(function () { el.classList.remove('on'); }, 3600);
@@ -2830,7 +2905,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
 
   /* ---------- Sauvegarde / restauration de la collection ---------- */
   function bkMake() {
-    var ex = exGet(), p = { v: 1, t: 'bk', ts: Date.now(), col: colGet(), sc: scGet(), pe: ex.pending, us: ex.used, st: stGet() };
+    var ex = exGet(), p = { v: 1, t: 'bk', ts: Date.now(), col: colGet(), sc: scGet(), pe: ex.pending, us: ex.used, st: stGet(), x: { pi: coGet(), bo: numGet('portfolio-bonus'), pr: numGet('portfolio-protege'), gr: grGet(), uz: lsObj('portfolio-usure'), sh: shGet(), vt: vtGet() } };
     return 'GC1.' + b64e(p);
   }
   function bkParse(text) {
@@ -2865,9 +2940,18 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
       if (Array.isArray(p.us)) p.us.forEach(function (n) { if (/^[0-9a-f]{8,32}$/.test(String(n)) && ex.used.indexOf(n) < 0) ex.used.push(n); });
       if (p.st && typeof p.st === 'object') {
         var st = stGet(), kk;
-        ['boosters', 'rare', 'ultra', 'legend', 'dup', 'echanges', 'saves', 'jackpot', 'nuit', 'bk', 'fights', 'wins', 'pvp', 'perfect', 'graded', 'grade10'].forEach(function (n) { var v = Number(p.st[n]) || 0; if (v > (st[n] || 0)) st[n] = v; });
+        ['boosters', 'rare', 'ultra', 'legend', 'dup', 'echanges', 'saves', 'jackpot', 'nuit', 'bk', 'fights', 'wins', 'pvp', 'perfect', 'graded', 'grade10', 'earned', 'bought', 'shared'].forEach(function (n) { var v = Number(p.st[n]) || 0; if (v > (st[n] || 0)) st[n] = v; });
         ['days', 'seen'].forEach(function (n) { if (Array.isArray(p.st[n])) { var a = Array.isArray(st[n]) ? st[n] : []; p.st[n].forEach(function (x) { if (typeof x === 'string' && x.length < 120 && a.indexOf(x) < 0 && a.length < 500) a.push(x); }); st[n] = a; } });
         stSet(st);
+      }
+      if (p.x && typeof p.x === 'object') {
+        var x = p.x; coAdd(Math.max(0, (Number(x.pi) || 0) - coGet())); numSet('portfolio-bonus', Math.max(numGet('portfolio-bonus'), Number(x.bo) || 0)); numSet('portfolio-protege', Math.max(numGet('portfolio-protege'), Number(x.pr) || 0));
+        var gg = grGet(), uu = lsObj('portfolio-usure'), ss = shGet(), kk2;
+        if (x.gr && typeof x.gr === 'object') for (kk2 in x.gr) if (!gg[kk2] && x.gr[kk2] && x.gr[kk2].g >= 1 && x.gr[kk2].g <= 10 && kk2.length < 120) gg[kk2] = { g: x.gr[kk2].g, ts: Number(x.gr[kk2].ts) || Date.now() };
+        if (x.uz && typeof x.uz === 'object') for (kk2 in x.uz) if (Number(x.uz[kk2]) > (uu[kk2] || 0) && kk2.length < 120) uu[kk2] = Math.min(99, Number(x.uz[kk2]));
+        if (Array.isArray(x.vt) && !vtGet().length) { try { localStorage.setItem('portfolio-vitrine', JSON.stringify(x.vt.filter(function (q) { return typeof q === 'string'; }).slice(0, 3))); } catch (e2) {} }
+        if (x.sh && typeof x.sh === 'object') for (kk2 in x.sh) if (!ss[kk2] && kk2.length < 120) ss[kk2] = Number(x.sh[kk2]) || Date.now();
+        lsSet('portfolio-gradees', gg); lsSet('portfolio-usure', uu); lsSet('portfolio-brillantes', ss);
       }
       exSet(ex);
       L.close(); BO.slice().forEach(function (x) { x.close(); });
@@ -2892,7 +2976,7 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     return o;
   }
   function exSet(o) { try { o.used = o.used.slice(-60); localStorage.setItem(EXK, JSON.stringify(o)); } catch (e) {} }
-  function colDel(id) { var a = colGet().filter(function (x) { return x !== id; }); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} var g = grGet(); if (g[id]) { delete g[id]; lsSet('portfolio-gradees', g); } }
+  function colDel(id) { var a = colGet().filter(function (x) { return x !== id; }); try { localStorage.setItem('portfolio-cartes', JSON.stringify(a)); } catch (e) {} var g = grGet(); if (g[id]) { delete g[id]; lsSet('portfolio-gradees', g); } var sh = shGet(); if (sh[id]) { delete sh[id]; lsSet('portfolio-brillantes', sh); } }
   function b64e(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function b64d(s) { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
   function exNonce() { var a = new Uint8Array(8), i, t = ''; try { crypto.getRandomValues(a); } catch (e) { for (i = 0; i < 8; i++) a[i] = Math.floor(Math.random() * 256); } for (i = 0; i < 8; i++) t += ('0' + a[i].toString(16)).slice(-2); return t; }
@@ -3001,6 +3085,129 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
   }
   function btCode() { var c = 'abcdefghjkmnpqrstuvwxyz23456789', o = '', i; for (i = 0; i < 6; i++) o += c[Math.floor(Math.random() * c.length)]; return o; }
   function btTeamOk(t) { return Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(function (id) { return typeof id === 'string' && wById(id); }) && new Set(t).size === t.length; }
+  function openShop() {
+    var L = boLayer('bo-one', 'Boutique'), body = h('div', { class: 'bo-stage', style: 'justify-content:flex-start;gap:12px;overflow:auto' }), top = h('b');
+    function render() {
+      top.textContent = 'Boutique · ' + coGet() + ' 🪙';
+      body.innerHTML = '';
+      body.append(h('div', { class: 'ex-s', text: 'Stock : ' + numGet('portfolio-bonus') + ' booster' + (numGet('portfolio-bonus') > 1 ? 's' : '') + ' bonus · ' + numGet('portfolio-protege') + ' protège-carte' + (numGet('portfolio-protege') > 1 ? 's' : '') }),
+        h('div', { class: 'ex-s', text: 'Gagne des pièces en jouant : victoire (+25, +40 contre un ami), défaite (+8), booster (+5), succès (+20).' }));
+      var items = [
+        { n: 'Booster bonus', d: 'S\'ouvre n\'importe quand, sans attendre les 30 minutes, et ne relance pas le délai.', p: 80, g: '✦', f: function () { numSet('portfolio-bonus', numGet('portfolio-bonus') + 1); } },
+        { n: 'Protège-carte', d: 'Sauve une de tes cartes de la destruction, une seule fois. Active-le avant le combat avec le bouclier 🛡.', p: 40, g: '🛡', f: function () { numSet('portfolio-protege', numGet('portfolio-protege') + 1); } },
+        { n: 'Restauration', d: 'Remet à zéro l\'usure d\'une carte de ton choix (pour une meilleure gradation).', p: 50, g: '✚', f: null }
+      ];
+      var list = h('div', { class: 'sc-list' });
+      items.forEach(function (it) {
+        var ok = coGet() >= it.p, btn = boBtn('Acheter · ' + it.p + ' 🪙', function () {
+          if (coGet() < it.p) { toast('Pas assez de pièces.', true); return; }
+          if (!it.f) { restoPick(it.p, render); return; }
+          coAdd(-it.p); it.f(); stInc('bought'); sfx('cash'); toast(it.n + ' acheté'); render();
+        }, true);
+        btn.disabled = !ok; btn.style.opacity = ok ? 1 : .4;
+        list.append(h('div', { class: 'sc-row' }, h('div', { class: 'sc-medal', text: it.g }), h('div', { style: 'flex:1;min-width:0' }, h('b', { text: it.n }), h('span', { text: it.d }), h('div', { style: 'margin-top:8px' }, btn))));
+      });
+      body.append(list);
+    }
+    function restoPick(price, done) {
+      var us = lsObj('portfolio-usure'), have = colGet(), els = cardPool().filter(function (w) { return us[w.id] > 0 && (have.indexOf(w.id) >= 0); });
+      if (!els.length) { toast('Aucune carte usée à restaurer.', true); return; }
+      var L2 = boLayer('bo-one', 'Restauration'), grid = h('div', { class: 'bt-pick' });
+      els.forEach(function (w) { var d = h('div', null, cardEl(w, { w: 100 }), h('div', { class: 'bo-hint', text: 'Usure : ' + us[w.id] })); d.addEventListener('click', function () { if (coGet() < price) return; coAdd(-price); var u2 = lsObj('portfolio-usure'); delete u2[w.id]; lsSet('portfolio-usure', u2); stInc('bought'); sfx('cash'); L2.close(); toast('Carte restaurée'); done(); }); grid.append(d); });
+      L2.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Quelle carte restaurer ?' }), boBtn('Fermer', L2.close)), h('div', { class: 'bo-stage', style: 'justify-content:flex-start;overflow:auto' }, grid));
+    }
+    L.wrap.append(h('div', { class: 'pp-top' }, top, boBtn('Fermer', L.close)), body); render();
+  }
+    /* ---------- Classeur 3D et vitrine partageable ---------- */
+  function vtGet() { try { var a = JSON.parse(localStorage.getItem('portfolio-vitrine') || '[]'); return Array.isArray(a) ? a.filter(function (x) { return typeof x === 'string'; }).slice(0, 3) : []; } catch (e) { return []; } }
+  function vtSet(a) { try { localStorage.setItem('portfolio-vitrine', JSON.stringify(a.slice(0, 3))); } catch (e) {} scCheck(); }
+  function vtPress(w, o) {
+    var a = vtGet(), i = a.indexOf(w.id);
+    if (i >= 0) { a.splice(i, 1); vtSet(a); toast('Retirée de la vitrine'); }
+    else if (a.length >= 3) { toast('Ta vitrine est pleine (3 cartes). Retire-en une d\'abord.', true); return; }
+    else { a.push(w.id); vtSet(a); sfx('tap'); toast('Ajoutée à ta vitrine ★'); }
+    BO.slice().forEach(function (x) { if (x.wrap && x.wrap.classList.contains('bo-one') && !x.wrap.classList.contains('bo-bn')) x.close(); }); openCard(w, o);
+  }
+  function pseudoGet() { try { return String(localStorage.getItem('portfolio-pseudo') || '').slice(0, 20); } catch (e) { return ''; } }
+  function vtPayload(name) {
+    var ids = vtGet().filter(function (id) { return wById(id); }), g = {}, sh = [];
+    ids.forEach(function (id) { var q = gradeOf(id); if (q) g[id] = q; if (shinyOf(id)) sh.push(id); });
+    return { v: 1, t: 'vt', n: String(name || '').slice(0, 20), c: ids, g: g, s: sh };
+  }
+  function vtLink(name) { return siteUrl('#vt=' + b64e(vtPayload(name))); }
+  function vtShare() {
+    if (!vtGet().length) { toast('Mets d\'abord 1 à 3 cartes en vitrine (bouton « Mettre en vitrine » sur une carte).', true); return; }
+    var L = boLayer('bo-one', 'Partager ma vitrine'), name = h('input', { type: 'text', maxlength: '20', placeholder: 'Ton pseudo', autocomplete: 'off', style: 'font-size:1.1rem;text-align:center;width:min(80vw,280px);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff' }), qrBox = h('div'), url, tmr;
+    name.value = pseudoGet() || 'Grégoire';
+    function mk() { url = vtLink(name.value.trim()); try { localStorage.setItem('portfolio-pseudo', name.value.trim().slice(0, 20)); } catch (e) {} qrBox.innerHTML = ''; qrBox.append(exQr(url)); }
+    name.addEventListener('input', function () { clearTimeout(tmr); tmr = setTimeout(mk, 300); });
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Partager ma vitrine' }), boBtn('Fermer', L.close)),
+      h('div', { class: 'bo-stage', style: 'justify-content:flex-start;gap:12px;overflow:auto' }, h('div', { class: 'ex-t', text: 'Montre ta vitrine à un ami' }), name, qrBox,
+        h('div', { class: 'ex-s', text: 'Il scanne le QR code ou ouvre le lien : il voit tes cartes, avec leurs notes de gradation et leurs effets brillants.' }),
+        h('div', { class: 'bo-btns' }, boBtn('Partager le lien', function () { stInc('shared'); exShare(url, 'Ma vitrine de cartes'); }, true), boBtn('Copier', function () { stInc('shared'); exCopy(url); }))));
+    mk();
+  }
+  function openVitrineView(p) {
+    var ids = p && p.t === 'vt' && Array.isArray(p.c) ? p.c.filter(function (id) { return typeof id === 'string' && wById(id); }).slice(0, 3) : [];
+    if (!ids.length) { exMsg('Vitrine', 'Cette vitrine contient des cartes que ce site ne connaît pas (le site a peut-être changé).'); return; }
+    var nm = String(p.n || '').slice(0, 20) || 'un ami', L = boLayer('bo-one', 'Vitrine'), cw = Math.round(Math.min(170, ((window.innerWidth || 390) - 40) / (ids.length > 2 ? 3 : 2) - 10, ((window.innerHeight || 800) - 300) / 1.4)), row = h('div', { class: 'vt-row' });
+    var g = p.g && typeof p.g === 'object' ? p.g : {}, sh = Array.isArray(p.s) ? p.s : [];
+    ids.forEach(function (id) { row.append(h('div', null, cardEl(wById(id), { w: cw, grade: Math.max(0, Math.min(10, Number(g[id]) || 0)), shiny: sh.indexOf(id) >= 0 }))); });
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Vitrine de ' + nm }), boBtn('Fermer', L.close)),
+      h('div', { class: 'bo-stage', style: 'gap:14px' }, row, h('div', { class: 'vt-shelf' }), h('div', { class: 'ex-s', text: ids.length + ' carte' + (ids.length > 1 ? 's' : '') + ' exposée' + (ids.length > 1 ? 's' : '') + ' par ' + nm }),
+        h('div', { class: 'bo-btns' }, boBtn('Ouvrir mon classeur', function () { L.close(); openClasseur(); }, true), boBtn('Fermer', L.close))));
+    sfx('rare', 3);
+  }
+  function vtBoot() {
+    var m = /^#vt=([A-Za-z0-9_\-]+)/.exec(location.hash), tries = 0, code;
+    if (!m) return; code = m[1];
+    try { history.replaceState(null, '', siteUrl()); } catch (e) {}
+    (function wait() { if (cardPool().length || tries++ > 30) { setTimeout(function () { var p = null; try { p = b64d(code); } catch (e) {} openVitrineView(p); }, 400); } else setTimeout(wait, 500); })();
+  }
+  window.addEventListener('hashchange', function () { if (/^#vt=/.test(location.hash)) vtBoot(); });
+  function openClasseur() {
+    var L = boLayer('bo-one bo-bn', 'Classeur'), W = window.innerWidth || 390, H = window.innerHeight || 800, pw = Math.round(Math.min(W * .92, 440)), cw = Math.floor(Math.max(90, Math.min(150, (pw - 50 - 12) / 2 - 12, (H - 300) / 2 / 1.4)));
+    var pool = cardPool().sort(function (a, b) { return rarOf(b) - rarOf(a) || String(a.title).localeCompare(String(b.title)); }), have = colGet(), all = !!state.canAdd, per = 4, pages = 1 + Math.ceil(pool.length / per), cur = 0, busy = false;
+    var ph = Math.round(cw * 1.4 * 2 + 10 * 2 + 12 + 30 + 40), bn = h('div', { class: 'bn closed' }), nav = h('div', { class: 'bn-nav' }), lab = h('span'), prev = boBtn('◀', function () { go(cur - 1); }), next = boBtn('▶', function () { go(cur + 1); });
+    bn.style.width = pw + 'px'; bn.style.height = ph + 'px';
+    function slot(w, wd) { var d = h('div', { class: 'bn-sl' }, cardEl(w, { w: wd })); d.addEventListener('click', function () { openCard(w); }); return d; }
+    function pageEl(i) {
+      var pg = h('div', { class: 'bn-page' });
+      if (i === 0) {
+        var wv = Math.floor((pw - 36 - 14 - 16) / 3 - 10), grid = h('div', { class: 'bn-grid v3' }), vt = vtGet(), k;
+        for (k = 0; k < 3; k++) { var w = vt[k] && wById(vt[k]); if (w) grid.append(slot(w, wv)); else { var em = h('div', { class: 'bn-sl empty', style: 'width:' + (wv + 10) + 'px;height:' + Math.round(wv * 1.4 + 10) + 'px' }, h('small', { text: '＋ Ajoute une carte' })); em.addEventListener('click', function () { toast('Ouvre une carte de ta collection puis « Mettre en vitrine ★ ».'); }); grid.append(em); } }
+        pg.append(h('div', { class: 'bn-hd' }, h('span', { text: '★ Vitrine' }), h('span', { text: vt.length + ' / 3' })), grid,
+          h('div', { class: 'ex-s', style: 'margin-top:16px;text-align:center', text: 'Tes 3 cartes préférées. Elles s\'affichent aussi chez un ami quand tu partages ta vitrine.' }),
+          h('div', { class: 'bo-btns', style: 'margin-top:12px;justify-content:center' }, boBtn('Partager ma vitrine', vtShare, true)));
+      } else {
+        var grid2 = h('div', { class: 'bn-grid' }), sub = pool.slice((i - 1) * per, i * per);
+        sub.forEach(function (w) { if (all || have.indexOf(w.id) >= 0) grid2.append(slot(w, cw)); else { var lk = h('div', { class: 'bn-sl empty', style: 'width:' + (cw + 10) + 'px;height:' + Math.round(cw * 1.4 + 10) + 'px', text: '?' }); grid2.append(lk); } });
+        pg.append(h('div', { class: 'bn-hd' }, h('span', { text: 'Page ' + i }), h('span', { text: Math.min(pool.length, i * per) + ' / ' + pool.length })), grid2);
+      }
+      return pg;
+    }
+    function upd() { lab.textContent = 'Page ' + (cur + 1) + ' / ' + pages; prev.disabled = cur <= 0; next.disabled = cur >= pages - 1; prev.style.opacity = prev.disabled ? .35 : 1; next.style.opacity = next.disabled ? .35 : 1; }
+    function go(n) {
+      if (busy || n < 0 || n >= pages || n === cur || bn.classList.contains('closed')) return; busy = true; sfx('page');
+      var old = bn.querySelector('.bn-page:last-of-type'), nx = pageEl(n);
+      if (n > cur) { bn.insertBefore(nx, old); old.classList.add('out'); } else { nx.classList.add('in'); bn.append(nx); }
+      cur = n; upd(); setTimeout(function () { [].forEach.call(bn.querySelectorAll('.bn-page'), function (x) { if (x !== nx) x.remove(); }); busy = false; }, 850);
+    }
+    var cover = h('div', { class: 'bn-cover', role: 'button', tabindex: '0', 'aria-label': 'Ouvrir le classeur' }, h('i', { text: '📒' }), h('b', { text: 'CLASSEUR' }), h('span', { text: 'Portfolio de Grégoire' }), h('span', { style: 'opacity:.6', text: 'Touche pour ouvrir' }));
+    function openIt() { if (!bn.classList.contains('closed')) return; sfx('page'); bn.classList.remove('closed'); cover.classList.add('open'); setTimeout(function () { cover.remove(); }, 1000); }
+    cover.addEventListener('click', openIt); cover.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIt(); } });
+    bn.append(pageEl(0), cover);
+    var sx = null;
+    bn.addEventListener('pointerdown', function (e) { sx = e.clientX; });
+    bn.addEventListener('pointerup', function (e) { if (sx === null) return; var dx = e.clientX - sx; sx = null; if (dx < -60) go(cur + 1); else if (dx > 60) go(cur - 1); });
+    document.addEventListener('keydown', function kk(e) { if (!L.wrap.isConnected) { document.removeEventListener('keydown', kk); return; } if (e.key === 'ArrowRight') go(cur + 1); else if (e.key === 'ArrowLeft') go(cur - 1); });
+    nav.append(prev, lab, next); upd();
+    L.wrap.append(h('div', { class: 'pp-top' }, h('b', { text: 'Mon classeur' }), h('span', { style: 'margin-left:auto' }, boBtn('Partager', vtShare)), boBtn('Fermer', L.close)),
+      h('div', { class: 'bo-stage', style: 'justify-content:center;overflow:auto' }, bn, nav));
+  }
+  window.__vt = { get: vtGet, set: vtSet, payload: vtPayload, view: openVitrineView, classeur: openClasseur };
+  vtBoot();
+  window.__shop = { open: openShop, coins: coGet, add: coAdd };
   function openCombat(joinCode) {
     var L = boLayer('bo-bat', 'Combat de cartes'), stage = h('div', { class: 'bo-stage bt-stage' }), origClose = L.close;
     var bt = { started: false, done: false, me: 'A', S: null, mode: null, peer: null, conn: null, team: [], busy: false, queue: [], alive: true, el: null, cw: 130 };
@@ -3022,10 +3229,11 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     function screenTeam(cb) {
       stage.innerHTML = ''; var el = btEligible().sort(function (a, b) { return rarOf(b) - rarOf(a); }), sel = [], cw = Math.round(Math.max(90, Math.min(140, ((window.innerWidth || 390) - 60) / 3)));
       if (!el.length) { stage.append(h('div', { class: 'ex-t', text: 'Aucune carte jouable' }), h('div', { class: 'ex-s', text: 'Il te faut au moins une carte non gradée. Ouvre un booster !' }), h('div', { class: 'bo-btns' }, boBtn('Retour', screenMode))); return; }
+      var stockP = numGet('portfolio-protege'); bt.prot = {};
       var cnt = h('div', { class: 'ex-t' }), go = boBtn('Combattre !', function () { if (sel.length) { bt.team = sel.slice(); cb(sel.slice()); } }, true), grid = h('div', { class: 'bt-pick' });
-      function upd() { cnt.textContent = 'Cartes en jeu : ' + sel.length + ' / 3'; go.disabled = !sel.length; go.style.opacity = sel.length ? 1 : .4; [].forEach.call(grid.children, function (d) { d.classList.toggle('sel', sel.indexOf(d.dataset.id) >= 0); }); }
-      el.forEach(function (w) { var d = h('div', { 'data-id': w.id }, cardEl(w, { w: cw })); d.addEventListener('click', function () { sfx('select'); var i = sel.indexOf(w.id); if (i >= 0) sel.splice(i, 1); else if (sel.length < 3) sel.push(w.id); else { sel.shift(); sel.push(w.id); } upd(); }); grid.append(d); });
-      stage.append(cnt, h('div', { class: 'bo-hint', text: 'Les cartes choisies peuvent être détruites : assume ton choix.' }),
+      function upd() { Object.keys(bt.prot).forEach(function (k) { if (sel.indexOf(k) < 0) delete bt.prot[k]; }); cnt.textContent = 'Cartes en jeu : ' + sel.length + ' / 3' + (stockP ? ' · 🛡 ' + Object.keys(bt.prot).length + ' / ' + stockP : ''); [].forEach.call(grid.children, function (d) { var sh = d.querySelector('.bt-shield'); if (sh) { sh.style.display = sel.indexOf(d.dataset.id) >= 0 ? 'grid' : 'none'; sh.classList.toggle('on', !!bt.prot[d.dataset.id]); } }); go.disabled = !sel.length; go.style.opacity = sel.length ? 1 : .4; [].forEach.call(grid.children, function (d) { d.classList.toggle('sel', sel.indexOf(d.dataset.id) >= 0); }); }
+      el.forEach(function (w) { var d = h('div', { 'data-id': w.id }, cardEl(w, { w: cw }), stockP ? h('button', { class: 'bt-shield', type: 'button', text: '🛡', title: 'Protéger cette carte (1 protège-carte)', style: 'display:none', onclick: function (ev) { ev.stopPropagation(); if (bt.prot[w.id]) delete bt.prot[w.id]; else if (Object.keys(bt.prot).length < stockP) bt.prot[w.id] = 1; else toast('Plus de protège-cartes disponibles.', true); sfx('tap'); upd(); } }) : null); d.addEventListener('click', function () { sfx('select'); var i = sel.indexOf(w.id); if (i >= 0) sel.splice(i, 1); else if (sel.length < 3) sel.push(w.id); else { sel.shift(); sel.push(w.id); } upd(); }); grid.append(d); });
+      stage.append(cnt, h('div', { class: 'bo-hint', text: stockP ? 'Touche 🛡 sur une carte choisie pour la protéger (un protège-carte est utilisé seulement si elle est détruite).' : 'Les cartes choisies peuvent être détruites : assume ton choix.' }),
         h('div', { class: 'bo-btns' }, boBtn('Pioche aléatoire', function () { sel = shuf(el.map(function (w) { return w.id; })).slice(0, 3); upd(); }), go, boBtn('Retour', screenMode)), grid);
       upd();
     }
@@ -3113,17 +3321,21 @@ html[data-view="phone"] .tag3d { font-size: 9px; }
     function btFinish(forfeit) {
       if (bt.done) return; bt.done = true;
       var S = bt.S, mine = S ? S[bt.me] : null; if (!mine) return;
-      var won = !forfeit && S.over === bt.me, lost = mine.ko.slice(), names = lost.map(function (id) { var w = wById(id); return w ? w.title || 'Carte' : 'Carte'; });
-      lost.forEach(function (id) { colDel(id); }); if (!forfeit) sfx(won ? 'win' : 'lose');
+      var won = !forfeit && S.over === bt.me, lost = mine.ko.slice(), saved = [], stock = numGet('portfolio-protege'), prot = bt.prot || {};
+      lost.slice().forEach(function (id) { if (prot[id] && stock > 0) { stock--; saved.push(id); } }); numSet('portfolio-protege', stock);
+      var gone = lost.filter(function (id) { return saved.indexOf(id) < 0; }), nm = function (id) { var w = wById(id); return w ? w.title || 'Carte' : 'Carte'; }, names = gone.map(nm), gain = forfeit ? 0 : won ? (bt.mode === 'solo' ? 25 : 40) : 8;
+      gone.forEach(function (id) { colDel(id); }); coAdd(gain); if (!forfeit) sfx(won ? 'win' : 'lose');
       bt.team.forEach(function (id) { if (lost.indexOf(id) < 0) usAdd(id); });
       var st = stGet(); st.fights = (st.fights || 0) + 1; if (won) { st.wins = (st.wins || 0) + 1; if (bt.mode !== 'solo') st.pvp = (st.pvp || 0) + 1; if (!lost.length) st.perfect = 1; } stSet(st); scCheck();
       try { if (bt.conn && bt.alive && !forfeit) { /* garder la connexion un instant pour que l'autre reçoive l'état */ } } catch (e) {}
       if (!bt.alive) return;
       stage.innerHTML = '';
       stage.append(h('div', { class: 'bt-res' }, h('h2', { class: won ? 'win' : 'lose', text: forfeit ? 'Combat abandonné' : (won ? 'Victoire !' : 'Défaite') }),
-        lost.length ? h('div', { class: 'ex-t', text: lost.length + ' carte' + (lost.length > 1 ? 's' : '') + ' détruite' + (lost.length > 1 ? 's' : '') + ' :' }) : h('div', { class: 'ex-t', text: 'Aucune carte perdue.' }),
-        lost.length ? h.apply(null, ['div', { class: 'bt-lost' }].concat(names.map(function (n) { return h('span', { text: n }); }))) : null,
-        lost.length ? h('div', { class: 'ex-s', text: 'Pour les récupérer, il faut retomber dessus dans un booster.' }) : null,
+        gone.length ? h('div', { class: 'ex-t', text: gone.length + ' carte' + (gone.length > 1 ? 's' : '') + ' détruite' + (gone.length > 1 ? 's' : '') + ' :' }) : h('div', { class: 'ex-t', text: 'Aucune carte perdue.' }),
+        gone.length ? h.apply(null, ['div', { class: 'bt-lost' }].concat(names.map(function (n) { return h('span', { text: n }); }))) : null,
+        gone.length ? h('div', { class: 'ex-s', text: 'Pour les récupérer, il faut retomber dessus dans un booster.' }) : null,
+        saved.length ? h('div', { class: 'ex-t', style: 'color:#6fe3a0', text: '🛡 Sauvée' + (saved.length > 1 ? 's' : '') + ' par un protège-carte : ' + saved.map(nm).join(', ') }) : null,
+        gain ? h('div', { class: 'ex-t', style: 'color:#ffcf4a', text: '+' + gain + ' 🪙' }) : null,
         h('div', { class: 'ex-s', text: 'Tes cartes utilisées s\'usent un peu : une future gradation sera un peu moins bonne.' }),
         h('div', { class: 'bo-btns' }, boBtn('Rejouer', screenMode, true), boBtn('Fermer', function () { L.close(); }))));
       try { var c = bt.conn; bt.conn = null; if (c) setTimeout(function () { try { c.close(); } catch (e) {} }, 800); } catch (e) {}
